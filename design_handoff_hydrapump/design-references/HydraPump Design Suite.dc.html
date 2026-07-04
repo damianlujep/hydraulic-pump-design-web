@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#0a0e14">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect x="430" y="250" width="340" height="300" rx="28" fill="none" stroke="#6366f1" stroke-width="22"/>
+    <circle cx="600" cy="400" r="78" fill="none" stroke="#6366f1" stroke-width="22"/>
+    <circle cx="600" cy="400" r="20" fill="#34d399"/>
+    <rect x="770" y="368" width="120" height="64" rx="14" fill="#6366f1"/>
+    <rect x="310" y="368" width="120" height="64" rx="14" fill="#5b9dff"/>
+  </svg>
+</template>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;}
+:root{
+ --bg:#0a0e14; --surface:#10151e; --surface-2:#151c27; --surface-3:#1b2433;
+ --border:#243044; --border-strong:#34435c;
+ --text:#e7eef7; --text-dim:#9aa7b8; --text-faint:#647082;
+ --primary:#6366f1; --primary-hover:#818cf8; --primary-fg:#ffffff;
+ --primary-soft:rgba(99,102,241,.16); --primary-ring:rgba(99,102,241,.34);
+ --green:#34d399; --green-soft:rgba(52,211,153,.14); --green-fg:#04140d;
+ --amber:#fbbf24; --amber-soft:rgba(251,191,36,.14);
+ --danger:#fb5b78; --danger-hover:#ff7089; --danger-soft:rgba(251,91,120,.12); --danger-ring:rgba(251,91,120,.30);
+ --grid:rgba(255,255,255,.06); --chart-plot:#0b111d;
+ --data-blue:#5b9dff; --data-green:#3ddc97; --data-orange:#fb923c;
+ --tint-blue:rgba(91,157,255,.09); --tint-amber:rgba(251,191,36,.08); --tint-green:rgba(61,220,151,.09);
+ --shadow:0 18px 50px rgba(0,0,0,.55);
+}
+[data-theme="light"]{
+ --bg:#e9edf3; --surface:#ffffff; --surface-2:#f3f6fb; --surface-3:#eaf0f7;
+ --border:#dde3ec; --border-strong:#c3ccd9;
+ --text:#1b2433; --text-dim:#5b687b; --text-faint:#8c97a8;
+ --primary-soft:rgba(99,102,241,.1); --primary-ring:rgba(99,102,241,.26);
+ --green:#059669; --green-soft:rgba(5,150,105,.12); --green-fg:#ffffff;
+ --amber:#d97706; --amber-soft:rgba(217,119,6,.12);
+ --danger:#e11d48; --danger-hover:#f43f5e; --danger-soft:rgba(225,29,72,.08); --danger-ring:rgba(225,29,72,.22);
+ --grid:rgba(15,23,42,.07); --chart-plot:#fbfcfe;
+ --data-blue:#2563eb; --data-green:#059669; --data-orange:#ea7a2a;
+ --tint-blue:rgba(37,99,235,.06); --tint-amber:rgba(217,119,6,.07); --tint-green:rgba(5,150,105,.06);
+ --shadow:0 18px 50px rgba(15,23,42,.16);
+}
+[data-accent="cyan"]{--primary:#06b6d4;--primary-hover:#22d3ee;--primary-fg:#03161b;--primary-soft:rgba(6,182,212,.16);--primary-ring:rgba(6,182,212,.34);}
+[data-accent="emerald"]{--primary:#10b981;--primary-hover:#34d399;--primary-fg:#04140d;--primary-soft:rgba(16,185,129,.16);--primary-ring:rgba(16,185,129,.34);}
+[data-accent="amber"]{--primary:#f59e0b;--primary-hover:#fbbf24;--primary-fg:#1c1206;--primary-soft:rgba(245,158,11,.16);--primary-ring:rgba(245,158,11,.34);}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:8px;border:2px solid transparent;background-clip:content-box;}
+::-webkit-scrollbar-track{background:transparent;}
+input,select,textarea,button{font-family:inherit;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes popIn{from{opacity:0;transform:translateY(14px) scale(.985);}to{opacity:1;transform:none;}}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" data-accent="{{ accentAttr }}" style="position:relative;width:100%;height:100vh;display:flex;flex-direction:column;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased;font-feature-settings:'tnum' 1;">
+
+<!-- ================= EXPLORADOR DE PROYECTOS ================= -->
+<sc-if value="{{ screenExplorer }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;height:100%;animation:fade .25s ease;">
+
+  <!-- Sidebar -->
+  <aside style="width:238px;flex:none;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;">
+    <div style="padding:17px 18px 15px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border);">
+      <div style="width:34px;height:34px;border-radius:9px;background:var(--primary);display:flex;align-items:center;justify-content:center;color:var(--primary-fg);box-shadow:0 3px 10px var(--primary-ring);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6M12 21v-6M5 8l7 4 7-4M5 16l7-4 7 4"/></svg>
+      </div>
+      <div>
+        <div style="font-size:13.5px;font-weight:700;letter-spacing:-.01em;">HydraPump</div>
+        <div style="font-size:10px;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;letter-spacing:.06em;">DESIGN SUITE · v4.2</div>
+      </div>
+    </div>
+    <nav style="padding:13px 10px;display:flex;flex-direction:column;gap:3px;flex:1;">
+      <div style="padding:6px 10px 4px;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--text-faint);font-weight:600;">Espacio de trabajo</div>
+      <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text);background:var(--primary-soft);box-shadow:inset 0 0 0 1px var(--primary-ring);cursor:pointer;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg>
+        Explorador de Proyectos
+      </a>
+      <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-dim);cursor:pointer;" style-hover="background:var(--surface-2);color:var(--text);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 4v16M4 12h5"/></svg>
+        Catálogo de Bombas
+      </a>
+      <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-dim);cursor:pointer;" style-hover="background:var(--surface-2);color:var(--text);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 8v4l3 2"/></svg>
+        Historial de Simulaciones
+      </a>
+      <div style="padding:14px 10px 4px;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--text-faint);font-weight:600;">Recursos</div>
+      <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-dim);cursor:pointer;" style-hover="background:var(--surface-2);color:var(--text);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-1.5zM19 17H6"/></svg>
+        Documentación técnica
+      </a>
+      <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-dim);cursor:pointer;" style-hover="background:var(--surface-2);color:var(--text);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 2.6 14H2a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4 8.6a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 4.6V4a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 5.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 21 9.4H21a2 2 0 1 1 0 4h-.1Z"/></svg>
+        Configuración
+      </a>
+    </nav>
+    <div style="margin:10px;padding:11px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--green);"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-soft);"></span>Nube conectada</div>
+      <div style="font-size:10.5px;color:var(--text-faint);margin-top:4px;font-family:'IBM Plex Mono',monospace;">Última sinc. 14:02 · 12 pozos</div>
+    </div>
+  </aside>
+
+  <!-- Main column -->
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <header style="height:60px;flex:none;display:flex;align-items:center;gap:16px;padding:0 24px;border-bottom:1px solid var(--border);background:var(--surface);">
+      <div style="display:flex;align-items:center;gap:11px;white-space:nowrap;">
+        <button title="Cambiar de workspace" style="display:inline-flex;align-items:center;gap:9px;padding:6px 10px 6px 7px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);cursor:pointer;" style-hover="border-color:var(--border-strong);">
+          <span style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--primary),var(--primary-hover));display:flex;align-items:center;justify-content:center;color:var(--primary-fg);font-size:11px;font-weight:700;flex:none;">PE</span>
+          <span style="line-height:1.2;text-align:left;">
+            <span style="display:block;font-size:12.5px;font-weight:600;color:var(--text);">PAM EP</span>
+            <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--green);">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              Workspace interno
+            </span>
+          </span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:1px;"><path d="M8 9l4 4 4-4"/></svg>
+        </button>
+        <span style="font-size:12px;color:var(--text-faint);font-weight:600;letter-spacing:.02em;">/ Explorador</span>
+      </div>
+      <div style="flex:1;max-width:440px;margin-left:6px;position:relative;display:flex;align-items:center;">
+        <svg style="position:absolute;left:11px;color:var(--text-faint);" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input placeholder="Buscar activos, campos o pozos..." style="width:100%;padding:8px 12px 8px 34px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;font-size:13px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);">
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+        <button onClick="{{ toggleTheme }}" title="Cambiar tema" style="display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-dim);font-size:12px;font-weight:600;cursor:pointer;" style-hover="border-color:var(--border-strong);color:var(--text);">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>Oscuro</sc-if>
+          <sc-if value="{{ isLight }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>Claro</sc-if>
+        </button>
+        <div style="width:1px;height:26px;background:var(--border);"></div>
+        <div style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-hover));display:flex;align-items:center;justify-content:center;color:var(--primary-fg);font-size:12.5px;font-weight:700;">GS</div>
+          <div style="line-height:1.25;">
+            <div style="font-size:12.5px;font-weight:600;">Ing. Gabriel Silva</div>
+            <div style="font-size:10.5px;color:var(--text-faint);">Ingeniero de Producción</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div style="flex:1;overflow-y:auto;padding:26px 30px 40px;">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px;">
+        <div>
+          <h1 style="margin:0;font-size:23px;font-weight:700;letter-spacing:-.022em;">Panel de Proyectos</h1>
+          <p style="margin:6px 0 0;font-size:13px;color:var(--text-dim);">Diseño y rediseño de sistemas de bombeo hidráulico — Jet &amp; Pistón</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button title="Importar datos desde archivo" style="display:inline-flex;align-items:center;gap:9px;padding:11px 16px;border-radius:10px;background:var(--surface-2);color:var(--text);border:1px solid var(--border);font-size:13.5px;font-weight:600;cursor:pointer;" style-hover="border-color:var(--border-strong);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 11l4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+            Importar Datos
+          </button>
+          <button onClick="{{ openModal }}" style="display:inline-flex;align-items:center;gap:9px;padding:11px 18px;border-radius:10px;background:var(--primary);color:var(--primary-fg);border:none;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 5px 16px var(--primary-ring);" style-hover="background:var(--primary-hover);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Crear Nuevo Proyecto
+          </button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 16px;">
+          <div style="font-size:11px;color:var(--text-faint);font-weight:600;letter-spacing:.03em;text-transform:uppercase;">Proyectos activos</div>
+          <div style="font-size:26px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-top:5px;letter-spacing:-.02em;">24</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 16px;">
+          <div style="font-size:11px;color:var(--text-faint);font-weight:600;letter-spacing:.03em;text-transform:uppercase;">Pozos en diseño</div>
+          <div style="font-size:26px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-top:5px;letter-spacing:-.02em;">11</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 16px;">
+          <div style="font-size:11px;color:var(--text-faint);font-weight:600;letter-spacing:.03em;text-transform:uppercase;">Simulaciones (mes)</div>
+          <div style="font-size:26px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-top:5px;letter-spacing:-.02em;">187</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 16px;">
+          <div style="font-size:11px;color:var(--text-faint);font-weight:600;letter-spacing:.03em;text-transform:uppercase;">Sincronizados</div>
+          <div style="font-size:26px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-top:5px;letter-spacing:-.02em;color:var(--green);">92%</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="display:flex;gap:6px;">
+          <span style="padding:6px 13px;border-radius:8px;font-size:12px;font-weight:600;background:var(--primary-soft);color:var(--text);box-shadow:inset 0 0 0 1px var(--primary-ring);cursor:pointer;">Todos</span>
+          <span style="padding:6px 13px;border-radius:8px;font-size:12px;font-weight:500;background:var(--surface);color:var(--text-dim);border:1px solid var(--border);cursor:pointer;" style-hover="color:var(--text);">Sincronizados</span>
+          <span style="padding:6px 13px;border-radius:8px;font-size:12px;font-weight:500;background:var(--surface);color:var(--text-dim);border:1px solid var(--border);cursor:pointer;" style-hover="color:var(--text);">Caché local</span>
+        </div>
+        <span style="margin-left:auto;font-size:11.5px;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;">6 de 24 proyectos</span>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <div style="font-size:13px;">
+          <div style="display:grid;grid-template-columns:minmax(0,2.4fr) minmax(0,1.2fr) 150px 132px 100px;background:var(--surface-2);">
+            <div style="padding:11px 16px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);font-weight:600;">Nombre del Proyecto</div>
+            <div style="padding:11px 16px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);font-weight:600;">Campo / Bloque</div>
+            <div style="padding:11px 16px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);font-weight:600;">Estado de Sincronización</div>
+            <div style="padding:11px 16px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);font-weight:600;">Última Modificación</div>
+            <div style="padding:11px 16px;"></div>
+          </div>
+          <sc-for list="{{ projects }}" as="p" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:minmax(0,2.4fr) minmax(0,1.2fr) 150px 132px 100px;align-items:center;border-top:1px solid var(--border);" style-hover="background:var(--surface-2);">
+              <div style="padding:13px 16px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div style="width:34px;height:34px;border-radius:8px;background:var(--surface-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--primary);flex:none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6M12 21v-6M5 8l7 4 7-4M5 16l7-4 7 4"/></svg>
+                  </div>
+                  <div style="min-width:0;">
+                    <div style="font-weight:600;font-size:13px;letter-spacing:-.01em;">{{ p.name }}</div>
+                    <div style="font-size:11px;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;margin-top:1px;">{{ p.well }} · {{ p.type }}</div>
+                  </div>
+                </div>
+              </div>
+              <div style="padding:13px 16px;color:var(--text-dim);font-size:12.5px;">{{ p.campo }}</div>
+              <div style="padding:13px 16px;">
+                <sc-if value="{{ p.isCloud }}" hint-placeholder-val="{{ true }}">
+                  <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;background:var(--green-soft);color:var(--green);font-size:11.5px;font-weight:600;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 .5-9 6 6 0 0 0-11.6-1.5A4 4 0 0 0 6.5 19z"/></svg>
+                    Sincronizado
+                  </span>
+                </sc-if>
+                <sc-if value="{{ p.local }}">
+                  <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;background:var(--amber-soft);color:var(--amber);font-size:11.5px;font-weight:600;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Caché local
+                  </span>
+                </sc-if>
+              </div>
+              <div style="padding:13px 16px;color:var(--text-dim);font-size:12px;font-family:'IBM Plex Mono',monospace;">{{ p.modified }}</div>
+              <div style="padding:13px 16px;text-align:right;">
+                <button onClick="{{ goWorkspace }}" style="display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;background:transparent;border:1px solid var(--border-strong);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;" style-hover="border-color:var(--primary);color:var(--primary);background:var(--primary-soft);">
+                  Abrir
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ================= WORKSPACE ================= -->
+<sc-if value="{{ screenWorkspace }}">
+<div style="display:flex;flex-direction:column;height:100%;animation:fade .25s ease;">
+
+  <!-- Navbar -->
+  <header style="height:58px;flex:none;display:flex;align-items:center;gap:15px;padding:0 22px;background:var(--surface);border-bottom:1px solid var(--border);">
+    <button onClick="{{ goExplorer }}" style="display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-dim);font-size:12.5px;font-weight:600;cursor:pointer;" style-hover="color:var(--text);border-color:var(--border-strong);">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      Regresar al Explorador
+    </button>
+    <div style="width:1px;height:26px;background:var(--border);"></div>
+    <div style="display:flex;align-items:center;gap:11px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;color:var(--primary);flex:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6M12 21v-6M5 8l7 4 7-4M5 16l7-4 7 4"/></svg>
+      </div>
+      <div style="line-height:1.3;">
+        <div style="font-size:14px;font-weight:700;letter-spacing:-.01em;">APK-11M2 JET PUMP</div>
+        <div style="font-size:11px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;">Pozo Activo: APAIKA-11 · Arena M2 · PAM EP</div>
+      </div>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+      <span style="display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--green);"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-soft);"></span>Guardado en la nube</span>
+      <div style="width:1px;height:24px;background:var(--border);"></div>
+      <button onClick="{{ toggleTheme }}" title="Cambiar tema" style="display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-dim);font-size:12px;font-weight:600;cursor:pointer;" style-hover="border-color:var(--border-strong);color:var(--text);">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>Oscuro</sc-if>
+        <sc-if value="{{ isLight }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>Claro</sc-if>
+      </button>
+      <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-hover));display:flex;align-items:center;justify-content:center;color:var(--primary-fg);font-size:12px;font-weight:700;">GS</div>
+    </div>
+  </header>
+
+  <!-- Progress tab bar -->
+  <div style="display:flex;align-items:center;gap:9px;padding:11px 22px;background:var(--surface);border-bottom:1px solid var(--border);">
+    <button onClick="{{ setTabCompletion }}" style="{{ completionStyle }}">
+      <span style="width:18px;height:18px;border-radius:50%;background:var(--green);display:inline-flex;align-items:center;justify-content:center;color:var(--green-fg);flex:none;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M5 12l5 5 9-10"/></svg></span>
+      Completación
+    </button>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+    <button onClick="{{ setTabFluids }}" style="{{ fluidsStyle }}">
+      <span style="width:18px;height:18px;border-radius:50%;background:var(--green);display:inline-flex;align-items:center;justify-content:center;color:var(--green-fg);flex:none;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M5 12l5 5 9-10"/></svg></span>
+      Fluidos y PVT
+    </button>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+    <button onClick="{{ setTabIpr }}" style="{{ iprStyle }}">
+      <span style="width:18px;height:18px;box-sizing:border-box;border-radius:50%;border:2px solid var(--primary);display:inline-flex;align-items:center;justify-content:center;flex:none;"><span style="width:7px;height:7px;border-radius:50%;background:var(--primary);flex:none;"></span></span>
+      IPR y OPR
+    </button>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+    <button disabled style="{{ calcStyle }}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      Cálculos
+    </button>
+    <div style="margin-left:auto;font-size:11.5px;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;">Paso 3 de 4 · Validación de entradas</div>
+  </div>
+
+  <!-- Split workspace -->
+  <div style="flex:1;display:flex;min-height:0;">
+
+    <!-- LEFT: data input engine (45%) -->
+    <section style="width:45%;flex:none;overflow-y:auto;padding:18px 20px 24px;display:flex;flex-direction:column;gap:14px;border-right:1px solid var(--border);">
+
+      <!-- ===== IPR y OPR ===== -->
+      <sc-if value="{{ tabIpr }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;">
+            <div style="padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);font-weight:600;"><span style="width:6px;height:6px;border-radius:2px;background:var(--primary);"></span>A · Datos de la prueba de producción</div>
+            <div style="padding:6px;">
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Temperatura de fondo de pozo</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="185" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">°F</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Temperatura de cabeza de pozo</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="150" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">°F</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Modelo de reservorio para IPR</span><select defaultValue="Ambos" style="width:150px;padding:5px 8px;font-size:12.5px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;" style-focus="border-color:var(--primary);"><option>Ambos</option><option>Vogel</option><option>IPR lineal (Darcy)</option><option>Fetkovich</option></select></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Presión estática del reservorio, Ps</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="2300" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">psi</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Presión de fondo fluyente, Pwf</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="1781" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">psi</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Presión de entrada a la bomba, PIP</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="1720" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">psi</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Tasa de prueba de producción, IPR</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="520" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">bfpd</span></span></label>
+            </div>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;">
+            <div style="padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);font-weight:600;"><span style="width:6px;height:6px;border-radius:2px;background:var(--primary);"></span>B · Parámetros limitantes para diseño</div>
+            <div style="padding:6px;">
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Volumen máximo inyectado</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="3200" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">bipd</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Presión máxima de inyección</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="2900" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">psi</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Jet · Relación máxima Qt/Qcavitación</span><input defaultValue="1" style="width:150px;padding:5px 9px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Jet · Eficiencia mínima para diseño</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="30" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">%</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Pistón · Relación máxima GPM/GPMmáx</span><input defaultValue="0.75" style="width:150px;padding:5px 9px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></label>
+            </div>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;">
+            <div style="padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);font-weight:600;"><span style="width:6px;height:6px;border-radius:2px;background:var(--primary);"></span>C · Correlaciones hidráulicas</div>
+            <div style="padding:6px;">
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Correlación para fluido inyectado</span><select defaultValue="Darcy - Weisbach" style="width:180px;padding:5px 8px;font-size:12.5px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;" style-focus="border-color:var(--primary);"><option>Darcy - Weisbach</option><option>Hazen - Williams</option></select></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Correlación para flujo multifásico</span><select defaultValue="Griffith" style="width:180px;padding:5px 8px;font-size:12.5px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;" style-focus="border-color:var(--primary);"><option>Griffith</option><option>Beggs - Brill</option><option>Hagedorn - Brown</option></select></label>
+            </div>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;">
+            <div style="padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);font-weight:600;"><span style="width:6px;height:6px;border-radius:2px;background:var(--primary);"></span>D · Datos de operación para diseño</div>
+            <div style="padding:6px;">
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Tasa de ajuste o diseño</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="520" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">bfpd</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Presión fluyente en la cabeza</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="170" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">psi</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Tasa máxima de inyección referencial</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="1923" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">bipd</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Presión máxima de inyección · Ajuste</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="1800" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">psi</span></span></label>
+            </div>
+          </div>
+
+          <button onClick="{{ runCalc }}" style="display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:13px;border-radius:11px;background:var(--primary);color:var(--primary-fg);border:none;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px var(--primary-ring);" style-hover="background:var(--primary-hover);">
+            <sc-if value="{{ calcIdle }}" hint-placeholder-val="{{ true }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Ejecutar Cálculo IPR</sc-if>
+            <sc-if value="{{ calcRunning }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="animation:spin .8s linear infinite;"><path d="M12 3a9 9 0 1 0 9 9" /></svg>Calculando diseño…</sc-if>
+            <sc-if value="{{ calcDone }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Cálculo completado · 14 diseños viables</sc-if>
+          </button>
+        </div>
+      </sc-if>
+
+      <!-- ===== COMPLETACIÓN ===== -->
+      <sc-if value="{{ tabCompletion }}">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;">
+            <div style="padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);font-weight:600;">Completación de bombeo hidráulico</div>
+            <div style="padding:6px;">
+              <label style="display:flex;flex-direction:column;gap:5px;padding:6px 10px;border-radius:7px;background:var(--danger-soft);">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;"><span style="font-size:12.5px;color:var(--text-dim);">Longitud a profundidad media de disparos, MD</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--danger);box-shadow:0 0 0 2px var(--danger-ring);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--danger);box-shadow:0 0 0 2px var(--danger-ring);"><input placeholder="—" defaultValue="" aria-invalid="true" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">ft</span></span></div>
+                <div style="display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:var(--danger);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>Campo requerido — ingrese la profundidad MD</div>
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Profundidad media de disparos, TVD</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="6103.0" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">ft</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Longitud de asentamiento de bomba, MD</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="8511" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">ft</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Profundidad de asentamiento de bomba, TVD</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="5957" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">ft</span></span></label>
+            </div>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);"><span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);font-weight:600;">Revestimiento (Casing)</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-faint);">{{ casingCount }} de 3 tramos</span></div>
+            <div style="padding:8px;display:flex;flex-direction:column;gap:8px;">
+              <sc-for list="{{ casingSections }}" as="sec" hint-placeholder-count="2">
+                <div style="border:1px solid var(--border);border-radius:9px;overflow:hidden;background:{{ sec.tint }};">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;"><span style="display:flex;align-items:center;gap:8px;"><span style="width:7px;height:7px;border-radius:50%;background:{{ sec.accent }};"></span><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:{{ sec.accent }};">{{ sec.label }}</span></span><sc-if value="{{ sec.canRemove }}" hint-placeholder-val="{{ true }}"><button onClick="{{ sec.onRemove }}" title="Eliminar tramo" style="display:inline-flex;align-items:center;padding:3px 7px;border-radius:6px;background:transparent;border:1px solid var(--border);color:var(--text-faint);cursor:pointer;" style-hover="border-color:var(--danger);color:var(--danger);background:var(--danger-soft);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></sc-if></div>
+                  <div style="padding:0 10px 10px;display:flex;flex-direction:column;gap:8px;">
+                    <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;"><span style="font-size:12.5px;color:var(--text-dim);">Tamaño [in] · [lbs/ft]</span><button onClick="{{ sec.onOpen }}" style="width:210px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;background:var(--surface-3);border:1px solid var(--border);border-radius:7px;color:var(--text);cursor:pointer;text-align:left;" style-hover="border-color:var(--primary);"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ sec.sizeLabel }}</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2.1" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button></label>
+                    <div style="display:flex;gap:6px;"><div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:5px 8px;"><div style="display:flex;align-items:center;gap:4px;font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint);"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Ø ext</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--text);margin-top:1px;">{{ sec.od }} <span style="color:var(--text-faint);font-size:9.5px;">in</span></div></div><div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:5px 8px;"><div style="display:flex;align-items:center;gap:4px;font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint);"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Ø int</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--text);margin-top:1px;">{{ sec.id }} <span style="color:var(--text-faint);font-size:9.5px;">in</span></div></div><div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:5px 8px;"><div style="display:flex;align-items:center;gap:4px;font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint);"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Peso</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--text);margin-top:1px;">{{ sec.w }} <span style="color:var(--text-faint);font-size:9.5px;">lb/ft</span></div></div></div>
+                    <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;"><span style="font-size:12.5px;color:var(--text-dim);">Longitud</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input value="{{ sec.length }}" onChange="{{ sec.onLen }}" style="flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">ft</span></span></label>
+                  </div>
+                </div>
+              </sc-for>
+              <button onClick="{{ addCasing }}" disabled="{{ addCasingDisabled }}" style="{{ addCasingStyle }}" style-hover="border-color:var(--primary);color:var(--primary);background:var(--primary-soft);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Agregar tramo</button>
+            </div>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);"><span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);font-weight:600;">Tubería de producción (Tubing)</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-faint);">{{ tubingCount }} de 3 tramos</span></div>
+            <div style="padding:8px;display:flex;flex-direction:column;gap:8px;">
+              <sc-for list="{{ tubingSections }}" as="sec" hint-placeholder-count="2">
+                <div style="border:1px solid var(--border);border-radius:9px;overflow:hidden;background:{{ sec.tint }};">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;"><span style="display:flex;align-items:center;gap:8px;"><span style="width:7px;height:7px;border-radius:50%;background:{{ sec.accent }};"></span><span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:{{ sec.accent }};">{{ sec.label }}</span></span><sc-if value="{{ sec.canRemove }}" hint-placeholder-val="{{ true }}"><button onClick="{{ sec.onRemove }}" title="Eliminar tramo" style="display:inline-flex;align-items:center;padding:3px 7px;border-radius:6px;background:transparent;border:1px solid var(--border);color:var(--text-faint);cursor:pointer;" style-hover="border-color:var(--danger);color:var(--danger);background:var(--danger-soft);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></sc-if></div>
+                  <div style="padding:0 10px 10px;display:flex;flex-direction:column;gap:8px;">
+                    <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;"><span style="font-size:12.5px;color:var(--text-dim);">Tamaño [in] · [lbs/ft]</span><button onClick="{{ sec.onOpen }}" style="width:210px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;background:var(--surface-3);border:1px solid var(--border);border-radius:7px;color:var(--text);cursor:pointer;text-align:left;" style-hover="border-color:var(--primary);"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;">{{ sec.sizeLabel }}</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2.1" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button></label>
+                    <div style="display:flex;gap:6px;"><div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:5px 8px;"><div style="display:flex;align-items:center;gap:4px;font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint);"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Ø ext</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--text);margin-top:1px;">{{ sec.od }} <span style="color:var(--text-faint);font-size:9.5px;">in</span></div></div><div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:5px 8px;"><div style="display:flex;align-items:center;gap:4px;font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint);"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Ø int</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--text);margin-top:1px;">{{ sec.id }} <span style="color:var(--text-faint);font-size:9.5px;">in</span></div></div><div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:5px 8px;"><div style="display:flex;align-items:center;gap:4px;font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint);"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Peso</div><div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--text);margin-top:1px;">{{ sec.w }} <span style="color:var(--text-faint);font-size:9.5px;">lb/ft</span></div></div></div>
+                    <label style="display:flex;align-items:center;justify-content:space-between;gap:12px;"><span style="font-size:12.5px;color:var(--text-dim);">Longitud</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input value="{{ sec.length }}" onChange="{{ sec.onLen }}" style="flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">ft</span></span></label>
+                  </div>
+                </div>
+              </sc-for>
+              <button onClick="{{ addTubing }}" disabled="{{ addTubingDisabled }}" style="{{ addTubingStyle }}" style-hover="border-color:var(--primary);color:var(--primary);background:var(--primary-soft);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Agregar tramo</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== FLUIDOS Y PVT ===== -->
+      <sc-if value="{{ tabFluids }}">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;">
+            <div style="padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);font-weight:600;">Fluido motriz inyectado</div>
+            <div style="padding:6px;">
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Fluido motriz inyectado</span><select defaultValue="Petróleo" style="width:150px;padding:5px 8px;font-size:12.5px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;"><option>Petróleo</option><option>Agua</option></select></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Gravedad del petróleo inyectado</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="10" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">°API</span></span></label>
+            </div>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;">
+            <div style="padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);font-weight:600;">Fluido producido</div>
+            <div style="padding:6px;">
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Presión de separador</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="170" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">psi</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Temperatura de separador</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="150" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">°F</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Relación gas-petróleo, GOR</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="57" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">scf/stb</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Gravedad del petróleo</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="18" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">°API</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Gravedad específica del gas, SGg</span><input defaultValue="0.81" style="width:150px;padding:5px 9px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Salinidad del agua de formación</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="6200" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">ppm Cl⁻</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Grav. específica, agua inyectada, SGw</span><input defaultValue="1.004" style="width:150px;padding:5px 9px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Corte de agua producida, BSW</span><span style="display:inline-flex;align-items:center;flex:none;width:150px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;overflow:hidden;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><input defaultValue="0.342" style="flex:none;flex:1;min-width:0;padding:5px 0 5px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:transparent;border:none;color:var(--text);outline:none;"><span style="align-self:stretch;display:flex;align-items:center;flex:none;padding:0 10px;background:var(--surface-2);border-left:1px solid var(--border);font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);white-space:nowrap;pointer-events:none;">fracción</span></span></label>
+            </div>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;">
+            <div style="padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);font-weight:600;">Correlaciones PVT</div>
+            <div style="padding:6px;">
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Presión de burbuja, Pb</span><span style="display:inline-flex;align-items:stretch;flex:none;width:180px;"><input defaultValue="520" style="flex:1;min-width:0;padding:5px 9px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:left;background:var(--surface-3);border:1px solid var(--border);border-radius:6px 0 0 6px;border-right:none;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><span style="display:inline-flex;align-items:center;padding:0 9px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--text-faint);background:var(--surface-2);border:1px solid var(--border);border-radius:0 6px 6px 0;white-space:nowrap;">psi</span></span></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;"><span style="font-size:12.5px;color:var(--text-faint);">Solubilidad del gas, Rs (scf/stb)</span><div style="display:flex;align-items:center;gap:7px;" title="Fijado por la correlación de Pb"><span style="color:var(--text-faint);display:inline-flex;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><select disabled defaultValue="Velarde - Blasingame" style="width:180px;padding:5px 8px;font-size:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;color:var(--text-faint);outline:none;cursor:not-allowed;opacity:.7;"><option>Velarde - Blasingame</option><option>Standing</option><option>Vasquez - Beggs</option></select></div></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Factor volumétrico Bo (rb/stb)</span><select defaultValue="Valko - McCain - Spivey" style="width:180px;padding:5px 8px;font-size:12px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;"><option>Valko - McCain - Spivey</option><option>Standing</option></select></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Viscosidad Uo saturado (cp)</span><select defaultValue="Beggs - Robinson" style="width:180px;padding:5px 8px;font-size:12px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;"><option>Beggs - Robinson</option><option>Chew - Connally</option></select></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Viscosidad Uo subsaturado (cp)</span><select defaultValue="Petrosky - Farshad" style="width:180px;padding:5px 8px;font-size:12px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;"><option>Petrosky - Farshad</option><option>Vasquez - Beggs</option></select></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Viscosidad Uo muerto (cp)</span><select defaultValue="RODA V80-120" style="width:180px;padding:5px 8px;font-size:12px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;"><option>RODA V80-120</option><option>Beal</option><option>Glaso</option></select></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Agua, Bw (rb/stb), Uw (cp)</span><select defaultValue="McCain" style="width:180px;padding:5px 8px;font-size:12px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;"><option>McCain</option><option>Meehan</option></select></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Viscosidad del gas, Ug (cp)</span><select defaultValue="Lee" style="width:180px;padding:5px 8px;font-size:12px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;"><option>Lee</option><option>Carr - Kobayashi</option></select></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Factor de compresibilidad, Z</span><select defaultValue="Abou - Kassem" style="width:180px;padding:5px 8px;font-size:12px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;"><option>Abou - Kassem</option><option>Hall - Yarborough</option></select></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Tensión superficial agua (dina/cm)</span><select defaultValue="Jennings - Newman" style="width:180px;padding:5px 8px;font-size:12px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;"><option>Jennings - Newman</option></select></label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 10px;border-radius:7px;" style-hover="background:var(--surface-2);"><span style="font-size:12.5px;color:var(--text-dim);">Tensión superficial petróleo (dina/cm)</span><select defaultValue="Abdul - Majeed" style="width:180px;padding:5px 8px;font-size:12px;background:var(--surface-3);border:1px solid var(--border);border-radius:6px;color:var(--text);outline:none;cursor:pointer;"><option>Abdul - Majeed</option><option>Baker - Swerdloff</option></select></label>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </section>
+
+    <!-- RIGHT: fixed visual canvas stack (55%) -->
+    <section style="flex:1;min-width:0;overflow-y:auto;padding:18px 20px 24px;display:flex;flex-direction:column;gap:16px;background:var(--surface-2);">
+
+      <!-- top: survey table on Completación (data present, top-aligned) -->
+      <sc-if value="{{ tabCompletionData }}">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;flex:none;">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="font-size:13px;font-weight:700;letter-spacing:-.01em;">Survey Direccional</div>
+              <span style="font-size:11px;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;">20 estaciones</span>
+            </div>
+            <button onClick="{{ openSurveyModal }}" style="display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:9px;background:var(--primary);border:none;color:var(--primary-fg);font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px var(--primary-ring);" style-hover="background:var(--primary-hover);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+              Editar survey direccional
+            </button>
+          </div>
+          <sc-if value="{{ surveyLoaded }}" hint-placeholder-val="{{ true }}">
+          <div style="height:340px;overflow-y:auto;flex:none;">
+            <div style="font-size:12px;font-family:'IBM Plex Mono',monospace;">
+              <div style="position:sticky;top:0;z-index:1;display:grid;grid-template-columns:56px repeat(4,1fr);background:var(--surface-2);">
+                <div style="text-align:right;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-family:'IBM Plex Sans';">#</div>
+                <div style="text-align:right;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-family:'IBM Plex Sans';">MD (ft)</div>
+                <div style="text-align:right;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-family:'IBM Plex Sans';">TVD (ft)</div>
+                <div style="text-align:right;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-family:'IBM Plex Sans';">Dist.Hor (ft)</div>
+                <div style="text-align:right;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-family:'IBM Plex Sans';">Áng (°)</div>
+              </div>
+              <sc-for list="{{ surveyRows }}" as="r" hint-placeholder-count="10">
+                <div style="display:grid;grid-template-columns:56px repeat(4,1fr);border-top:1px solid var(--border);" style-hover="background:var(--primary-soft);">
+                  <div style="text-align:right;padding:6px 12px;color:var(--text-faint);">{{ r.n }}</div>
+                  <div style="text-align:right;padding:6px 12px;color:var(--text);">{{ r.md }}</div>
+                  <div style="text-align:right;padding:6px 12px;color:var(--text);">{{ r.tvd }}</div>
+                  <div style="text-align:right;padding:6px 12px;color:var(--text-dim);">{{ r.hd }}</div>
+                  <div style="text-align:right;padding:6px 12px;color:var(--data-blue);">{{ r.ang }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:13px 16px;border-top:1px solid var(--border);">
+            <div style="display:flex;align-items:center;gap:16px;">
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:11px;font-weight:600;color:var(--text-dim);">Calcular TVD desde MD</div>
+                <div style="font-size:10.5px;color:var(--text-faint);margin-top:3px;">Inserte MD para calcular TVD por interpolación del survey</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;flex:none;">
+                <div style="position:relative;display:flex;align-items:center;"><input placeholder="MD" style="width:96px;padding:6px 24px 6px 9px;font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:left;background:var(--surface-3);border:1px solid var(--border);border-radius:7px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-faint);">ft</span></div>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2" stroke-linecap="round" style="flex:none;"><path d="M9 6l6 6-6 6"/></svg>
+                <div style="position:relative;display:flex;align-items:center;"><input placeholder="TVD" disabled style="width:96px;padding:6px 24px 6px 9px;font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:left;background:var(--surface-2);border:1px dashed var(--border);border-radius:7px;color:var(--text-faint);outline:none;"><span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-faint);">ft</span></div>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+          <sc-if value="{{ surveyBlank }}">{{ surveyEmpty }}</sc-if>
+        </div>
+      </sc-if>
+
+      <!-- bottom: trajectory on Completación (data present, top-aligned) -->
+      <sc-if value="{{ tabCompletionData }}">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px 12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:13px;font-weight:700;letter-spacing:-.01em;">Trayectoria y Desviación del Pozo</div>
+            <div style="display:flex;gap:14px;">
+              <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);"><span style="width:9px;height:9px;border-radius:50%;background:var(--data-blue);"></span>Ángulo (°)</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);"><span style="width:9px;height:9px;border-radius:50%;background:var(--data-green);"></span>Trayectoria MD/HD</span>
+            </div>
+          </div>
+          {{ trajectoryChart }}
+        </div>
+      </sc-if>
+
+      <!-- Completación empty state: both cards centered as a group -->
+      <sc-if value="{{ tabCompletionEmpty }}">
+        <div style="display:flex;flex-direction:column;gap:16px;margin:auto 0;">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px 12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:12px;">
+              <div style="font-size:13px;font-weight:700;letter-spacing:-.01em;">Survey Direccional</div>
+              <button onClick="{{ openSurveyModal }}" style="display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:9px;background:var(--primary);border:none;color:var(--primary-fg);font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px var(--primary-ring);" style-hover="background:var(--primary-hover);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                Editar survey direccional
+              </button>
+            </div>
+            {{ surveyEmpty }}
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px 12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div style="font-size:13px;font-weight:700;letter-spacing:-.01em;">Trayectoria y Desviación del Pozo</div>
+            </div>
+            {{ trajEmpty }}
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ tabIpr }}" hint-placeholder-val="{{ true }}">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px 12px;margin:auto 0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:13px;font-weight:700;letter-spacing:-.01em;">Curva de Rendimiento IPR</div>
+            <div style="display:flex;gap:14px;">
+              <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);"><span style="width:14px;height:3px;border-radius:2px;background:var(--data-blue);"></span>Ps estática</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);"><span style="width:14px;height:3px;border-radius:2px;background:var(--data-orange);"></span>IPR (Vogel)</span>
+            </div>
+          </div>
+          <sc-if value="{{ iprReady }}" hint-placeholder-val="{{ true }}">
+          {{ iprChart }}
+          <div style="display:flex;gap:18px;margin-top:8px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;">
+            <div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;">Ps</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;">2300 <span style="font-size:10px;color:var(--text-faint);">psi</span></div></div>
+            <div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;">Pwf</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;">1781 <span style="font-size:10px;color:var(--text-faint);">psi</span></div></div>
+            <div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;">Pb</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--data-orange);">520 <span style="font-size:10px;color:var(--text-faint);">psi</span></div></div>
+            <div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;">Qmáx</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;">2073 <span style="font-size:10px;color:var(--text-faint);">bfpd</span></div></div>
+            <div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;">PI (J)</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;">1.00 <span style="font-size:10px;color:var(--text-faint);">bfpd/psi</span></div></div>
+          </div>
+          </sc-if>
+          <sc-if value="{{ iprBlank }}">{{ iprEmpty }}</sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ===== FLUIDOS Y PVT canvas: Propiedades PVT vs Presión ===== -->
+      <sc-if value="{{ tabFluids }}" hint-placeholder-val="{{ true }}">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px 12px;margin:auto 0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="font-size:13px;font-weight:700;letter-spacing:-.01em;">Propiedades PVT vs Presión</div>
+              <span style="font-size:11px;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;">aceite negro</span>
+            </div>
+            <div style="display:flex;gap:14px;flex-wrap:wrap;">
+              <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);"><span style="width:14px;height:3px;border-radius:2px;background:var(--data-blue);"></span>Bo</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);"><span style="width:14px;height:3px;border-radius:2px;background:var(--data-orange);"></span>Rs</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);"><span style="width:14px;height:3px;border-radius:2px;background:var(--data-green);"></span>μo</span>
+            </div>
+          </div>
+          <sc-if value="{{ pvtReady }}" hint-placeholder-val="{{ true }}">
+          {{ pvtChart }}
+          <div style="display:flex;gap:18px;margin-top:8px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;">
+            <div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;">Pb</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--data-orange);">520 <span style="font-size:10px;color:var(--text-faint);">psi</span></div></div>
+            <div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;">Bo @ Pb</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--data-blue);">1.284 <span style="font-size:10px;color:var(--text-faint);">rb/stb</span></div></div>
+            <div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;">Rs @ Pb</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--data-orange);">385 <span style="font-size:10px;color:var(--text-faint);">scf/stb</span></div></div>
+            <div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;">μo @ Pb</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--data-green);">1.92 <span style="font-size:10px;color:var(--text-faint);">cp</span></div></div>
+            <div><div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;">API</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;">32.4 <span style="font-size:10px;color:var(--text-faint);">°</span></div></div>
+          </div>
+          </sc-if>
+          <sc-if value="{{ pvtBlank }}">{{ pvtEmpty }}</sc-if>
+        </div>
+      </sc-if>
+    </section>
+  </div>
+</div>
+</sc-if>
+
+<!-- ================= MODAL: SURVEY DIRECCIONAL ================= -->
+<sc-if value="{{ surveyModalOpen }}">
+<div style="position:fixed;inset:0;background:rgba(5,8,13,.62);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:28px;z-index:60;animation:fade .18s ease;">
+  <div style="width:100%;max-width:720px;max-height:92%;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);animation:popIn .24s cubic-bezier(.2,.8,.3,1);overflow:hidden;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 24px 16px;border-bottom:1px solid var(--border);flex:none;">
+      <div>
+        <h2 style="margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em;">Insertar Datos de Survey Direccional</h2>
+        <p style="margin:5px 0 0;font-size:12.5px;color:var(--text-dim);display:flex;align-items:center;gap:7px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6M12 21v-6M5 8l7 4 7-4M5 16l7-4 7 4"/></svg>
+          MD y TVD editables — HD y ángulo se calculan automáticamente
+        </p>
+      </div>
+      <button onClick="{{ closeSurveyModal }}" style="width:32px;height:32px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;" style-hover="color:var(--text);border-color:var(--border-strong);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <div style="overflow-y:auto;flex:1;">
+      <div style="font-size:12px;font-family:'IBM Plex Mono',monospace;">
+        <div style="position:sticky;top:0;z-index:1;display:grid;grid-template-columns:56px 1fr 1fr 1fr 1fr;background:var(--surface-2);box-shadow:0 1px 0 var(--border);">
+          <div style="text-align:right;padding:9px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-family:'IBM Plex Sans';">id</div>
+          <div style="text-align:right;padding:9px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--primary);font-family:'IBM Plex Sans';">MD [ft] ✎</div>
+          <div style="text-align:right;padding:9px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--primary);font-family:'IBM Plex Sans';">TVD [ft] ✎</div>
+          <div style="text-align:right;padding:9px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-family:'IBM Plex Sans';">HD [ft]</div>
+          <div style="text-align:right;padding:9px 18px 9px 14px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);font-family:'IBM Plex Sans';">Áng [°]</div>
+        </div>
+        <sc-for list="{{ surveyFull }}" as="r" hint-placeholder-count="10">
+          <div style="display:grid;grid-template-columns:56px 1fr 1fr 1fr 1fr;align-items:center;border-top:1px solid var(--border);">
+            <div style="text-align:right;padding:5px 14px;color:var(--text-faint);">{{ r.n }}</div>
+            <div style="padding:4px 8px;"><input defaultValue="{{ r.md }}" style="width:100%;padding:5px 9px;font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:left;background:var(--primary-soft);border:1px solid transparent;border-radius:6px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);background:var(--surface-3);"></div>
+            <div style="padding:4px 8px;"><input defaultValue="{{ r.tvd }}" style="width:100%;padding:5px 9px;font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:left;background:var(--primary-soft);border:1px solid transparent;border-radius:6px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);background:var(--surface-3);"></div>
+            <div style="text-align:right;padding:5px 14px;color:var(--text-dim);">{{ r.hd }}</div>
+            <div style="text-align:right;padding:5px 18px 5px 14px;color:var(--data-blue);">{{ r.ang }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 24px;border-top:1px solid var(--border);flex:none;background:var(--surface);">
+      <span style="font-size:11px;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;">20 estaciones</span>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+        <button onClick="{{ closeSurveyModal }}" style="padding:10px 20px;border-radius:10px;background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:13px;font-weight:600;cursor:pointer;" style-hover="background:var(--danger);color:#fff;">Cancelar</button>
+        <button onClick="{{ saveSurvey }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:10px;background:var(--primary);color:var(--primary-fg);border:none;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 5px 16px var(--primary-ring);" style-hover="background:var(--primary-hover);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>
+          Guardar survey
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ================= MODAL: NUEVO PROYECTO ================= -->
+<sc-if value="{{ modalOpen }}">
+<div style="position:fixed;inset:0;background:rgba(5,8,13,.62);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:28px;z-index:50;animation:fade .18s ease;">
+  <div style="width:100%;max-width:740px;max-height:92%;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);animation:popIn .24s cubic-bezier(.2,.8,.3,1);">
+    <div style="position:sticky;top:0;background:var(--surface);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 24px 16px;border-bottom:1px solid var(--border);">
+      <div>
+        <h2 style="margin:0;font-size:18px;font-weight:700;letter-spacing:-.01em;">Crear Nuevo Proyecto</h2>
+        <p style="margin:5px 0 0;font-size:12.5px;color:var(--text-dim);">Información del proyecto y del pozo de diseño</p>
+      </div>
+      <button onClick="{{ closeModal }}" style="width:32px;height:32px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;" style-hover="color:var(--text);border-color:var(--border-strong);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <div style="padding:22px 24px;">
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;">
+        <label style="font-size:11.5px;font-weight:600;color:var(--text-dim);">Nombre del Proyecto</label>
+        <input defaultValue="APK-11M2 JET PUMP" style="width:100%;padding:11px 13px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;font-size:15px;font-weight:600;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 18px;">
+        <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-dim);">Nombre de la Compañía</label><input defaultValue="PAM EP" style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-dim);">Campo Petrolero</label><input defaultValue="APAIKA" style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-dim);">Locación</label><input defaultValue="APAIKA &amp; NENKE" style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-dim);">Nombre del Pozo</label><input defaultValue="APAIKA-11" style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-dim);">Arena o Reservorio</label><input defaultValue="M2" style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-dim);">Fecha</label><input type="date" defaultValue="2026-04-25" style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--text);outline:none;font-family:'IBM Plex Mono',monospace;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-dim);">Nombre del Analista</label><input defaultValue="App Tester" style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--text);outline:none;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></div>
+        <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:11.5px;font-weight:600;color:var(--text-dim);">Tipo de Pozo</label><select defaultValue="Direccional" style="padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;font-size:13.5px;color:var(--text);outline:none;cursor:pointer;" style-focus="border-color:var(--primary);"><option>Direccional</option><option>Vertical</option><option>Horizontal</option></select></div>
+        <div style="display:flex;flex-direction:column;gap:6px;grid-column:1 / -1;"><label style="font-size:11.5px;font-weight:600;color:var(--text-dim);">Comentarios</label><textarea defaultValue="Survey Direccional, ajuste Jet Claw 10 L, PIP 1720 de Griffith." style="padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);outline:none;min-height:74px;resize:vertical;line-height:1.5;" style-focus="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"></textarea></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:26px;">
+        <button onClick="{{ goWorkspace }}" style="width:240px;padding:12px;border-radius:10px;background:var(--primary);color:var(--primary-fg);border:none;font-size:14px;font-weight:700;letter-spacing:.02em;cursor:pointer;box-shadow:0 6px 18px var(--primary-ring);" style-hover="background:var(--primary-hover);">Continuar</button>
+        <button onClick="{{ closeModal }}" style="width:160px;padding:10px;border-radius:10px;background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:13px;font-weight:600;cursor:pointer;" style-hover="background:var(--danger);color:#fff;">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ================= MODAL: CATÁLOGO DE TAMAÑO ================= -->
+<sc-if value="{{ sizeModalOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSizeModal }}" style="position:fixed;inset:0;background:rgba(5,8,13,.62);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:60px 24px;z-index:70;animation:fade .16s ease;">
+  <div onClick="{{ stopProp }}" style="width:100%;max-width:500px;max-height:84%;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;animation:popIn .2s ease;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px 14px;border-bottom:1px solid var(--border);flex:none;"><span style="font-size:13.5px;font-weight:600;color:var(--text);">{{ sizeModalTitle }}</span><button onClick="{{ closeSizeModal }}" style="display:inline-flex;padding:5px;border-radius:7px;background:transparent;border:none;color:var(--text-faint);cursor:pointer;" style-hover="color:var(--text);background:var(--surface-2);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);flex:none;"><span style="display:flex;align-items:center;gap:9px;background:var(--surface-3);border:1px solid var(--border);border-radius:9px;padding:0 12px;" style-focus-within="border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-ring);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2.1" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input value="{{ sizeModalSearch }}" onChange="{{ onSizeSearch }}" onInput="{{ onSizeSearch }}" placeholder="Buscar por tamaño, Ø o peso (ej. 7, 26)" style="flex:1;padding:10px 0;background:transparent;border:none;color:var(--text);outline:none;font-size:13px;font-family:'IBM Plex Sans',sans-serif;"></span></div>
+    <div style="overflow-y:auto;padding:8px;flex:1;">
+      <div style="display:grid;grid-template-columns:1fr 74px 74px 64px;gap:8px;padding:4px 14px 7px;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-faint);"><span>Tamaño nominal</span><span style="text-align:right;font-family:'IBM Plex Mono',monospace;">Ø ext</span><span style="text-align:right;font-family:'IBM Plex Mono',monospace;">Ø int</span><span style="text-align:right;font-family:'IBM Plex Mono',monospace;">lb/ft</span></div>
+      <sc-for list="{{ sizeRows }}" as="row" hint-placeholder-count="7"><button onClick="{{ row.onPick }}" style="{{ row.style }}" style-hover="background:var(--surface-2);"><span style="display:grid;grid-template-columns:1fr 74px 74px 64px;gap:8px;align-items:center;width:100%;"><span style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);"><sc-if value="{{ row.selected }}" hint-placeholder-val="{{ false }}"><span style="color:var(--primary);display:inline-flex;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></sc-if>{{ row.name }}</span><span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--text-dim);">{{ row.od }}</span><span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--text-dim);">{{ row.id }}</span><span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--data-blue);">{{ row.w }}</span></span></button></sc-for>
+      <sc-if value="{{ sizeNoResults }}" hint-placeholder-val="{{ false }}"><div style="padding:26px;text-align:center;font-size:12.5px;color:var(--text-faint);">Sin coincidencias en el catálogo.</div></sc-if>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;indigo&quot;,&quot;cyan&quot;,&quot;emerald&quot;,&quot;amber&quot;],&quot;default&quot;:&quot;indigo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;emptyState&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.casingCat=[
+      {n:"4½″",od:"4.500",id:"4.090",w:"9.5"},{n:"4½″",od:"4.500",id:"4.000",w:"11.6"},{n:"4½″",od:"4.500",id:"3.920",w:"13.5"},
+      {n:"5″",od:"5.000",id:"4.560",w:"11.5"},{n:"5″",od:"5.000",id:"4.494",w:"13.0"},{n:"5″",od:"5.000",id:"4.408",w:"15.0"},{n:"5″",od:"5.000",id:"4.276",w:"18.0"},
+      {n:"5½″",od:"5.500",id:"5.012",w:"14.0"},{n:"5½″",od:"5.500",id:"4.950",w:"15.5"},{n:"5½″",od:"5.500",id:"4.892",w:"17.0"},{n:"5½″",od:"5.500",id:"4.778",w:"20.0"},{n:"5½″",od:"5.500",id:"4.670",w:"23.0"},
+      {n:"7″",od:"7.000",id:"6.538",w:"17.0"},{n:"7″",od:"7.000",id:"6.456",w:"20.0"},{n:"7″",od:"7.000",id:"6.366",w:"23.0"},{n:"7″",od:"7.000",id:"6.276",w:"26.0"},{n:"7″",od:"7.000",id:"6.184",w:"29.0"},{n:"7″",od:"7.000",id:"6.094",w:"32.0"},
+      {n:"7⅝″",od:"7.625",id:"7.025",w:"26.4"},{n:"7⅝″",od:"7.625",id:"6.969",w:"29.7"},{n:"7⅝″",od:"7.625",id:"6.875",w:"33.7"},
+      {n:"9⅝″",od:"9.625",id:"9.001",w:"32.3"},{n:"9⅝″",od:"9.625",id:"8.921",w:"36.0"},{n:"9⅝″",od:"9.625",id:"8.835",w:"40.0"},{n:"9⅝″",od:"9.625",id:"8.755",w:"43.5"},{n:"9⅝″",od:"9.625",id:"8.681",w:"47.0"},{n:"9⅝″",od:"9.625",id:"8.535",w:"53.5"},
+      {n:"10¾″",od:"10.750",id:"10.050",w:"40.5"},{n:"10¾″",od:"10.750",id:"9.950",w:"45.5"},{n:"10¾″",od:"10.750",id:"9.850",w:"51.0"},
+      {n:"13⅜″",od:"13.375",id:"12.615",w:"54.5"},{n:"13⅜″",od:"13.375",id:"12.515",w:"61.0"},{n:"13⅜″",od:"13.375",id:"12.415",w:"68.0"},{n:"13⅜″",od:"13.375",id:"12.347",w:"72.0"}
+    ];
+    this.tubingCat=[
+      {n:"2⅜″",od:"2.375",id:"2.041",w:"4.0"},{n:"2⅜″",od:"2.375",id:"1.995",w:"4.6"},{n:"2⅜″",od:"2.375",id:"1.867",w:"5.8"},
+      {n:"2⅞″",od:"2.875",id:"2.441",w:"6.4"},{n:"2⅞″",od:"2.875",id:"2.441",w:"6.5"},{n:"2⅞″",od:"2.875",id:"2.323",w:"7.8"},{n:"2⅞″",od:"2.875",id:"2.259",w:"8.6"},
+      {n:"3½″",od:"3.500",id:"3.068",w:"7.7"},{n:"3½″",od:"3.500",id:"2.992",w:"9.2"},{n:"3½″",od:"3.500",id:"2.992",w:"9.3"},{n:"3½″",od:"3.500",id:"2.922",w:"10.2"},{n:"3½″",od:"3.500",id:"2.750",w:"12.7"},
+      {n:"4″",od:"4.000",id:"3.548",w:"9.5"},{n:"4″",od:"4.000",id:"3.476",w:"11.0"},
+      {n:"4½″",od:"4.500",id:"3.958",w:"12.6"},{n:"4½″",od:"4.500",id:"3.920",w:"13.5"},{n:"4½″",od:"4.500",id:"3.826",w:"15.1"}
+    ];
+    this.state = {
+      theme: (props && props.defaultTheme) || 'dark',
+      screen: 'explorer',
+      modalOpen: false,
+      surveyModalOpen: false,
+      activeTab: 'ipr',
+      calcStatus: 'idle',
+      surveyLoaded: !(props && props.emptyState),
+      iprReady: !(props && props.emptyState),
+      pvtReady: !(props && props.emptyState),
+      casing: [{sizeIdx:25,length:'62'},{sizeIdx:15,length:'8449'}],
+      tubing: [{sizeIdx:4,length:'7891'},{sizeIdx:9,length:'620'}],
+      sizeModal: {open:false,kind:'casing',target:0,search:''}
+    };
+    this.survey = [
+      {n:4,md:1000,tvd:999,hd:25,ang:5},
+      {n:5,md:1400,tvd:1397,hd:65,ang:6},
+      {n:6,md:1786,tvd:1777,hd:133,ang:10},
+      {n:7,md:2073,tvd:2054,hd:208,ang:15},
+      {n:8,md:2458,tvd:2413,hd:347,ang:21},
+      {n:9,md:2843,tvd:2752,hd:529,ang:28},
+      {n:10,md:3323,tvd:3153,hd:793,ang:33},
+      {n:11,md:3802,tvd:3519,hd:1102,ang:40},
+      {n:12,md:4282,tvd:3831,hd:1467,ang:49},
+      {n:13,md:4858,tvd:4163,hd:1938,ang:55},
+      {n:14,md:5672,tvd:4554,hd:2652,ang:61},
+      {n:15,md:6343,tvd:4893,hd:3231,ang:60},
+      {n:16,md:7012,tvd:5222,hd:3814,ang:61},
+      {n:17,md:7770,tvd:5595,hd:4474,ang:61},
+      {n:18,md:8511,tvd:5957,hd:5121,ang:61},
+      {n:19,md:8766,tvd:6083,hd:5343,ang:60},
+      {n:20,md:8847,tvd:6123,hd:5413,ang:60}
+    ];
+    this.surveyFull = [
+      {n:1,md:0,tvd:0,hd:0,ang:0},
+      {n:2,md:349,tvd:349,hd:0,ang:0},
+      {n:3,md:698,tvd:698,hd:0,ang:0},
+      {n:4,md:1000,tvd:999.8,hd:0,ang:0},
+      {n:5,md:1400,tvd:1397,hd:47,ang:7},
+      {n:6,md:1786,tvd:1777,hd:115,ang:10},
+      {n:7,md:2073,tvd:2054,hd:190,ang:15},
+      {n:8,md:2458,tvd:2413,hd:329,ang:21},
+      {n:9,md:2843,tvd:2752,hd:511,ang:28},
+      {n:10,md:3323,tvd:3153,hd:775,ang:33},
+      {n:11,md:3802,tvd:3519,hd:1084,ang:40},
+      {n:12,md:4282,tvd:3831,hd:1449,ang:49},
+      {n:13,md:4858,tvd:4193,hd:1897,ang:51},
+      {n:14,md:5672,tvd:4554,hd:2627,ang:64},
+      {n:15,md:6343,tvd:4893,hd:3206,ang:60},
+      {n:16,md:7012,tvd:5222,hd:3789,ang:61},
+      {n:17,md:7770,tvd:5595,hd:4449,ang:61},
+      {n:18,md:8511,tvd:5957,hd:5096,ang:61},
+      {n:19,md:8766,tvd:6083,hd:5318,ang:60},
+      {n:20,md:8847,tvd:6123,hd:5388,ang:60}
+    ].map(r=>({n:r.n, md:r.md.toFixed(3), tvd:r.tvd.toFixed(3), hd:r.hd.toFixed(3), ang:r.ang}));
+    this.projects = [
+      {name:'APK-11M2 JET PUMP', well:'APAIKA-11', type:'Jet', campo:'APAIKA / Bloque 31', isCloud:true, local:false, modified:'Hace 4 min'},
+      {name:'NENKE-07 PISTON LIFT', well:'NENKE-07', type:'Pistón', campo:'NENKE / Bloque 31', isCloud:true, local:false, modified:'Hace 2 h'},
+      {name:'TIPUTINI-22 JET', well:'TIPUTINI-22', type:'Jet', campo:'TIPUTINI / Bloque 43', isCloud:false, local:true, modified:'Ayer, 18:42'},
+      {name:'SACHA-118 PISTON REDISEÑO', well:'SACHA-118', type:'Pistón', campo:'SACHA / Bloque 60', isCloud:true, local:false, modified:'24 abr 2026'},
+      {name:'AUCA-51 JET', well:'AUCA-51', type:'Jet', campo:'AUCA / Bloque 61', isCloud:false, local:true, modified:'22 abr 2026'},
+      {name:'PAÑACOCHA-09 JET', well:'PAÑACOCHA-09', type:'Jet', campo:'PAÑACOCHA / Bloque 12', isCloud:true, local:false, modified:'19 abr 2026'}
+    ];
+  }
+
+  componentDidUpdate(prevProps){
+    if(prevProps.emptyState!==this.props.emptyState){
+      const filled=!this.props.emptyState;
+      this.setState({surveyLoaded:filled,iprReady:filled,pvtReady:filled,calcStatus:'idle'});
+    }
+  }
+
+  sizeLabel(c){return c.od+" ("+c.id+") — "+c.w;}
+  buildSec(kind){
+    const arr=this.state[kind];
+    const cat=kind==="casing"?this.casingCat:this.tubingCat;
+    const names=["Superior","Intermedio","Inferior"];
+    const tints=["var(--tint-blue)","var(--tint-amber)","var(--tint-green)"];
+    const accents=["var(--data-blue)","var(--amber)","var(--data-green)"];
+    return arr.map((s,i)=>{
+      const c=cat[s.sizeIdx]||cat[0];
+      return{
+        label:arr.length===1?"Tramo único":names[i],
+        tint:tints[i%3],accent:accents[i%3],
+        sizeLabel:this.sizeLabel(c),od:c.od,id:c.id,w:c.w,length:s.length,
+        canRemove:arr.length>1,
+        onOpen:()=>this.setState({sizeModal:{open:true,kind:kind,target:i,search:""}}),
+        onRemove:()=>this.setState(st=>({[kind]:st[kind].filter((_,j)=>j!==i)})),
+        onLen:(e)=>this.setState(st=>{const a=st[kind].slice();a[i]={...a[i],length:e.target.value};return{[kind]:a};})
+      };
+    });
+  }
+  addSec(kind){this.setState(st=>st[kind].length>=3?null:({[kind]:[...st[kind],{sizeIdx:0,length:""}]}));}
+  pickSize(idx){const m=this.state.sizeModal;this.setState(st=>{const a=st[m.kind].slice();a[m.target]={...a[m.target],sizeIdx:idx};return{[m.kind]:a,sizeModal:{...m,open:false}};});}
+
+  pillStyle(name, locked){
+    const sel = this.state.activeTab === name;
+    let s = 'display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap;border:1px solid;transition:box-shadow .15s,border-color .15s,background .15s;';
+    if (locked) return s + 'background:var(--surface-2);border-color:var(--border);color:var(--text-faint);cursor:not-allowed;';
+    if (sel) return s + 'background:var(--primary-soft);border-color:var(--primary);color:var(--text);cursor:pointer;box-shadow:0 0 0 3px var(--primary-ring);';
+    return s + 'background:var(--surface);border-color:var(--border);color:var(--text-dim);cursor:pointer;';
+  }
+
+  buildTrajectory(){
+    const e = React.createElement;
+    const W=560,H=388,mL=58,mR=30,mT=52,mB=46;
+    const pw=W-mL-mR, ph=H-mT-mB;
+    const tvdMax=6300, angMax=75, hdMax=5700;
+    const xA=a=>mL+(a/angMax)*pw;
+    const xH=h=>mL+(h/hdMax)*pw;
+    const y=v=>mT+(v/tvdMax)*ph;
+    const k=[];
+    k.push(e('rect',{key:'bg',x:mL,y:mT,width:pw,height:ph,fill:'var(--chart-plot)',stroke:'var(--border)'}));
+    [0,700,1400,2100,2800,3500,4200,4900,5600,6300].forEach((t,i)=>{
+      const yy=y(t);
+      k.push(e('line',{key:'gy'+i,x1:mL,y1:yy,x2:mL+pw,y2:yy,stroke:'var(--grid)',strokeWidth:1}));
+      k.push(e('text',{key:'ly'+i,x:mL-8,y:yy+3,textAnchor:'end',fontSize:9,fill:'var(--text-dim)',fontFamily:'IBM Plex Mono'},t));
+      k.push(e('text',{key:'lyr'+i,x:mL+pw+8,y:yy+3,fontSize:9,fill:'var(--text-dim)',fontFamily:'IBM Plex Mono'},t));
+    });
+    [0,15,30,45,60,75].forEach((a,i)=>{
+      const xx=xA(a);
+      k.push(e('line',{key:'gx'+i,x1:xx,y1:mT,x2:xx,y2:mT+ph,stroke:'var(--grid)',strokeWidth:1}));
+      k.push(e('text',{key:'lxb'+i,x:xx,y:mT+ph+15,textAnchor:'middle',fontSize:9,fill:'var(--text-dim)',fontFamily:'IBM Plex Mono'},a));
+    });
+    [0,950,1900,2850,3800,4750,5700].forEach((h,i)=>{
+      k.push(e('text',{key:'lxt'+i,x:xH(h),y:mT-9,textAnchor:'middle',fontSize:8.5,fill:'var(--text-faint)',fontFamily:'IBM Plex Mono'},h));
+    });
+    const gp=this.survey.map(d=>xH(d.hd)+','+y(d.tvd)).join(' ');
+    const bp=this.survey.map(d=>xA(d.ang)+','+y(d.tvd)).join(' ');
+    k.push(e('polyline',{key:'g',points:gp,fill:'none',stroke:'var(--data-green)',strokeWidth:2}));
+    k.push(e('polyline',{key:'b',points:bp,fill:'none',stroke:'var(--data-blue)',strokeWidth:2}));
+    this.survey.forEach((d,i)=>{
+      k.push(e('circle',{key:'gd'+i,cx:xH(d.hd),cy:y(d.tvd),r:2.4,fill:'var(--data-green)'}));
+      k.push(e('circle',{key:'bd'+i,cx:xA(d.ang),cy:y(d.tvd),r:2.4,fill:'var(--data-blue)'}));
+    });
+    k.push(e('text',{key:'axb',x:mL+pw/2,y:H-6,textAnchor:'middle',fontSize:10,fill:'var(--text-dim)'},'Ángulo de inclinación (°)'));
+    k.push(e('text',{key:'axt',x:mL+pw/2,y:15,textAnchor:'middle',fontSize:9.5,fill:'var(--text-faint)'},'Desplazamiento horizontal, HD (ft)'));
+    k.push(e('text',{key:'ayl',x:15,y:mT+ph/2,textAnchor:'middle',fontSize:10,fill:'var(--text-dim)',transform:'rotate(-90 15 '+(mT+ph/2)+')'},'TVD (ft)'));
+    return e('svg',{viewBox:'0 0 '+W+' '+H,width:'100%',style:{display:'block'}},k);
+  }
+
+  buildIPR(){
+    const e = React.createElement;
+    const W=560,H=336,mL=58,mR=30,mT=20,mB=46;
+    const pw=W-mL-mR, ph=H-mT-mB;
+    const qMax=2200, pMax=2300;
+    const X=q=>mL+(q/qMax)*pw;
+    const Y=p=>mT+(1-p/pMax)*ph;
+    const Ps=2300, Pb=520, J=1.002;
+    const qb=J*(Ps-Pb);
+    const add=J*Pb/1.8;
+    const pts=[];
+    for(let p=Ps;p>=Pb;p-=50) pts.push([J*(Ps-p),p]);
+    for(let p=Pb;p>=0;p-=30){ const q=qb+add*(1-0.2*(p/Pb)-0.8*Math.pow(p/Pb,2)); pts.push([q,p]); }
+    const poly=pts.map(a=>X(a[0])+','+Y(a[1])).join(' ');
+    const k=[];
+    k.push(e('rect',{key:'bg',x:mL,y:mT,width:pw,height:ph,fill:'var(--chart-plot)',stroke:'var(--border)'}));
+    [0,500,1000,1500,2000].forEach((q,i)=>{
+      const xx=X(q);
+      k.push(e('line',{key:'gx'+i,x1:xx,y1:mT,x2:xx,y2:mT+ph,stroke:'var(--grid)',strokeWidth:1}));
+      k.push(e('text',{key:'lx'+i,x:xx,y:mT+ph+15,textAnchor:'middle',fontSize:9,fill:'var(--text-dim)',fontFamily:'IBM Plex Mono'},q));
+    });
+    [0,500,1000,1500,2000,2300].forEach((p,i)=>{
+      const yy=Y(p);
+      k.push(e('line',{key:'gy'+i,x1:mL,y1:yy,x2:mL+pw,y2:yy,stroke:'var(--grid)',strokeWidth:1}));
+      k.push(e('text',{key:'ly'+i,x:mL-8,y:yy+3,textAnchor:'end',fontSize:9,fill:'var(--text-dim)',fontFamily:'IBM Plex Mono'},p));
+    });
+    k.push(e('line',{key:'ps',x1:X(0),y1:Y(Ps),x2:X(qMax),y2:Y(Ps),stroke:'var(--data-blue)',strokeWidth:2}));
+    k.push(e('polyline',{key:'ipr',points:poly,fill:'none',stroke:'var(--data-orange)',strokeWidth:2.4,strokeLinejoin:'round'}));
+    k.push(e('line',{key:'pbl',x1:X(0),y1:Y(Pb),x2:X(qb),y2:Y(Pb),stroke:'var(--data-orange)',strokeWidth:1,strokeDasharray:'3 3',opacity:.55}));
+    k.push(e('circle',{key:'pbd',cx:X(qb),cy:Y(Pb),r:4,fill:'var(--data-orange)'}));
+    k.push(e('text',{key:'pbt',x:X(qb)+8,y:Y(Pb)+4,fontSize:11,fontWeight:600,fill:'var(--data-orange)',fontFamily:'IBM Plex Mono'},'Pb'));
+    k.push(e('text',{key:'axb',x:mL+pw/2,y:H-6,textAnchor:'middle',fontSize:10,fill:'var(--text-dim)'},'Tasa (bfpd)'));
+    k.push(e('text',{key:'ayl',x:15,y:mT+ph/2,textAnchor:'middle',fontSize:10,fill:'var(--text-dim)',transform:'rotate(-90 15 '+(mT+ph/2)+')'},'Presión (psi)'));
+    return e('svg',{viewBox:'0 0 '+W+' '+H,width:'100%',style:{display:'block'}},k);
+  }
+
+  buildPVT(){
+    const e=React.createElement;
+    const W=560,H=336,mL=52,mR=30,mT=20,mB=46;
+    const pw=W-mL-mR, ph=H-mT-mB;
+    const pMax=3000, Pb=520;
+    const X=p=>mL+(p/pMax)*pw;
+    const Y=v=>mT+(1-v)*ph;
+    const rs=p=> p<Pb ? 0.06+0.94*(p/Pb) : 1;
+    const bo=p=> p<Pb ? 0.42+0.58*(p/Pb) : 1-0.14*((p-Pb)/(pMax-Pb));
+    const mu=p=> p<Pb ? 1-0.72*(p/Pb) : 0.28+0.24*((p-Pb)/(pMax-Pb));
+    const series=f=>{const a=[];for(let p=0;p<=pMax;p+=50)a.push(X(p)+','+Y(f(p)));return a.join(' ');};
+    const k=[];
+    k.push(e('rect',{key:'bg',x:mL,y:mT,width:pw,height:ph,fill:'var(--chart-plot)',stroke:'var(--border)'}));
+    [0,750,1500,2250,3000].forEach((p,i)=>{
+      const xx=X(p);
+      k.push(e('line',{key:'gx'+i,x1:xx,y1:mT,x2:xx,y2:mT+ph,stroke:'var(--grid)',strokeWidth:1}));
+      k.push(e('text',{key:'lx'+i,x:xx,y:mT+ph+15,textAnchor:'middle',fontSize:9,fill:'var(--text-dim)',fontFamily:'IBM Plex Mono'},p));
+    });
+    [0,0.25,0.5,0.75,1].forEach((v,i)=>{
+      const yy=Y(v);
+      k.push(e('line',{key:'gy'+i,x1:mL,y1:yy,x2:mL+pw,y2:yy,stroke:'var(--grid)',strokeWidth:1}));
+      k.push(e('text',{key:'ly'+i,x:mL-8,y:yy+3,textAnchor:'end',fontSize:9,fill:'var(--text-dim)',fontFamily:'IBM Plex Mono'},v.toFixed(2)));
+    });
+    k.push(e('line',{key:'pbl',x1:X(Pb),y1:mT,x2:X(Pb),y2:mT+ph,stroke:'var(--data-orange)',strokeWidth:1,strokeDasharray:'3 3',opacity:.6}));
+    k.push(e('text',{key:'pbt',x:X(Pb)+6,y:mT+12,fontSize:11,fontWeight:600,fill:'var(--data-orange)',fontFamily:'IBM Plex Mono'},'Pb'));
+    k.push(e('polyline',{key:'bo',points:series(bo),fill:'none',stroke:'var(--data-blue)',strokeWidth:2.4,strokeLinejoin:'round'}));
+    k.push(e('polyline',{key:'rs',points:series(rs),fill:'none',stroke:'var(--data-orange)',strokeWidth:2.4,strokeLinejoin:'round'}));
+    k.push(e('polyline',{key:'mu',points:series(mu),fill:'none',stroke:'var(--data-green)',strokeWidth:2.4,strokeLinejoin:'round'}));
+    k.push(e('text',{key:'axb',x:mL+pw/2,y:H-6,textAnchor:'middle',fontSize:10,fill:'var(--text-dim)'},'Presión (psi)'));
+    k.push(e('text',{key:'ayl',x:13,y:mT+ph/2,textAnchor:'middle',fontSize:10,fill:'var(--text-dim)',transform:'rotate(-90 13 '+(mT+ph/2)+')'},'Propiedad (norm.)'));
+    return e('svg',{viewBox:'0 0 '+W+' '+H,width:'100%',style:{display:'block'}},k);
+  }
+
+  emptyPanel(title,msg,cta,onCta){
+    const e=React.createElement;
+    const icon=e('svg',{width:22,height:22,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.8,strokeLinecap:'round',strokeLinejoin:'round'},e('path',{key:'a',d:'M3 3v18h18'}),e('path',{key:'b',d:'M7 14l3-4 3 3 5-7'}));
+    const pencil=e('svg',{width:14,height:14,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.1,strokeLinecap:'round',strokeLinejoin:'round'},e('path',{key:'a',d:'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z'}));
+    return e('div',{style:{height:300,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'13px',border:'1.5px dashed var(--border)',borderRadius:'10px',background:'repeating-linear-gradient(45deg,var(--surface) 0 9px,var(--surface-2) 9px 10px)'}},
+      e('div',{key:'i',style:{width:48,height:48,borderRadius:13,background:'var(--surface)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text-faint)'}},icon),
+      e('div',{key:'t',style:{textAlign:'center',maxWidth:'300px'}},
+        e('div',{key:'1',style:{fontSize:'13.5px',fontWeight:600,color:'var(--text-dim)'}},title),
+        e('div',{key:'2',style:{fontSize:'11.5px',color:'var(--text-faint)',marginTop:'4px',lineHeight:1.45}},msg)),
+      e('button',{key:'b',onClick:onCta||undefined,style:{display:'inline-flex',alignItems:'center',gap:'7px',padding:'8px 15px',borderRadius:'9px',background:'var(--primary)',color:'var(--primary-fg)',border:'none',fontSize:'12px',fontWeight:600,cursor:'pointer',boxShadow:'0 4px 12px var(--primary-ring)'}},pencil,cta));
+  }
+
+  runCalc(){
+    if(this.state.calcStatus==='running') return;
+    this.setState({calcStatus:'running'});
+    clearTimeout(this._t1); clearTimeout(this._t2);
+    this._t1=setTimeout(()=>this.setState({calcStatus:'done',iprReady:true}),1300);
+    this._t2=setTimeout(()=>this.setState({calcStatus:'idle'}),4400);
+  }
+
+  renderVals(){
+    const t=this.state;
+    const surveyLoaded=!!t.surveyLoaded, iprReady=!!t.iprReady, pvtReady=!!t.pvtReady;
+    const sm=t.sizeModal;
+    const _cat=sm.kind==="tubing"?this.tubingCat:this.casingCat;
+    const _q=(sm.search||"").trim().toLowerCase();
+    const _cur=(t[sm.kind]&&t[sm.kind][sm.target])||null;
+    const _rows=_cat.map((c,idx)=>({c,idx})).filter(o=>!_q||(o.c.n+" "+o.c.od+" "+o.c.id+" "+o.c.w).toLowerCase().includes(_q)).map(o=>{const sel=!!(_cur&&_cur.sizeIdx===o.idx);return{name:o.c.n,od:o.c.od,id:o.c.id,w:o.c.w,selected:sel,style:"display:block;width:100%;text-align:left;padding:9px 14px;margin:1px 0;border-radius:9px;background:"+(sel?"var(--primary-soft)":"transparent")+";border:1px solid "+(sel?"var(--primary-ring)":"transparent")+";cursor:pointer;font-family:'IBM Plex Sans',sans-serif;",onPick:()=>this.pickSize(o.idx)};});
+    const _addBase="display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:9px;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;background:var(--surface-2);border:1px dashed var(--border-strong);color:var(--text-dim);";
+    const _addDis="display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:9px;border-radius:9px;font-size:12.5px;font-weight:600;font-family:'IBM Plex Sans',sans-serif;background:var(--surface-2);border:1px dashed var(--border);color:var(--text-faint);opacity:.5;cursor:not-allowed;";
+    return {
+      theme:t.theme,
+      accentAttr:(this.props && this.props.accent) || 'indigo',
+      isDark:t.theme==='dark',
+      isLight:t.theme!=='dark',
+      screenExplorer:t.screen==='explorer',
+      screenWorkspace:t.screen==='workspace',
+      modalOpen:t.modalOpen,
+      surveyModalOpen:t.surveyModalOpen,
+      surveyFull:this.surveyFull,
+      tabCompletion:t.activeTab==='completion',
+      tabCompletionData:t.activeTab==='completion'&&surveyLoaded,
+      tabCompletionEmpty:t.activeTab==='completion'&&!surveyLoaded,
+      tabFluids:t.activeTab==='fluids',
+      tabIpr:t.activeTab==='ipr',
+      notCompletion:t.activeTab!=='completion',
+      completionStyle:this.pillStyle('completion',false),
+      fluidsStyle:this.pillStyle('fluids',false),
+      iprStyle:this.pillStyle('ipr',false),
+      calcStyle:this.pillStyle('calc',true),
+      projects:this.projects,
+      surveyRows:this.survey,
+      trajectoryChart:this.buildTrajectory(),
+      iprChart:this.buildIPR(),
+      pvtChart:this.buildPVT(),
+      iprReady:iprReady,
+      iprBlank:!iprReady,
+      pvtReady:pvtReady,
+      pvtBlank:!pvtReady,
+      surveyLoaded:surveyLoaded,
+      surveyBlank:!surveyLoaded,
+      surveyEmpty:this.emptyPanel('Sin survey direccional cargado','Importe o inserte las estaciones de survey para visualizar la tabla y calcular TVD por interpolación.','Insertar datos de survey',()=>this.setState({surveyModalOpen:true})),
+      trajEmpty:this.emptyPanel('Sin trayectoria para graficar','Complete el survey direccional para generar el perfil de trayectoria y desviación del pozo.','Editar datos de trayectoria',()=>this.setState({surveyModalOpen:true})),
+      iprEmpty:this.emptyPanel('Sin curva IPR generada','Ingrese los parámetros del yacimiento y ejecute el cálculo para obtener la curva de rendimiento.','Ejecutar cálculo IPR',()=>this.runCalc()),
+      pvtEmpty:this.emptyPanel('Sin propiedades PVT calculadas','Defina la composición del fluido y las correlaciones para generar las curvas Bo, Rs y μo vs presión.','Calcular propiedades PVT',()=>this.setState({pvtReady:true})),
+      calcIdle:t.calcStatus==='idle',
+      calcRunning:t.calcStatus==='running',
+      calcDone:t.calcStatus==='done',
+      toggleTheme:()=>this.setState(s=>({theme:s.theme==='dark'?'light':'dark'})),
+      openModal:()=>this.setState({modalOpen:true}),
+      closeModal:()=>this.setState({modalOpen:false}),
+      openSurveyModal:()=>this.setState({surveyModalOpen:true}),
+      closeSurveyModal:()=>this.setState({surveyModalOpen:false}),
+      saveSurvey:()=>this.setState({surveyModalOpen:false,surveyLoaded:true}),
+      goWorkspace:()=>this.setState({modalOpen:false,screen:'workspace'}),
+      goExplorer:()=>this.setState({screen:'explorer'}),
+      setTabCompletion:()=>this.setState({activeTab:'completion'}),
+      setTabFluids:()=>this.setState({activeTab:'fluids'}),
+      setTabIpr:()=>this.setState({activeTab:'ipr'}),
+      runCalc:()=>this.runCalc(),
+      casingSections:this.buildSec("casing"),
+      tubingSections:this.buildSec("tubing"),
+      casingCount:t.casing.length,
+      tubingCount:t.tubing.length,
+      addCasing:()=>this.addSec("casing"),
+      addTubing:()=>this.addSec("tubing"),
+      addCasingDisabled:t.casing.length>=3,
+      addTubingDisabled:t.tubing.length>=3,
+      addCasingStyle:t.casing.length>=3?_addDis:_addBase,
+      addTubingStyle:t.tubing.length>=3?_addDis:_addBase,
+      sizeModalOpen:sm.open,
+      sizeModalSearch:sm.search,
+      sizeModalTitle:sm.kind==="tubing"?"Catálogo de tubería de producción":"Catálogo de revestimiento",
+      sizeRows:_rows,
+      sizeNoResults:_rows.length===0,
+      onSizeSearch:(e)=>this.setState(st=>({sizeModal:{...st.sizeModal,search:e.target.value}})),
+      closeSizeModal:()=>this.setState(st=>({sizeModal:{...st.sizeModal,open:false}})),
+      stopProp:(e)=>e.stopPropagation()
+    };
+  }
+}
+</script>
+</body>
+</html>

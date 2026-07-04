@@ -1,65 +1,50 @@
-import Image from "next/image";
+import { DownloadIcon } from "@/components/icons";
+import { Sidebar } from "@/components/explorer/Sidebar";
+import { ExplorerHeader } from "@/components/explorer/ExplorerHeader";
+import { StatCard } from "@/components/explorer/StatCard";
+import { FilterPills } from "@/components/explorer/FilterPills";
+import { ProjectsTable } from "@/components/explorer/ProjectsTable";
+import { NewProjectModal } from "@/components/explorer/NewProjectModal";
 
-export default function Home() {
+export default function ExplorerPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex h-full animate-fade">
+      <Sidebar />
+
+      <div className="flex-1 flex flex-col min-w-0">
+        <ExplorerHeader />
+
+        <div className="flex-1 overflow-y-auto p-[26px_30px_40px]">
+          <div className="flex items-end justify-between gap-5 mb-5">
+            <div>
+              <h1 className="m-0 text-[23px] font-bold tracking-[-.022em]">Panel de Proyectos</h1>
+              <p className="mt-[6px] text-[13px] text-text-dim">
+                Diseño y rediseño de sistemas de bombeo hidráulico — Jet &amp; Pistón
+              </p>
+            </div>
+            <div className="flex items-center gap-[10px]">
+              <button
+                title="Importar datos desde archivo"
+                className="inline-flex items-center gap-[9px] px-4 py-[11px] rounded-[10px] bg-surface-2 text-text border border-border text-[13.5px] font-semibold cursor-pointer hover:border-border-strong"
+              >
+                <DownloadIcon size={16} />
+                Importar Datos
+              </button>
+              <NewProjectModal />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 gap-[14px] mb-[22px]">
+            <StatCard label="Proyectos activos" value="24" />
+            <StatCard label="Pozos en diseño" value="11" />
+            <StatCard label="Simulaciones (mes)" value="187" />
+            <StatCard label="Sincronizados" value="92%" accent />
+          </div>
+
+          <FilterPills />
+          <ProjectsTable />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }
