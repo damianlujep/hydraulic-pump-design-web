@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 const NO_FLASH_SCRIPT = `
-(function () {
+(() => {
   try {
     var stored = localStorage.getItem("hydrapump-theme");
     var theme = stored === "dark" || stored === "light"

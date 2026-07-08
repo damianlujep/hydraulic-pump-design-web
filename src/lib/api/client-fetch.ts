@@ -1,22 +1,22 @@
 let refreshPromise: Promise<number> | null = null;
 
-async function refreshSession(): Promise<number> {
+const refreshSession = async (): Promise<number> => {
   try {
     const res = await fetch("/api/auth/refresh", { method: "POST" });
     return res.status;
   } catch {
     return 0;
   }
-}
+};
 
-function redirectToLogin() {
+const redirectToLogin = () => {
   if (typeof window === "undefined") return;
   if (window.location.pathname.startsWith("/login")) return;
   const redirect = window.location.pathname + window.location.search;
   window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`;
-}
+};
 
-export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+export const apiFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
   const res = await fetch(input, init);
   if (res.status !== 401) return res;
 
@@ -31,4 +31,4 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Pr
     return new Promise<Response>(() => undefined);
   }
   return res;
-}
+};

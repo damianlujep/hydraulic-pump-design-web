@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient, forwardOpenApiResponse } from "@/lib/api/server-client";
 import type { components } from "@/lib/api/schema";
 
-export async function GET(req: NextRequest) {
+export const GET = async (req: NextRequest) => {
   const { searchParams } = req.nextUrl;
   const page = Number(searchParams.get("page") ?? 0);
   const size = Number(searchParams.get("size") ?? 20);
@@ -15,9 +15,9 @@ export async function GET(req: NextRequest) {
     params: { query: { page, size, q, sort, scope } },
   });
   return forwardOpenApiResponse(result);
-}
+};
 
-export async function POST(req: NextRequest) {
+export const POST = async (req: NextRequest) => {
   const [body, client] = await Promise.all([
     req.json() as Promise<components["schemas"]["CreateProjectRequest"]>,
     createServerClient(),
@@ -25,4 +25,4 @@ export async function POST(req: NextRequest) {
 
   const result = await client.POST("/api/v1/projects", { body });
   return forwardOpenApiResponse(result, (data) => NextResponse.json(data, { status: 201 }));
-}
+};

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { clearAuthCookies, readRequestCookie } from "@/lib/api/auth-cookies";
 import { REFRESH_TOKEN_COOKIE } from "@/lib/api/cookies";
 
-export async function POST(request: Request) {
+export const POST = async (request: Request) => {
   const refreshToken = readRequestCookie(request, REFRESH_TOKEN_COOKIE);
 
   if (refreshToken) {
@@ -19,4 +19,4 @@ export async function POST(request: Request) {
   const res = new NextResponse(null, { status: 204 });
   clearAuthCookies(res);
   return res;
-}
+};

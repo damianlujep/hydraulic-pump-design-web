@@ -1,14 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api/client-fetch";
-import { queryKeys, type ProjectListParams } from "@/lib/api/query-keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import type { components } from "@/lib/api/schema";
+import type { ProjectListParams } from "@/interfaces/project";
 
 export type ProjectSummaryResponse = components["schemas"]["ProjectSummaryResponse"];
 export type ProjectResponse = components["schemas"]["ProjectResponse"];
 export type CreateProjectRequest = components["schemas"]["CreateProjectRequest"];
 export type ProjectPage = components["schemas"]["PageResponseProjectSummaryResponse"];
 
-export function useProjectList(params: ProjectListParams) {
+export const useProjectList = (params: ProjectListParams) => {
   return useQuery({
     queryKey: queryKeys.projects.list(params),
     queryFn: async () => {
@@ -22,9 +23,9 @@ export function useProjectList(params: ProjectListParams) {
     },
     placeholderData: (prev) => prev,
   });
-}
+};
 
-export function useCreateProject() {
+export const useCreateProject = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (body: CreateProjectRequest): Promise<ProjectResponse> => {
@@ -41,9 +42,9 @@ export function useCreateProject() {
     },
     onSuccess: () => void qc.invalidateQueries({ queryKey: queryKeys.projects.all }),
   });
-}
+};
 
-export function useDeleteProject() {
+export const useDeleteProject = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: number): Promise<void> => {
@@ -55,4 +56,4 @@ export function useDeleteProject() {
     },
     onSuccess: () => void qc.invalidateQueries({ queryKey: queryKeys.projects.all }),
   });
-}
+};

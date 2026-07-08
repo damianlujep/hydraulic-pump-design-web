@@ -1,13 +1,13 @@
 import { CASING_CATALOG, TUBING_CATALOG } from "@/lib/data";
 import type { CatalogEntry, PipeKind, PipeSection } from "@/interfaces/workspace";
 
-export function catalogFor(kind: PipeKind): CatalogEntry[] {
+export const catalogFor = (kind: PipeKind): CatalogEntry[] => {
   return kind === "tubing" ? TUBING_CATALOG : CASING_CATALOG;
-}
+};
 
-export function sizeLabel(c: CatalogEntry) {
+export const sizeLabel = (c: CatalogEntry) => {
   return `${c.od} (${c.id}) — ${c.w}`;
-}
+};
 
 const LABELS = ["Superior", "Intermedio", "Inferior"];
 const TINTS = ["var(--tint-blue)", "var(--tint-amber)", "var(--tint-green)"];
@@ -25,7 +25,7 @@ export type SectionDisplay = {
   canRemove: boolean;
 };
 
-export function buildSections(kind: PipeKind, sections: PipeSection[]): SectionDisplay[] {
+export const buildSections = (kind: PipeKind, sections: PipeSection[]): SectionDisplay[] => {
   const cat = catalogFor(kind);
   return sections.map((s, i) => {
     const c = cat[s.sizeIdx] || cat[0];
@@ -41,4 +41,4 @@ export function buildSections(kind: PipeKind, sections: PipeSection[]): SectionD
       canRemove: sections.length > 1,
     };
   });
-}
+};

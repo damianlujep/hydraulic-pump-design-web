@@ -6,7 +6,7 @@ export interface ErrorResponse {
   details: { field: string; message: string }[];
 }
 
-export function isErrorResponse(error: unknown): error is ErrorResponse {
+export const isErrorResponse = (error: unknown): error is ErrorResponse => {
   return (
     typeof error === "object" &&
     error !== null &&
@@ -14,4 +14,4 @@ export function isErrorResponse(error: unknown): error is ErrorResponse {
     "code" in error &&
     "message" in error
   );
-}
+};

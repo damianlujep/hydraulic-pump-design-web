@@ -30,8 +30,8 @@ export const WorkspaceProvider = ({ isNew, children }: { isNew: boolean; childre
   );
 };
 
-export function useWorkspace() {
+export const useWorkspace = () => {
   const ctx = useContext(WorkspaceContext);
   if (!ctx) throw new Error("useWorkspace must be used within a WorkspaceProvider");
   return ctx;
-}
+};

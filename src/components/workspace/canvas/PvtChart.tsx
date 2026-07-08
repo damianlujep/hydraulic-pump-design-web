@@ -16,11 +16,11 @@ const rs = (p: number) => (p < PB ? 0.06 + 0.94 * (p / PB) : 1);
 const bo = (p: number) => (p < PB ? 0.42 + 0.58 * (p / PB) : 1 - 0.14 * ((p - PB) / (P_MAX - PB)));
 const mu = (p: number) => (p < PB ? 1 - 0.72 * (p / PB) : 0.28 + 0.24 * ((p - PB) / (P_MAX - PB)));
 
-function series(f: (p: number) => number) {
+const series = (f: (p: number) => number) => {
   const pts: string[] = [];
   for (let p = 0; p <= P_MAX; p += 50) pts.push(`${X(p)},${Y(f(p))}`);
   return pts.join(" ");
-}
+};
 
 const P_TICKS = [0, 750, 1500, 2250, 3000];
 const V_TICKS = [0, 0.25, 0.5, 0.75, 1];

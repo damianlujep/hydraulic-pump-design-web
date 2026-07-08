@@ -18,7 +18,7 @@ const Y = (p: number) => M_T + (1 - p / P_MAX) * PH;
 const Q_TICKS = [0, 500, 1000, 1500, 2000];
 const P_TICKS = [0, 500, 1000, 1500, 2000, 2300];
 
-function buildIprPoints() {
+const buildIprPoints = () => {
   const qb = J * (PS - PB);
   const add = (J * PB) / 1.8;
   const pts: [number, number][] = [];
@@ -28,7 +28,7 @@ function buildIprPoints() {
     pts.push([q, p]);
   }
   return { pts, qb };
-}
+};
 
 export const IprChart = () => {
   const { pts, qb } = buildIprPoints();

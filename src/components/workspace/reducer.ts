@@ -30,7 +30,7 @@ export type WorkspaceAction =
   | { type: "SET_SIZE_SEARCH"; search: string }
   | { type: "PICK_SIZE"; idx: number };
 
-export function createInitialState(isNew: boolean): WorkspaceState {
+export const createInitialState = (isNew: boolean): WorkspaceState => {
   const filled = !isNew;
   return {
     activeTab: "ipr",
@@ -43,9 +43,9 @@ export function createInitialState(isNew: boolean): WorkspaceState {
     sizeModal: { open: false, kind: "casing", target: 0, search: "" },
     surveyModalOpen: false,
   };
-}
+};
 
-export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction): WorkspaceState {
+export const workspaceReducer = (state: WorkspaceState, action: WorkspaceAction): WorkspaceState => {
   switch (action.type) {
     case "SET_TAB":
       return { ...state, activeTab: action.tab };
@@ -92,4 +92,4 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
     default:
       return state;
   }
-}
+};
