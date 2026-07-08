@@ -87,7 +87,10 @@ The "Ejecutar Cálculo IPR" button's idle → running → done → idle sequence
 ### Shared atoms encode the design contract
 `src/components/workspace/{UnitField,InputRow,GroupCard,SelectField,EmptyPanel}.tsx` are the load-bearing primitives — nearly every data-entry row and the four empty-state panels are built from them. `UnitField` in particular implements the "MUI endAdornment" pattern from the design spec: a single bordered wrapper (not a fixed-width chip) so numbers share one left edge and units hug their own right edge regardless of unit string length. Modifying these affects the whole app; don't create parallel one-off input styles.
 
-`src/components/Modal.tsx` is the shared overlay/card wrapper (fade + pop-in animation, configurable width/z-index/alignment/scroll mode) used by all three modals (new-project, survey editor, casing/tubing size picker).
+`src/components/Modal.tsx` is the shared overlay/card wrapper (fade + pop-in animation, configurable width/z-index/alignment/scroll mode) used by the three modals (new-project, survey editor, casing/tubing size picker) and the logout confirmation dialog inside `UserMenu`.
+
+### Header user menu
+`src/components/explorer/UserMenu.tsx` is the shared account dropdown mounted in both `ExplorerHeader.tsx` and `WorkspaceNavbar.tsx` — despite living under `explorer/`, it isn't Explorer-specific; import it from there for any future header too. Self-contained: fetches the user via `useCurrentUser()` and signs out via `useLogout()` (both `src/lib/api/auth.ts`), no user-data props. The dropdown's menu items (Mi perfil, Configuración de cuenta, Preferencias de notificación, Ayuda y soporte, Atajos de teclado) are wired as no-ops that just close the menu — wire them to real routes/features as those land. "Cerrar sesión" opens a confirmation dialog (built on the shared `Modal`) before actually calling `logout.mutate()`. Takes `variant?: "full" | "compact"` (`"full"` = avatar+name+role+chevron, `"compact"` = avatar+chevron only) — built for a future mobile layout; nothing renders `variant="compact"` yet, both current headers use the `"full"` default.
 
 ### Reference data
 `src/lib/data.ts` holds the casing/tubing catalogs, directional survey stations, and seed projects — copied verbatim from the original prototype's logic block. `src/components/workspace/canvas/{TrajectoryChart,IprChart,PvtChart}.tsx` are hand-rolled inline SVG charts (no charting library) porting the original prototype's pixel-space math (margins, tick arrays, the Vogel IPR curve) 1:1; if the underlying data or chart size changes, the tick arrays and margins are hardcoded per component and must be updated together.
@@ -97,7 +100,7 @@ The "Ejecutar Cálculo IPR" button's idle → running → done → idle sequence
 ### Icons
 All icons are inline SVGs in `src/components/icons.tsx` (no icon library dependency) — copied from the Feather-style paths in the original design so stroke widths/sizes match exactly.
 
-### Conventions
+## Conventions
 
 - **Server Components by default.** `"use client"` only when needed.
 - **No `useEffect` for data fetching.**
@@ -107,11 +110,11 @@ All icons are inline SVGs in `src/components/icons.tsx` (no icon library depende
 - No comments unless genuinely non-obvious.
 - Shared types in `src/interfaces/` — never inside `"use client"` files.
 
-### Loading states
+## Loading states
 
 `react-loading-skeleton` (stylesheet imported once in `app/layout.tsx`). Use for noticeable waits (lists, dashboards, tables). Match skeleton shape to the element. Don't wrap every inline value.
 
-### Component syntax
+## Component syntax
 
 Arrow functions for all components and page/layout files:
 ```tsx
@@ -122,7 +125,7 @@ export default MyComponent;
 ```
 Named: `export const X = (...) => { ... };`. Never `export default function` / `export function`. Close with `};`.
 
-### Lint check
+## Lint check
 
 After any 2+ file change:
 ```bash
@@ -130,11 +133,11 @@ npx tsc --noEmit && yarn lint
 ```
 Fix errors only. Pre-existing warnings (useReactTable, watch(), route `req.json()`) are intentional. Don't add `eslint-disable` without need.
 
-### Commit hygiene
+## Commit hygiene
 
 Don't commit unless explicitly asked. When asked, show staged diff and wait for confirmation.
 
-### Source of truth for visual fidelity
+## Source of truth for visual fidelity
 `design_handoff_hydrapump/design-references/` contains the original prototype (`HydraPump Design Suite (standalone).html`, open-in-browser), the design token/density contract (`DESIGN_CONTRACT.md`), and the CSS→Tailwind migration plan (`TAILWIND_MIGRATION.md`). When in doubt about a spacing, color, or interaction detail, check there before guessing.
 
 **`DESIGN.md`** (repo root) documents the design system as actually implemented in this codebase — token-to-Tailwind-utility mapping, component specs, screen layouts, and the state/interaction model. Read it before any styling or new-component work.

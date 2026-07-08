@@ -255,3 +255,32 @@ export function LogoutIcon(props: IconProps) {
     </Icon>
   );
 }
+
+export const UserIcon = (props: IconProps) => (
+  <Icon strokeWidth={1.9} {...props}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7" />
+  </Icon>
+);
+
+export const BellIcon = (props: IconProps) => (
+  <Icon strokeWidth={1.9} {...props}>
+    <path d="M6 10a6 6 0 1 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z" />
+    <path d="M10 20a2 2 0 0 0 4 0" />
+  </Icon>
+);
+
+export const HelpCircleIcon = (props: IconProps) => (
+  <Icon strokeWidth={1.9} {...props}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.9.4-1.5 1-1.5 1.9v.3" />
+    <path d="M12 17.5v.01" />
+  </Icon>
+);
+
+export const KeyboardIcon = (props: IconProps) => (
+  <Icon strokeWidth={1.9} {...props}>
+    <rect x="3" y="6" width="18" height="12" rx="2" />
+    <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h12" />
+  </Icon>
+);

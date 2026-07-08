@@ -143,6 +143,7 @@
   --animate-fade: fade .25s ease;
   --animate-pop-in: popIn .24s cubic-bezier(.2, .8, .3, 1);
   --animate-spin-fast: spin .8s linear infinite;
+  --animate-menu-pop: menuPop .16s ease;
 }
 
 @keyframes spin {
@@ -154,6 +155,16 @@
   from {
     opacity: 0;
     transform: translateY(14px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes menuPop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(.985);
   }
   to {
     opacity: 1;

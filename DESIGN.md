@@ -71,7 +71,10 @@ Same visual language as `UnitField`'s input but for `<select>`; supports a `disa
 The single reusable "no data yet" placeholder, used in all four required spots (survey, trajectory, IPR chart, PVT chart). Fixed `h-[300px]`, `border-dashed`, diagonal hatch background (`repeating-linear-gradient(45deg, var(--surface) 0 9px, var(--surface-2) 9px 10px)`), 48px icon tile, title (13.5px/600), message (11.5px), and a primary CTA button with a pencil icon. Props: `title`, `message`, `cta`, `onCta`.
 
 ### `Modal` (`src/components/Modal.tsx`)
-Shared overlay (`fixed inset-0`, `rgba(5,8,13,.62)` + `backdrop-blur-[4px]`, `animate-fade`) and card (`rounded-[16px]`, `shadow-app`, `animate-pop-in`). Configurable via props: `maxWidthPx`, `zIndex` (new-project 50, survey 60, size-picker 70 — matches original stacking), `align` (`center` | `start`, the size picker anchors near the top), `scroll` (`inner` = header/body/footer each manage their own scroll region; `outer` = the whole card scrolls, used by the new-project modal).
+Shared overlay (`fixed inset-0`, `rgba(5,8,13,.62)` + `backdrop-blur-[4px]`, `animate-fade`) and card (`rounded-[16px]`, `shadow-app`, `animate-pop-in`). Configurable via props: `maxWidthPx`, `zIndex` (new-project 50, survey 60, size-picker 70, `UserMenu`'s logout confirmation 100 — matches original stacking), `align` (`center` | `start`, the size picker anchors near the top), `scroll` (`inner` = header/body/footer each manage their own scroll region; `outer` = the whole card scrolls, used by the new-project modal).
+
+### `UserMenu` (`src/components/explorer/UserMenu.tsx`)
+The header account dropdown, mounted in both the Explorer header and the Workspace navbar (not screen-specific despite its folder). Trigger button (avatar + name/role + chevron, or `variant="compact"` for avatar+chevron only — built for a future mobile layout, unused today) opens a 270px `absolute right-0` panel: identity header (avatar, name, role, mono email), grouped "Cuenta"/"Sistema" items (`Mi perfil`, `Configuración de cuenta`, `Preferencias de notificación`, `Ayuda y soporte`, `Atajos de teclado ⌘K`, currently no-ops that just close the menu), then a `text-danger` "Cerrar sesión" row. Opens with the `animate-menu-pop` keyframe (downward pop, distinct from `Modal`'s upward `animate-pop-in`). Escape and an invisible `fixed inset-0` backdrop close the panel. Selecting "Cerrar sesión" closes the panel and opens a `Modal`-based confirmation dialog before calling the real `useLogout()`.
 
 ### Buttons (no shared component — classes composed inline per usage)
 - **Primary**: `bg-primary text-primary-fg`, `rounded-[9-11px]`, `shadow-[0_5-6px_16-18px_var(--primary-ring)]`, `hover:bg-primary-hover`.
@@ -85,10 +88,10 @@ All Feather-style inline SVGs (24×24 viewBox, `stroke="currentColor"`, round ca
 ## 3. Screens
 
 ### Project Explorer (`/`)
-Fixed 238px sidebar (logo lockup, grouped nav with active-item soft-primary background + inset ring, pinned "Nube conectada" status card) + flexible main column (60px header with workspace-switcher button, search input, theme toggle, user chip; scrollable body with page title, 4-up stat card grid, filter pills, and a CSS-grid projects table `grid-cols-[minmax(0,2.4fr)_minmax(0,1.2fr)_150px_132px_100px]`).
+Fixed 238px sidebar (logo lockup, grouped nav with active-item soft-primary background + inset ring, pinned "Nube conectada" status card) + flexible main column (60px header with workspace-switcher button, search input, theme toggle, `UserMenu`; scrollable body with page title, 4-up stat card grid, filter pills, and a CSS-grid projects table `grid-cols-[minmax(0,2.4fr)_minmax(0,1.2fr)_150px_132px_100px]`).
 
 ### Workspace (`/workspace`)
-58px navbar (back button, project identity, cloud-save status, theme toggle) → chevron progress-tab bar (Completación ✓ / Fluidos y PVT ✓ / IPR y OPR active / Cálculos locked) → 45/55 split: left column scrolls (data-entry forms per active tab), right column is a fixed-width canvas stack (charts/tables per active tab) on a `surface-2` background.
+58px navbar (back button, project identity, cloud-save status, theme toggle, `UserMenu`) → chevron progress-tab bar (Completación ✓ / Fluidos y PVT ✓ / IPR y OPR active / Cálculos locked) → 45/55 split: left column scrolls (data-entry forms per active tab), right column is a fixed-width canvas stack (charts/tables per active tab) on a `surface-2` background.
 
 ## 4. State & interactions
 

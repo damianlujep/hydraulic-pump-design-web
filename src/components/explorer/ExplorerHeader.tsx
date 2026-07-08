@@ -1,7 +1,8 @@
 import { ChevronDownIcon, LockBadgeIcon, SearchIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserMenu } from "./UserMenu";
 
-export function ExplorerHeader() {
+export const ExplorerHeader = () => {
   return (
     <header className="h-[60px] flex-none flex items-center gap-4 px-6 border-b border-border bg-surface">
       <div className="flex items-center gap-[11px] whitespace-nowrap">
@@ -38,19 +39,8 @@ export function ExplorerHeader() {
       <div className="ml-auto flex items-center gap-3">
         <ThemeToggle />
         <div className="w-px h-[26px] bg-border" />
-        <div className="flex items-center gap-[10px] cursor-pointer">
-          <div
-            className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-primary-fg text-[12.5px] font-bold"
-            style={{ background: "linear-gradient(135deg, var(--primary), var(--primary-hover))" }}
-          >
-            GS
-          </div>
-          <div className="leading-[1.25]">
-            <div className="text-[12.5px] font-semibold">Ing. Gabriel Silva</div>
-            <div className="text-[10.5px] text-text-faint">Ingeniero de Producción</div>
-          </div>
-        </div>
+        <UserMenu />
       </div>
     </header>
   );
-}
+};

@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon, PumpIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserMenu } from "@/components/explorer/UserMenu";
 
-export function WorkspaceNavbar() {
+export const WorkspaceNavbar = () => {
   const router = useRouter();
 
   return (
@@ -33,13 +34,9 @@ export function WorkspaceNavbar() {
         </span>
         <div className="w-px h-6 bg-border" />
         <ThemeToggle />
-        <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-primary-fg text-xs font-bold"
-          style={{ background: "linear-gradient(135deg, var(--primary), var(--primary-hover))" }}
-        >
-          GS
-        </div>
+        <div className="w-px h-6 bg-border" />
+        <UserMenu />
       </div>
     </header>
   );
-}
+};
