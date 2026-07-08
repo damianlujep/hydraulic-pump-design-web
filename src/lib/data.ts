@@ -1,4 +1,4 @@
-import type { CatalogEntry, Project, SurveyFullStation, SurveyStation } from "./types";
+import type { CatalogEntry, SurveyFullStation, SurveyStation } from "@/interfaces/workspace";
 
 export const CASING_CATALOG: CatalogEntry[] = [
   { n: "4½″", od: "4.500", id: "4.090", w: "9.5" },
@@ -117,12 +117,3 @@ export const SURVEY_FULL: SurveyFullStation[] = SURVEY_FULL_RAW.map((r) => ({
   hd: r.hd.toFixed(3),
   ang: r.ang,
 }));
-
-export const PROJECTS: Project[] = [
-  { name: "APK-11M2 JET PUMP", well: "APAIKA-11", type: "Jet", campo: "APAIKA / Bloque 31", isCloud: true, local: false, modified: "Hace 4 min" },
-  { name: "NENKE-07 PISTON LIFT", well: "NENKE-07", type: "Pistón", campo: "NENKE / Bloque 31", isCloud: true, local: false, modified: "Hace 2 h" },
-  { name: "TIPUTINI-22 JET", well: "TIPUTINI-22", type: "Jet", campo: "TIPUTINI / Bloque 43", isCloud: false, local: true, modified: "Ayer, 18:42" },
-  { name: "SACHA-118 PISTON REDISEÑO", well: "SACHA-118", type: "Pistón", campo: "SACHA / Bloque 60", isCloud: true, local: false, modified: "24 abr 2026" },
-  { name: "AUCA-51 JET", well: "AUCA-51", type: "Jet", campo: "AUCA / Bloque 61", isCloud: false, local: true, modified: "22 abr 2026" },
-  { name: "PAÑACOCHA-09 JET", well: "PAÑACOCHA-09", type: "Jet", campo: "PAÑACOCHA / Bloque 12", isCloud: true, local: false, modified: "19 abr 2026" },
-];

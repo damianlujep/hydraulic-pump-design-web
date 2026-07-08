@@ -2,17 +2,18 @@
 
 import { CheckIcon, ChevronRightThinIcon, LockIcon } from "@/components/icons";
 import { useWorkspace } from "./WorkspaceContext";
-import type { TabId } from "@/lib/types";
+import type { TabId } from "@/interfaces/workspace";
+import { cn } from "@/utils/cn";
 
-function pillClass(selected: boolean, locked: boolean) {
-  const base =
-    "inline-flex items-center gap-2 px-[15px] py-2 rounded-full text-[12.5px] font-semibold whitespace-nowrap border transition-[box-shadow,border-color,background] duration-150";
-  if (locked) return `${base} bg-surface-2 border-border text-text-faint cursor-not-allowed`;
-  if (selected) return `${base} bg-primary-soft border-primary text-text cursor-pointer shadow-[0_0_0_3px_var(--primary-ring)]`;
-  return `${base} bg-surface border-border text-text-dim cursor-pointer`;
-}
+const pillClass = (selected: boolean, locked: boolean) =>
+  cn(
+    "inline-flex items-center gap-2 px-[15px] py-2 rounded-full text-[12.5px] font-semibold whitespace-nowrap border transition-[box-shadow,border-color,background] duration-150",
+    locked && "bg-surface-2 border-border text-text-faint cursor-not-allowed",
+    !locked && selected && "bg-primary-soft border-primary text-text cursor-pointer shadow-[0_0_0_3px_var(--primary-ring)]",
+    !locked && !selected && "bg-surface border-border text-text-dim cursor-pointer",
+  );
 
-function StepPill({
+const StepPill = ({
   label,
   tab,
   icon,
@@ -20,7 +21,7 @@ function StepPill({
   label: string;
   tab: TabId;
   icon: React.ReactNode;
-}) {
+}) => {
   const { state, dispatch } = useWorkspace();
   return (
     <button onClick={() => dispatch({ type: "SET_TAB", tab })} className={pillClass(state.activeTab === tab, false)}>
@@ -28,9 +29,9 @@ function StepPill({
       {label}
     </button>
   );
-}
+};
 
-export function ProgressTabs() {
+export const ProgressTabs = () => {
   return (
     <div className="flex items-center gap-[9px] p-[11px_22px] bg-surface border-b border-border">
       <StepPill
@@ -71,4 +72,4 @@ export function ProgressTabs() {
       <div className="ml-auto text-[11.5px] text-text-faint font-mono">Paso 3 de 4 · Validación de entradas</div>
     </div>
   );
-}
+};

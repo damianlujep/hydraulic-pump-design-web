@@ -4,8 +4,9 @@ import { Modal } from "@/components/Modal";
 import { CheckThinIcon, SearchIcon, XIcon } from "@/components/icons";
 import { useWorkspace } from "./WorkspaceContext";
 import { catalogFor } from "./casingTubing";
+import { cn } from "@/utils/cn";
 
-export function SizePickerModal() {
+export const SizePickerModal = () => {
   const { state, dispatch } = useWorkspace();
   const { sizeModal } = state;
   if (!sizeModal.open) return null;
@@ -57,9 +58,10 @@ export function SizePickerModal() {
             <button
               key={idx}
               onClick={() => dispatch({ type: "PICK_SIZE", idx })}
-              className={`block w-full text-left p-[9px_14px] my-px rounded-[9px] border cursor-pointer hover:bg-surface-2 ${
-                selected ? "bg-primary-soft border-primary-ring" : "bg-transparent border-transparent"
-              }`}
+              className={cn(
+                "block w-full text-left p-[9px_14px] my-px rounded-[9px] border cursor-pointer hover:bg-surface-2",
+                selected ? "bg-primary-soft border-primary-ring" : "bg-transparent border-transparent",
+              )}
             >
               <span className="grid grid-cols-[1fr_74px_74px_64px] gap-2 items-center w-full">
                 <span className="flex items-center gap-2 text-[13px] text-text">
@@ -86,4 +88,4 @@ export function SizePickerModal() {
       </div>
     </Modal>
   );
-}
+};

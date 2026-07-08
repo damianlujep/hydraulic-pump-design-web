@@ -8,7 +8,7 @@ interface Props {
   children: ReactNode;
 }
 
-export function ReactQueryProvider({ children }: Props) {
+export const ReactQueryProvider = ({ children }: Props) => {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -28,4 +28,4 @@ export function ReactQueryProvider({ children }: Props) {
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
-}
+};

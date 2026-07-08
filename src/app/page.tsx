@@ -6,7 +6,7 @@ import { FilterPills } from "@/components/explorer/FilterPills";
 import { ProjectsTable } from "@/components/explorer/ProjectsTable";
 import { NewProjectModal } from "@/components/explorer/NewProjectModal";
 
-export default function ExplorerPage() {
+const ExplorerPage = () => {
   return (
     <div className="flex h-full animate-fade">
       <Sidebar />
@@ -47,4 +47,6 @@ export default function ExplorerPage() {
       </div>
     </div>
   );
-}
+};
+
+export default ExplorerPage;

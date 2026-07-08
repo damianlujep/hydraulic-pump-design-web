@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes } from "react";
+import { cn } from "@/utils/cn";
 
 type UnitFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   unit: string;
@@ -6,12 +7,14 @@ type UnitFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   widthPx?: number;
 };
 
-export function UnitField({ unit, error = false, widthPx = 150, className = "", style, ...props }: UnitFieldProps) {
+export const UnitField = ({ unit, error = false, widthPx = 150, className = "", style, ...props }: UnitFieldProps) => {
   return (
     <span
-      className={`inline-flex items-center flex-none rounded-[6px] overflow-hidden border bg-surface-3 focus-within:border-primary focus-within:shadow-[0_0_0_2px_var(--primary-ring)] ${
-        error ? "border-danger shadow-[0_0_0_2px_var(--danger-ring)]" : "border-border"
-      } ${className}`}
+      className={cn(
+        "inline-flex items-center flex-none rounded-[6px] overflow-hidden border bg-surface-3 focus-within:border-primary focus-within:shadow-[0_0_0_2px_var(--primary-ring)]",
+        error ? "border-danger shadow-[0_0_0_2px_var(--danger-ring)]" : "border-border",
+        className,
+      )}
       style={{ width: widthPx, ...style }}
     >
       <input
@@ -23,4 +26,4 @@ export function UnitField({ unit, error = false, widthPx = 150, className = "", 
       </span>
     </span>
   );
-}
+};

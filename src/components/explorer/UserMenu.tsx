@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Skeleton from "react-loading-skeleton";
 import { Modal } from "@/components/Modal";
 import {
   BellIcon,
@@ -12,6 +13,7 @@ import {
   UserIcon,
 } from "@/components/icons";
 import { useCurrentUser, useLogout } from "@/lib/api/auth";
+import { cn } from "@/utils/cn";
 
 const ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN: "Super Administrador",
@@ -42,7 +44,7 @@ type UserMenuProps = {
 };
 
 export const UserMenu = ({ variant = "full" }: UserMenuProps) => {
-  const { data: user } = useCurrentUser();
+  const { data: user, isPending } = useCurrentUser();
   const logout = useLogout();
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -60,7 +62,7 @@ export const UserMenu = ({ variant = "full" }: UserMenuProps) => {
   }, [open, confirmOpen]);
 
   const initials = user ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() : "";
-  const fullName = user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "Cargando...";
+  const fullName = user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "";
   const subtitle = user ? (user.organizationName ?? ROLE_LABELS[user.role ?? ""] ?? "") : "";
 
   const closeMenu = () => setOpen(false);
@@ -72,11 +74,11 @@ export const UserMenu = ({ variant = "full" }: UserMenuProps) => {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className={`flex cursor-pointer items-center gap-[10px] rounded-[11px] border py-[5px] pl-[5px] transition-colors ${
-          variant === "compact" ? "pr-[9px]" : "pr-2"
-        } ${
-          open ? "border-border bg-surface-2" : "border-transparent bg-transparent hover:border-border hover:bg-surface-2"
-        }`}
+        className={cn(
+          "flex cursor-pointer items-center gap-[10px] rounded-[11px] border py-[5px] pl-[5px] transition-colors",
+          variant === "compact" ? "pr-[9px]" : "pr-2",
+          open ? "border-border bg-surface-2" : "border-transparent bg-transparent hover:border-border hover:bg-surface-2",
+        )}
       >
         {variant === "compact" ? (
           <Avatar initials={initials} size={32} fontSize={12} />
@@ -84,14 +86,23 @@ export const UserMenu = ({ variant = "full" }: UserMenuProps) => {
           <>
             <Avatar initials={initials} size={34} fontSize={12.5} />
             <span className="text-left leading-[1.25]">
-              <span className="block text-[12.5px] font-semibold text-text">{fullName}</span>
-              <span className="block text-[10.5px] text-text-faint">{subtitle}</span>
+              {isPending ? (
+                <>
+                  <Skeleton width={90} height={12} baseColor="var(--surface-2)" highlightColor="var(--surface-3)" />
+                  <Skeleton width={60} height={10} baseColor="var(--surface-2)" highlightColor="var(--surface-3)" />
+                </>
+              ) : (
+                <>
+                  <span className="block text-[12.5px] font-semibold text-text">{fullName}</span>
+                  <span className="block text-[10.5px] text-text-faint">{subtitle}</span>
+                </>
+              )}
             </span>
           </>
         )}
         <ChevronDownIcon
           size={14}
-          className={`text-text-faint transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={cn("text-text-faint transition-transform duration-200", open && "rotate-180")}
         />
       </button>
 
@@ -103,9 +114,19 @@ export const UserMenu = ({ variant = "full" }: UserMenuProps) => {
           <div className="flex items-center gap-[12px] rounded-[10px] bg-surface-2 p-[12px]">
             <Avatar initials={initials} size={42} fontSize={15} />
             <div className="min-w-0 leading-[1.3]">
-              <div className="text-[13px] font-bold text-text">{fullName}</div>
-              <div className="text-[11px] text-text-dim">{subtitle}</div>
-              <div className="mt-[2px] font-mono text-[10.5px] text-text-faint">{user?.email}</div>
+              {isPending ? (
+                <>
+                  <Skeleton width={110} height={13} baseColor="var(--surface-3)" highlightColor="var(--surface)" />
+                  <Skeleton width={80} height={11} baseColor="var(--surface-3)" highlightColor="var(--surface)" />
+                  <Skeleton width={130} height={10} baseColor="var(--surface-3)" highlightColor="var(--surface)" />
+                </>
+              ) : (
+                <>
+                  <div className="text-[13px] font-bold text-text">{fullName}</div>
+                  <div className="text-[11px] text-text-dim">{subtitle}</div>
+                  <div className="mt-[2px] font-mono text-[10.5px] text-text-faint">{user?.email}</div>
+                </>
+              )}
             </div>
           </div>
 

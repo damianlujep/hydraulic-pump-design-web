@@ -11,7 +11,7 @@ type WorkspaceContextValue = {
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 
-export function WorkspaceProvider({ isNew, children }: { isNew: boolean; children: React.ReactNode }) {
+export const WorkspaceProvider = ({ isNew, children }: { isNew: boolean; children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(workspaceReducer, isNew, createInitialState);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -28,7 +28,7 @@ export function WorkspaceProvider({ isNew, children }: { isNew: boolean; childre
   return (
     <WorkspaceContext.Provider value={{ state, dispatch, runCalc }}>{children}</WorkspaceContext.Provider>
   );
-}
+};
 
 export function useWorkspace() {
   const ctx = useContext(WorkspaceContext);

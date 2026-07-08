@@ -1,5 +1,5 @@
 import { CASING_CATALOG, TUBING_CATALOG } from "@/lib/data";
-import type { CatalogEntry, PipeKind, PipeSection } from "@/lib/types";
+import type { CatalogEntry, PipeKind, PipeSection } from "@/interfaces/workspace";
 
 export function catalogFor(kind: PipeKind): CatalogEntry[] {
   return kind === "tubing" ? TUBING_CATALOG : CASING_CATALOG;

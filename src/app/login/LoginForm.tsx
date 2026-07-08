@@ -9,7 +9,7 @@ import { isErrorResponse } from "@/lib/api/errors";
 const INPUT_CLASS =
   "w-full p-[11px_13px] bg-surface-2 border border-border rounded-[9px] text-[13.5px] text-text outline-none focus:border-primary focus:shadow-[0_0_0_2px_var(--primary-ring)]";
 
-export function LoginForm({ redirect }: { redirect?: string }) {
+export const LoginForm = ({ redirect }: { redirect?: string }) => {
   const router = useRouter();
   const login = useLogin();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -77,4 +77,4 @@ export function LoginForm({ redirect }: { redirect?: string }) {
       </div>
     </div>
   );
-}
+};

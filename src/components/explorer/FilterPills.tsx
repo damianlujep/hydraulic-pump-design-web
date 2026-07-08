@@ -1,6 +1,6 @@
 const FILTERS = ["Todos", "Sincronizados", "Caché local"];
 
-export function FilterPills() {
+export const FilterPills = () => {
   return (
     <div className="flex items-center gap-[10px] mb-3">
       <div className="flex gap-[6px]">
@@ -25,4 +25,4 @@ export function FilterPills() {
       <span className="ml-auto text-[11.5px] text-text-faint font-mono">6 de 24 proyectos</span>
     </div>
   );
-}
+};

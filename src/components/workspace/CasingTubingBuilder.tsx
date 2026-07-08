@@ -4,9 +4,10 @@ import { DiameterIcon, PlusIcon, SearchIcon, XIcon } from "@/components/icons";
 import { UnitField } from "./UnitField";
 import { useWorkspace } from "./WorkspaceContext";
 import { buildSections } from "./casingTubing";
-import type { PipeKind } from "@/lib/types";
+import type { PipeKind } from "@/interfaces/workspace";
+import { cn } from "@/utils/cn";
 
-export function CasingTubingBuilder({ kind, title }: { kind: PipeKind; title: string }) {
+export const CasingTubingBuilder = ({ kind, title }: { kind: PipeKind; title: string }) => {
   const { state, dispatch } = useWorkspace();
   const sections = state[kind];
   const rows = buildSections(kind, sections);
@@ -106,11 +107,12 @@ export function CasingTubingBuilder({ kind, title }: { kind: PipeKind; title: st
         <button
           onClick={() => dispatch({ type: "ADD_SECTION", kind })}
           disabled={atLimit}
-          className={`flex items-center justify-center gap-[7px] w-full p-[9px] rounded-[9px] text-[12.5px] font-semibold bg-surface-2 border border-dashed ${
+          className={cn(
+            "flex items-center justify-center gap-[7px] w-full p-[9px] rounded-[9px] text-[12.5px] font-semibold bg-surface-2 border border-dashed",
             atLimit
               ? "border-border text-text-faint opacity-50 cursor-not-allowed"
-              : "border-border-strong text-text-dim cursor-pointer hover:border-primary hover:text-primary hover:bg-primary-soft"
-          }`}
+              : "border-border-strong text-text-dim cursor-pointer hover:border-primary hover:text-primary hover:bg-primary-soft",
+          )}
         >
           <PlusIcon size={14} strokeWidth={2.2} />
           Agregar tramo
@@ -118,4 +120,4 @@ export function CasingTubingBuilder({ kind, title }: { kind: PipeKind; title: st
       </div>
     </div>
   );
-}
+};

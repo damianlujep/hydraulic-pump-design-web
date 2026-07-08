@@ -1,6 +1,6 @@
 import { CloudSyncIcon, LockIcon } from "@/components/icons";
 
-export function LockStatusBadge({ lockedBy }: { lockedBy?: string | null }) {
+export const LockStatusBadge = ({ lockedBy }: { lockedBy?: string | null }) => {
   if (lockedBy) {
     return (
       <span className="inline-flex items-center gap-[6px] px-[10px] py-1 rounded-full bg-amber-soft text-amber text-[11.5px] font-semibold">
@@ -15,4 +15,4 @@ export function LockStatusBadge({ lockedBy }: { lockedBy?: string | null }) {
       Sincronizado
     </span>
   );
-}
+};

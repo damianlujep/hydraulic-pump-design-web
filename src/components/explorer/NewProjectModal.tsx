@@ -10,7 +10,7 @@ import { isErrorResponse } from "@/lib/api/errors";
 const TEXT_INPUT_CLASS =
   "p-[9px_12px] bg-surface-2 border border-border rounded-lg text-[13.5px] text-text outline-none focus:border-primary focus:shadow-[0_0_0_2px_var(--primary-ring)]";
 
-export function NewProjectModal() {
+export const NewProjectModal = () => {
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
@@ -175,4 +175,4 @@ export function NewProjectModal() {
       )}
     </>
   );
-}
+};

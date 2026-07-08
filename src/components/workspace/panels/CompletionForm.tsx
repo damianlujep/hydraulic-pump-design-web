@@ -3,7 +3,7 @@ import { InputRow } from "../InputRow";
 import { UnitField } from "../UnitField";
 import { CasingTubingBuilder } from "../CasingTubingBuilder";
 
-export function CompletionForm() {
+export const CompletionForm = () => {
   return (
     <div className="flex flex-col gap-[14px]">
       <GroupCard title="Completación de bombeo hidráulico">
@@ -28,4 +28,4 @@ export function CompletionForm() {
       <CasingTubingBuilder kind="tubing" title="Tubería de producción (Tubing)" />
     </div>
   );
-}
+};

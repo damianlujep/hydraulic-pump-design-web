@@ -5,7 +5,7 @@ type GroupCardProps = {
   children: React.ReactNode;
 };
 
-export function GroupCard({ title, badge, bullet = false, children }: GroupCardProps) {
+export const GroupCard = ({ title, badge, bullet = false, children }: GroupCardProps) => {
   return (
     <div className="rounded-[11px] border border-border bg-surface overflow-hidden">
       <div className="flex items-center justify-between gap-2 p-[10px_14px] bg-surface-2 border-b border-border">
@@ -18,4 +18,4 @@ export function GroupCard({ title, badge, bullet = false, children }: GroupCardP
       <div className="p-[6px]">{children}</div>
     </div>
   );
-}
+};

@@ -20,7 +20,7 @@ const TVD_TICKS = [0, 700, 1400, 2100, 2800, 3500, 4200, 4900, 5600, 6300];
 const ANG_TICKS = [0, 15, 30, 45, 60, 75];
 const HD_TICKS = [0, 950, 1900, 2850, 3800, 4750, 5700];
 
-export function TrajectoryChart() {
+export const TrajectoryChart = () => {
   const greenPoints = SURVEY.map((d) => `${xH(d.hd)},${y(d.tvd)}`).join(" ");
   const bluePoints = SURVEY.map((d) => `${xA(d.ang)},${y(d.tvd)}`).join(" ");
 
@@ -91,4 +91,4 @@ export function TrajectoryChart() {
       </text>
     </svg>
   );
-}
+};

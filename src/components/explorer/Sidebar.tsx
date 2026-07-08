@@ -1,6 +1,6 @@
 import { CatalogIcon, DocsIcon, HistoryIcon, PumpIcon, SettingsIcon } from "@/components/icons";
 
-export function Sidebar() {
+export const Sidebar = () => {
   return (
     <aside className="w-[238px] flex-none bg-surface border-r border-border flex flex-col">
       <div className="flex items-center gap-[11px] p-[17px_18px_15px] border-b border-border">
@@ -51,4 +51,4 @@ export function Sidebar() {
       </div>
     </aside>
   );
-}
+};

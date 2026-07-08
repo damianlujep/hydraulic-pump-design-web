@@ -30,7 +30,7 @@ function buildIprPoints() {
   return { pts, qb };
 }
 
-export function IprChart() {
+export const IprChart = () => {
   const { pts, qb } = buildIprPoints();
   const poly = pts.map(([q, p]) => `${X(q)},${Y(p)}`).join(" ");
 
@@ -88,4 +88,4 @@ export function IprChart() {
       </text>
     </svg>
   );
-}
+};

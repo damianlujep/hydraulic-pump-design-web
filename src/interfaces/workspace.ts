@@ -30,16 +30,6 @@ export type SurveyFullStation = {
   ang: number;
 };
 
-export type Project = {
-  name: string;
-  well: string;
-  type: string;
-  campo: string;
-  isCloud: boolean;
-  local: boolean;
-  modified: string;
-};
-
 export type SizeModalState = {
   open: boolean;
   kind: PipeKind;

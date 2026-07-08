@@ -25,7 +25,7 @@ function series(f: (p: number) => number) {
 const P_TICKS = [0, 750, 1500, 2250, 3000];
 const V_TICKS = [0, 0.25, 0.5, 0.75, 1];
 
-export function PvtChart() {
+export const PvtChart = () => {
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block" }}>
       <rect x={M_L} y={M_T} width={PW} height={PH} fill="var(--chart-plot)" stroke="var(--border)" />
@@ -72,4 +72,4 @@ export function PvtChart() {
       </text>
     </svg>
   );
-}
+};

@@ -6,7 +6,7 @@ import { useWorkspace } from "../WorkspaceContext";
 
 const GRID_COLS = "grid-cols-[56px_repeat(4,1fr)]";
 
-export function SurveyTable() {
+export const SurveyTable = () => {
   const { dispatch } = useWorkspace();
 
   return (
@@ -76,4 +76,4 @@ export function SurveyTable() {
       </div>
     </div>
   );
-}
+};

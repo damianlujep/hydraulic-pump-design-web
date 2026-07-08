@@ -1,4 +1,5 @@
 import { AlertCircleIcon } from "@/components/icons";
+import { cn } from "@/utils/cn";
 
 type InputRowProps = {
   label: string;
@@ -7,7 +8,7 @@ type InputRowProps = {
   labelColor?: "dim" | "faint";
 };
 
-export function InputRow({ label, children, error, labelColor = "dim" }: InputRowProps) {
+export const InputRow = ({ label, children, error, labelColor = "dim" }: InputRowProps) => {
   if (error) {
     return (
       <label className="flex flex-col gap-[5px] p-[6px_10px] rounded-[7px] bg-danger-soft">
@@ -24,8 +25,8 @@ export function InputRow({ label, children, error, labelColor = "dim" }: InputRo
   }
   return (
     <label className="flex items-center justify-between gap-[14px] p-[6px_10px] rounded-[7px] hover:bg-surface-2">
-      <span className={`text-[12.5px] ${labelColor === "faint" ? "text-text-faint" : "text-text-dim"}`}>{label}</span>
+      <span className={cn("text-[12.5px]", labelColor === "faint" ? "text-text-faint" : "text-text-dim")}>{label}</span>
       {children}
     </label>
   );
-}
+};

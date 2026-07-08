@@ -37,11 +37,11 @@ const NO_FLASH_SCRIPT = `
 })();
 `;
 
-export default function RootLayout({
+const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   return (
     <html
       lang="es"
@@ -60,4 +60,6 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;

@@ -1,12 +1,10 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-
-export type ThemeContext = "dark" | "light";
-export type Accent = "indigo" | "cyan" | "emerald" | "amber";
+import type { Accent, ThemeContext as Theme } from "@/interfaces/theme";
 
 type ThemeContextValue = {
-  theme: ThemeContext;
+  theme: Theme;
   accent: Accent;
   toggleTheme: () => void;
   setAccent: (accent: Accent) => void;
@@ -18,8 +16,8 @@ const THEME_KEY = "hydrapump-theme";
 const ACCENT_KEY = "hydrapump-accent";
 const ACCENTS: Accent[] = ["indigo", "cyan", "emerald", "amber"];
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<ThemeContext>(() => {
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const [theme, setTheme] = useState<Theme>(() => {
     if (typeof document === "undefined") return "dark";
     return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
   });
@@ -47,7 +45,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       {children}
     </ThemeContext.Provider>
   );
-}
+};
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);

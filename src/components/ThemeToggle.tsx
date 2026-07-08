@@ -3,7 +3,7 @@
 import { MoonIcon, SunIcon } from "@/components/icons";
 import { useTheme } from "@/context/ThemeContext";
 
-export function ThemeToggle() {
+export const ThemeToggle = () => {
   const { toggleTheme } = useTheme();
   return (
     <button
@@ -21,4 +21,4 @@ export function ThemeToggle() {
       </span>
     </button>
   );
-}
+};

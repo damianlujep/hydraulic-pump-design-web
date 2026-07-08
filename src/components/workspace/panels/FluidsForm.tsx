@@ -7,7 +7,7 @@ import { SelectField } from "../SelectField";
 const PLAIN_NUMBER_CLASS =
   "w-[150px] p-[5px_9px] font-mono text-[13px] font-medium text-left bg-surface-3 border border-border rounded-[6px] text-text outline-none focus:border-primary focus:shadow-[0_0_0_2px_var(--primary-ring)]";
 
-export function FluidsForm() {
+export const FluidsForm = () => {
   return (
     <div className="flex flex-col gap-[14px]">
       <GroupCard title="Fluido motriz inyectado">
@@ -130,4 +130,4 @@ export function FluidsForm() {
       </GroupCard>
     </div>
   );
-}
+};

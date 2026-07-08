@@ -5,7 +5,7 @@ type Stat = {
   color?: string;
 };
 
-export function ChartStats({ stats }: { stats: Stat[] }) {
+export const ChartStats = ({ stats }: { stats: Stat[] }) => {
   return (
     <div className="flex gap-[18px] mt-2 pt-[10px] border-t border-border flex-wrap">
       {stats.map((s) => (
@@ -18,4 +18,4 @@ export function ChartStats({ stats }: { stats: Stat[] }) {
       ))}
     </div>
   );
-}
+};

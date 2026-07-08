@@ -1,10 +1,12 @@
 import { Suspense } from "react";
 import { WorkspaceScreen } from "@/components/workspace/WorkspaceScreen";
 
-export default function WorkspacePage() {
+const WorkspacePage = () => {
   return (
     <Suspense>
       <WorkspaceScreen />
     </Suspense>
   );
-}
+};
+
+export default WorkspacePage;

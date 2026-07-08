@@ -1,5 +1,5 @@
 import { DEFAULT_CASING, DEFAULT_TUBING } from "@/lib/data";
-import type { CalcStatus, PipeKind, PipeSection, SizeModalState, TabId } from "@/lib/types";
+import type { CalcStatus, PipeKind, PipeSection, SizeModalState, TabId } from "@/interfaces/workspace";
 
 export type WorkspaceState = {
   activeTab: TabId;

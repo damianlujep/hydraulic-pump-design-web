@@ -7,7 +7,7 @@ type EmptyPanelProps = {
   onCta?: () => void;
 };
 
-export function EmptyPanel({ title, message, cta, onCta }: EmptyPanelProps) {
+export const EmptyPanel = ({ title, message, cta, onCta }: EmptyPanelProps) => {
   return (
     <div
       className="h-[300px] flex flex-col items-center justify-center gap-[13px] rounded-[10px] border-[1.5px] border-dashed border-border"
@@ -29,4 +29,4 @@ export function EmptyPanel({ title, message, cta, onCta }: EmptyPanelProps) {
       </button>
     </div>
   );
-}
+};

@@ -7,7 +7,7 @@ import { useWorkspace } from "./WorkspaceContext";
 
 const GRID_COLS = "grid-cols-[56px_1fr_1fr_1fr_1fr]";
 
-export function SurveyModal() {
+export const SurveyModal = () => {
   const { state, dispatch } = useWorkspace();
   if (!state.surveyModalOpen) return null;
 
@@ -82,4 +82,4 @@ export function SurveyModal() {
       </div>
     </Modal>
   );
-}
+};

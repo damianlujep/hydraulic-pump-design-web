@@ -8,25 +8,25 @@ import { PvtChart } from "./canvas/PvtChart";
 import { ChartStats } from "./canvas/ChartStats";
 import { useWorkspace } from "./WorkspaceContext";
 
-function LegendDot({ color, label }: { color: string; label: string }) {
+const LegendDot = ({ color, label }: { color: string; label: string }) => {
   return (
     <span className="inline-flex items-center gap-[6px] text-[11px] text-text-dim">
       <span className="w-[9px] h-[9px] rounded-full" style={{ background: color }} />
       {label}
     </span>
   );
-}
+};
 
-function LegendLine({ color, label }: { color: string; label: string }) {
+const LegendLine = ({ color, label }: { color: string; label: string }) => {
   return (
     <span className="inline-flex items-center gap-[6px] text-[11px] text-text-dim">
       <span className="w-[14px] h-[3px] rounded-[2px]" style={{ background: color }} />
       {label}
     </span>
   );
-}
+};
 
-export function WorkspaceRightCanvas() {
+export const WorkspaceRightCanvas = () => {
   const { state, dispatch, runCalc } = useWorkspace();
 
   if (state.activeTab === "completion") {
@@ -154,4 +154,4 @@ export function WorkspaceRightCanvas() {
   }
 
   return null;
-}
+};

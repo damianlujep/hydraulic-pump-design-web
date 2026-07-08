@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Skeleton from "react-loading-skeleton";
 import { ArrowLeftIcon, ArrowRightIcon, PumpIcon, TrashIcon } from "@/components/icons";
 import { useDeleteProject, useProjectList } from "@/lib/api/projects";
 import { EmptyPanel } from "@/components/workspace/EmptyPanel";
@@ -12,7 +13,7 @@ const PAGE_SIZE = 20;
 
 const dateFormatter = new Intl.DateTimeFormat("es", { day: "2-digit", month: "short", year: "numeric" });
 
-export function ProjectsTable() {
+export const ProjectsTable = () => {
   const [page, setPage] = useState(0);
   const { data, isPending, isError, refetch } = useProjectList({
     page,
@@ -48,16 +49,44 @@ export function ProjectsTable() {
           Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className={`grid ${GRID_COLS} items-center border-t border-border`}>
               <div className="p-[13px_16px]">
-                <div className="h-[34px] w-3/4 rounded-lg bg-surface-2 animate-pulse" />
+                <div className="flex items-center gap-3">
+                  <Skeleton
+                    circle
+                    width={34}
+                    height={34}
+                    baseColor="var(--surface-2)"
+                    highlightColor="var(--surface-3)"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <Skeleton
+                      width="70%"
+                      height={13}
+                      baseColor="var(--surface-2)"
+                      highlightColor="var(--surface-3)"
+                    />
+                    <Skeleton
+                      width="45%"
+                      height={11}
+                      baseColor="var(--surface-2)"
+                      highlightColor="var(--surface-3)"
+                    />
+                  </div>
+                </div>
               </div>
               <div className="p-[13px_16px]">
-                <div className="h-4 w-1/2 rounded bg-surface-2 animate-pulse" />
+                <Skeleton width="60%" height={13} baseColor="var(--surface-2)" highlightColor="var(--surface-3)" />
               </div>
               <div className="p-[13px_16px]">
-                <div className="h-5 w-24 rounded-full bg-surface-2 animate-pulse" />
+                <Skeleton
+                  width={96}
+                  height={20}
+                  borderRadius={999}
+                  baseColor="var(--surface-2)"
+                  highlightColor="var(--surface-3)"
+                />
               </div>
               <div className="p-[13px_16px]">
-                <div className="h-4 w-16 rounded bg-surface-2 animate-pulse" />
+                <Skeleton width={64} height={13} baseColor="var(--surface-2)" highlightColor="var(--surface-3)" />
               </div>
               <div className="p-[13px_16px]" />
             </div>
@@ -165,4 +194,4 @@ export function ProjectsTable() {
       )}
     </div>
   );
-}
+};

@@ -9,7 +9,7 @@ import { WorkspaceRightCanvas } from "./WorkspaceRightCanvas";
 import { SurveyModal } from "./SurveyModal";
 import { SizePickerModal } from "./SizePickerModal";
 
-export function WorkspaceScreen() {
+export const WorkspaceScreen = () => {
   const searchParams = useSearchParams();
   const isNew = searchParams.get("new") === "1";
 
@@ -31,4 +31,4 @@ export function WorkspaceScreen() {
       <SizePickerModal />
     </WorkspaceProvider>
   );
-}
+};
