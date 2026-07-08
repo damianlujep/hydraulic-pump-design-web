@@ -51,6 +51,28 @@ The Spring Boot API is never called from the browser directly. Next.js Route Han
 - **Error shape**: the generated spec has no `ErrorResponse` schema (same root cause as above — springdoc doesn't introspect the global exception handler). It's hand-declared in `src/lib/api/errors.ts` (`{ status, code, message, timestamp, details }`) along with an `isErrorResponse` type guard; mutation hooks throw the parsed error body as `unknown` and call sites narrow with that guard.
 - **Dev login**: the backend bootstraps a `SUPER_ADMIN` on startup (dev profile) — `admin@hpd.local` / `ChangeMe123!` (from the backend's `application-dev.yml`). Note this account has no `organizationId`, so it **cannot create projects** (backend rule: "An organization is required to own a project") — create an organization + a `MEMBER`/`ADMIN` user under it via `POST /api/v1/organizations` and `/api/v1/users` to test project creation end-to-end.
 
+### TanStack Query conventions
+
+- Provider mounted in root layout. Defaults: `staleTime 30s`, `refetchOnWindowFocus: false`, `retry: 1`.
+- **Always use `src/lib/api/query-keys.ts`** — never inline string arrays.
+- One hook file per resource in `src/lib/api/`. Hooks fetch the **proxy**, not the backend.
+- Smooth pagination: `placeholderData: (prev) => prev`.
+
+**Mutation hooks — required patterns:**
+```ts
+const err: unknown = await res.json().catch(() => ({}));
+throw err;                                                  // throw unknown so callers can cast for field errors
+
+onSuccess: () => void qc.invalidateQueries({ queryKey: queryKeys.resource.all }),   // void the floating promise
+```
+
+**Async event handlers — required patterns:**
+```tsx
+<form onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
+onClick={() => void handleConfirm()}
+onFileSelected={(file) => void handleUpload(file)}
+```
+
 ### Workspace state
 All workspace state (active tab, casing/tubing sections, calc status, modals) lives in one `useReducer` in `src/components/workspace/reducer.ts`, exposed via React context in `WorkspaceContext.tsx` (`useWorkspace()` hook). `WorkspaceLeftPanel` and `WorkspaceRightCanvas` switch on `state.activeTab` (`'completion' | 'fluids' | 'ipr' | 'calc'`) to pick which form/canvas to render — the 4th tab (`calc`) is permanently locked and has no panel. The three unlocked tabs are independent; the "check" icon on the Completación/Fluidos tabs in `ProgressTabs.tsx` is a static per-step icon (not derived from data-readiness state), matching the original design's fixed demo scenario.
 
@@ -68,6 +90,43 @@ The "Ejecutar Cálculo IPR" button's idle → running → done → idle sequence
 
 ### Icons
 All icons are inline SVGs in `src/components/icons.tsx` (no icon library dependency) — copied from the Feather-style paths in the original design so stroke widths/sizes match exactly.
+
+### Conventions
+
+- **Server Components by default.** `"use client"` only when needed.
+- **No `useEffect` for data fetching.**
+- **`cn()` utility** for dynamic classes only; plain strings stay plain.
+- Path alias: `@/*` → `src/*`.
+- Mobile-first (`sm:` `md:` `lg:` for larger).
+- No comments unless genuinely non-obvious.
+- Shared types in `src/interfaces/` — never inside `"use client"` files.
+
+### Loading states
+
+`react-loading-skeleton` (stylesheet imported once in `app/layout.tsx`). Use for noticeable waits (lists, dashboards, tables). Match skeleton shape to the element. Don't wrap every inline value.
+
+### Component syntax
+
+Arrow functions for all components and page/layout files:
+```tsx
+const MyComponent = ({ prop }: Props) => {
+  return <div>{prop}</div>;
+};
+export default MyComponent;
+```
+Named: `export const X = (...) => { ... };`. Never `export default function` / `export function`. Close with `};`.
+
+### Lint check
+
+After any 2+ file change:
+```bash
+npx tsc --noEmit && yarn lint
+```
+Fix errors only. Pre-existing warnings (useReactTable, watch(), route `req.json()`) are intentional. Don't add `eslint-disable` without need.
+
+### Commit hygiene
+
+Don't commit unless explicitly asked. When asked, show staged diff and wait for confirmation.
 
 ### Source of truth for visual fidelity
 `design_handoff_hydrapump/design-references/` contains the original prototype (`HydraPump Design Suite (standalone).html`, open-in-browser), the design token/density contract (`DESIGN_CONTRACT.md`), and the CSS→Tailwind migration plan (`TAILWIND_MIGRATION.md`). When in doubt about a spacing, color, or interaction detail, check there before guessing.

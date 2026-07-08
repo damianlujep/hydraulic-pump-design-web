@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/theme";
-import { Providers } from "./providers";
-import "./globals.css";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { ReactQueryProvider } from "@/context/ReactQueryProvider";
+
+import "react-loading-skeleton/dist/skeleton.css";
+import "@/styles/globals.css";
 
 const sans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -49,7 +51,7 @@ export default function RootLayout({
       </head>
       <body className="h-full bg-bg text-text font-sans antialiased">
         <ThemeProvider>
-          <Providers>{children}</Providers>
+          <ReactQueryProvider>{children}</ReactQueryProvider>
         </ThemeProvider>
       </body>
     </html>

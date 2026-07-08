@@ -2,11 +2,11 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-export type Theme = "dark" | "light";
+export type ThemeContext = "dark" | "light";
 export type Accent = "indigo" | "cyan" | "emerald" | "amber";
 
 type ThemeContextValue = {
-  theme: Theme;
+  theme: ThemeContext;
   accent: Accent;
   toggleTheme: () => void;
   setAccent: (accent: Accent) => void;
@@ -18,13 +18,13 @@ const THEME_KEY = "hydrapump-theme";
 const ACCENT_KEY = "hydrapump-accent";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<ThemeContext>("dark");
   const [accent, setAccentState] = useState<Accent>("indigo");
 
   useEffect(() => {
     // One-time sync from localStorage after mount: the value isn't known during SSR,
     // so it can't be read in the initial useState without causing a hydration mismatch.
-    const storedTheme = window.localStorage.getItem(THEME_KEY) as Theme | null;
+    const storedTheme = window.localStorage.getItem(THEME_KEY) as ThemeContext | null;
     const storedAccent = window.localStorage.getItem(ACCENT_KEY) as Accent | null;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (storedTheme) setTheme(storedTheme);
