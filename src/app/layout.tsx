@@ -26,7 +26,10 @@ export const metadata: Metadata = {
 const NO_FLASH_SCRIPT = `
 (function () {
   try {
-    var theme = localStorage.getItem("hydrapump-theme") || "dark";
+    var stored = localStorage.getItem("hydrapump-theme");
+    var theme = stored === "dark" || stored === "light"
+      ? stored
+      : (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
     var accent = localStorage.getItem("hydrapump-accent") || "indigo";
     document.documentElement.setAttribute("data-theme", theme);
     document.documentElement.setAttribute("data-accent", accent);
@@ -45,6 +48,7 @@ export default function RootLayout({
       data-theme="dark"
       data-accent="indigo"
       className={`${sans.variable} ${mono.variable}`}
+      suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />

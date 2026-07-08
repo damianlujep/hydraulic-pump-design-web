@@ -16,20 +16,18 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 const THEME_KEY = "hydrapump-theme";
 const ACCENT_KEY = "hydrapump-accent";
+const ACCENTS: Accent[] = ["indigo", "cyan", "emerald", "amber"];
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<ThemeContext>("dark");
-  const [accent, setAccentState] = useState<Accent>("indigo");
-
-  useEffect(() => {
-    // One-time sync from localStorage after mount: the value isn't known during SSR,
-    // so it can't be read in the initial useState without causing a hydration mismatch.
-    const storedTheme = window.localStorage.getItem(THEME_KEY) as ThemeContext | null;
-    const storedAccent = window.localStorage.getItem(ACCENT_KEY) as Accent | null;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (storedTheme) setTheme(storedTheme);
-    if (storedAccent) setAccentState(storedAccent);
-  }, []);
+  const [theme, setTheme] = useState<ThemeContext>(() => {
+    if (typeof document === "undefined") return "dark";
+    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  });
+  const [accent, setAccentState] = useState<Accent>(() => {
+    if (typeof document === "undefined") return "indigo";
+    const attr = document.documentElement.getAttribute("data-accent");
+    return ACCENTS.includes(attr as Accent) ? (attr as Accent) : "indigo";
+  });
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
