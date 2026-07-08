@@ -2,17 +2,25 @@ import { NextResponse } from "next/server";
 import { parseRefreshToken, setAuthCookies } from "@/lib/api/auth-cookies";
 import type { components } from "@/lib/api/schema";
 
-export async function POST(request: Request) {
+export const POST = async (request: Request) => {
   const body: components["schemas"]["LoginRequest"] = await request.json();
 
-  const backendRes = await fetch(`${process.env.API_URL}/api/v1/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  let backendRes: Response;
+  try {
+    backendRes = await fetch(`${process.env.API_URL}/api/v1/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    return NextResponse.json({ message: "Backend unreachable" }, { status: 502 });
+  }
 
   if (!backendRes.ok) {
-    return NextResponse.json(await backendRes.json(), { status: backendRes.status });
+    const res = NextResponse.json(await backendRes.json().catch(() => null), { status: backendRes.status });
+    const retryAfter = backendRes.headers.get("Retry-After");
+    if (retryAfter) res.headers.set("Retry-After", retryAfter);
+    return res;
   }
 
   const { accessToken, user }: components["schemas"]["AuthResponse"] = await backendRes.json();
@@ -25,4 +33,4 @@ export async function POST(request: Request) {
   const res = NextResponse.json({ user });
   setAuthCookies(res, accessToken, refreshToken);
   return res;
-}
+};

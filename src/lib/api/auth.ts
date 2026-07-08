@@ -1,27 +1,14 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/api/client-fetch";
-import { queryKeys } from "@/lib/api/query-keys";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/lib/auth/auth-context";
+import type { User } from "@/interfaces/user";
 import type { components } from "@/lib/api/schema";
 
-export type UserResponse = components["schemas"]["UserResponse"];
 export type LoginRequest = components["schemas"]["LoginRequest"];
 
-export function useCurrentUser() {
-  return useQuery({
-    queryKey: queryKeys.auth.me,
-    queryFn: async () => {
-      const res = await apiFetch("/api/auth/me");
-      if (!res.ok) throw new Error("Failed to load current user");
-      return res.json() as Promise<UserResponse>;
-    },
-    staleTime: Infinity,
-  });
-}
-
-export function useLogin() {
-  const qc = useQueryClient();
+export const useLogin = () => {
+  const { setUser } = useAuth();
   return useMutation({
-    mutationFn: async (body: LoginRequest): Promise<{ user: UserResponse }> => {
+    mutationFn: async (body: LoginRequest): Promise<{ user?: User }> => {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -29,17 +16,25 @@ export function useLogin() {
       });
       if (!res.ok) {
         const err: unknown = await res.json().catch(() => ({}));
+        if (res.status === 429) {
+          const retryAfter = Number(res.headers.get("Retry-After"));
+          throw {
+            ...(typeof err === "object" && err !== null ? err : {}),
+            status: 429,
+            retryAfterSeconds: Number.isFinite(retryAfter) ? retryAfter : undefined,
+          };
+        }
         throw err;
       }
       return res.json();
     },
     onSuccess: ({ user }) => {
-      qc.setQueryData(queryKeys.auth.me, user);
+      setUser(user ?? null);
     },
   });
-}
+};
 
-export function useLogout() {
+export const useLogout = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
@@ -47,7 +42,7 @@ export function useLogout() {
     },
     onSettled: () => {
       qc.clear();
-      window.location.href = "/login";
+      window.location.replace("/login");
     },
   });
-}
+};

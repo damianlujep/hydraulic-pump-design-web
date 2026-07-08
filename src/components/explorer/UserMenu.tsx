@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Skeleton from "react-loading-skeleton";
 import { Modal } from "@/components/Modal";
 import {
   BellIcon,
@@ -12,7 +11,8 @@ import {
   SettingsIcon,
   UserIcon,
 } from "@/components/icons";
-import { useCurrentUser, useLogout } from "@/lib/api/auth";
+import { useLogout } from "@/lib/api/auth";
+import { useAuth } from "@/lib/auth/auth-context";
 import { cn } from "@/utils/cn";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -44,7 +44,7 @@ type UserMenuProps = {
 };
 
 export const UserMenu = ({ variant = "full" }: UserMenuProps) => {
-  const { data: user, isPending } = useCurrentUser();
+  const { user } = useAuth();
   const logout = useLogout();
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -61,8 +61,8 @@ export const UserMenu = ({ variant = "full" }: UserMenuProps) => {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, confirmOpen]);
 
-  const initials = user ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() : "";
-  const fullName = user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "";
+  const initials = user ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "?" : "?";
+  const fullName = user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Usuario" : "Usuario";
   const subtitle = user ? (user.organizationName ?? ROLE_LABELS[user.role ?? ""] ?? "") : "";
 
   const closeMenu = () => setOpen(false);
@@ -86,17 +86,8 @@ export const UserMenu = ({ variant = "full" }: UserMenuProps) => {
           <>
             <Avatar initials={initials} size={34} fontSize={12.5} />
             <span className="text-left leading-[1.25]">
-              {isPending ? (
-                <>
-                  <Skeleton width={90} height={12} baseColor="var(--surface-2)" highlightColor="var(--surface-3)" />
-                  <Skeleton width={60} height={10} baseColor="var(--surface-2)" highlightColor="var(--surface-3)" />
-                </>
-              ) : (
-                <>
-                  <span className="block text-[12.5px] font-semibold text-text">{fullName}</span>
-                  <span className="block text-[10.5px] text-text-faint">{subtitle}</span>
-                </>
-              )}
+              <span className="block text-[12.5px] font-semibold text-text">{fullName}</span>
+              <span className="block text-[10.5px] text-text-faint">{subtitle}</span>
             </span>
           </>
         )}
@@ -114,19 +105,9 @@ export const UserMenu = ({ variant = "full" }: UserMenuProps) => {
           <div className="flex items-center gap-[12px] rounded-[10px] bg-surface-2 p-[12px]">
             <Avatar initials={initials} size={42} fontSize={15} />
             <div className="min-w-0 leading-[1.3]">
-              {isPending ? (
-                <>
-                  <Skeleton width={110} height={13} baseColor="var(--surface-3)" highlightColor="var(--surface)" />
-                  <Skeleton width={80} height={11} baseColor="var(--surface-3)" highlightColor="var(--surface)" />
-                  <Skeleton width={130} height={10} baseColor="var(--surface-3)" highlightColor="var(--surface)" />
-                </>
-              ) : (
-                <>
-                  <div className="text-[13px] font-bold text-text">{fullName}</div>
-                  <div className="text-[11px] text-text-dim">{subtitle}</div>
-                  <div className="mt-[2px] font-mono text-[10.5px] text-text-faint">{user?.email}</div>
-                </>
-              )}
+              <div className="text-[13px] font-bold text-text">{fullName}</div>
+              <div className="text-[11px] text-text-dim">{subtitle}</div>
+              <div className="mt-[2px] font-mono text-[10.5px] text-text-faint">{user?.email}</div>
             </div>
           </div>
 

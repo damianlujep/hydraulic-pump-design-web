@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircleIcon, EyeIcon, LockIcon, MailIcon, SpinnerIcon } from "@/components/icons";
 import { useLogin } from "@/lib/api/auth";
 import { isErrorResponse } from "@/lib/api/errors";
+import { safeRedirectPath } from "@/lib/auth/safe-redirect";
 import { cn } from "@/utils/cn";
 import { loginSchema, type SignInFormData } from "./loginSchema";
 
@@ -38,19 +39,29 @@ export const LoginForm = ({ redirect }: { redirect?: string }) => {
   const onSubmit = (data: SignInFormData) => {
     login.mutate(data, {
       onSuccess: () => {
-        const target = redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : "/";
-        router.replace(target);
+        router.replace(safeRedirectPath(redirect));
       },
     });
   };
 
   const emailError = errors.email?.message;
   const passwordError = errors.password?.message;
+  const retryAfterMessage = (error: unknown): string => {
+    const seconds =
+      typeof error === "object" && error !== null && "retryAfterSeconds" in error
+        ? (error as { retryAfterSeconds?: unknown }).retryAfterSeconds
+        : undefined;
+    return typeof seconds === "number"
+      ? `Demasiados intentos. Intenta de nuevo en ${Math.ceil(seconds / 60)} min.`
+      : "Demasiados intentos. Intenta de nuevo más tarde.";
+  };
   const serverError = login.error
     ? isErrorResponse(login.error)
       ? login.error.status === 401
         ? "Credenciales inválidas"
-        : login.error.message
+        : login.error.status === 429
+          ? retryAfterMessage(login.error)
+          : login.error.message
       : "No se pudo iniciar sesión"
     : null;
 
