@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "design_handoff_hydrapump/**",
+    "design-handoff/**",
   ]),
   {
     rules: {

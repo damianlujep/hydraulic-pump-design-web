@@ -284,3 +284,17 @@ export const KeyboardIcon = (props: IconProps) => (
     <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h12" />
   </Icon>
 );
+
+export const MailIcon = (props: IconProps) => (
+  <Icon strokeWidth={1.9} {...props}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="m3 7 9 6 9-6" />
+  </Icon>
+);
+
+export const EyeIcon = (props: IconProps) => (
+  <Icon strokeWidth={1.9} {...props}>
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+    <circle cx="12" cy="12" r="3" />
+  </Icon>
+);
