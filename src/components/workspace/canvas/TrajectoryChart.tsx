@@ -1,4 +1,5 @@
-import { SURVEY } from "@/lib/data";
+import type { SurveyRow } from "@/interfaces/workspace";
+import { buildTicks, niceMax } from "./chartScale";
 
 const W = 560;
 const H = 388;
@@ -8,27 +9,31 @@ const M_T = 52;
 const M_B = 46;
 const PW = W - M_L - M_R;
 const PH = H - M_T - M_B;
-const TVD_MAX = 6300;
-const ANG_MAX = 75;
-const HD_MAX = 5700;
+const TICK_COUNT = 7;
 
-const xA = (a: number) => M_L + (a / ANG_MAX) * PW;
-const xH = (h: number) => M_L + (h / HD_MAX) * PW;
-const y = (v: number) => M_T + (v / TVD_MAX) * PH;
+export const TrajectoryChart = ({ rows }: { rows: SurveyRow[] }) => {
+  if (rows.length === 0) return null;
 
-const TVD_TICKS = [0, 700, 1400, 2100, 2800, 3500, 4200, 4900, 5600, 6300];
-const ANG_TICKS = [0, 15, 30, 45, 60, 75];
-const HD_TICKS = [0, 950, 1900, 2850, 3800, 4750, 5700];
+  const tvdMax = niceMax(Math.max(...rows.map((r) => r.tvd)));
+  const angMax = niceMax(Math.max(...rows.map((r) => r.angle)));
+  const hdMax = niceMax(Math.max(...rows.map((r) => r.hd)));
 
-export const TrajectoryChart = () => {
-  const greenPoints = SURVEY.map((d) => `${xH(d.hd)},${y(d.tvd)}`).join(" ");
-  const bluePoints = SURVEY.map((d) => `${xA(d.ang)},${y(d.tvd)}`).join(" ");
+  const xA = (a: number) => M_L + (a / angMax) * PW;
+  const xH = (h: number) => M_L + (h / hdMax) * PW;
+  const y = (v: number) => M_T + (v / tvdMax) * PH;
+
+  const tvdTicks = buildTicks(tvdMax, TICK_COUNT);
+  const angTicks = buildTicks(angMax, 6);
+  const hdTicks = buildTicks(hdMax, 6);
+
+  const greenPoints = rows.map((d) => `${xH(d.hd)},${y(d.tvd)}`).join(" ");
+  const bluePoints = rows.map((d) => `${xA(d.angle)},${y(d.tvd)}`).join(" ");
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block" }}>
       <rect x={M_L} y={M_T} width={PW} height={PH} fill="var(--chart-plot)" stroke="var(--border)" />
 
-      {TVD_TICKS.map((t) => (
+      {tvdTicks.map((t) => (
         <g key={`tvd-${t}`}>
           <line x1={M_L} y1={y(t)} x2={M_L + PW} y2={y(t)} stroke="var(--grid)" strokeWidth={1} />
           <text x={M_L - 8} y={y(t) + 3} textAnchor="end" fontSize={9} fill="var(--text-dim)" fontFamily="IBM Plex Mono">
@@ -40,7 +45,7 @@ export const TrajectoryChart = () => {
         </g>
       ))}
 
-      {ANG_TICKS.map((a) => (
+      {angTicks.map((a) => (
         <g key={`ang-${a}`}>
           <line x1={xA(a)} y1={M_T} x2={xA(a)} y2={M_T + PH} stroke="var(--grid)" strokeWidth={1} />
           <text x={xA(a)} y={M_T + PH + 15} textAnchor="middle" fontSize={9} fill="var(--text-dim)" fontFamily="IBM Plex Mono">
@@ -49,7 +54,7 @@ export const TrajectoryChart = () => {
         </g>
       ))}
 
-      {HD_TICKS.map((h) => (
+      {hdTicks.map((h) => (
         <text
           key={`hd-${h}`}
           x={xH(h)}
@@ -66,10 +71,10 @@ export const TrajectoryChart = () => {
       <polyline points={greenPoints} fill="none" stroke="var(--data-green)" strokeWidth={2} />
       <polyline points={bluePoints} fill="none" stroke="var(--data-blue)" strokeWidth={2} />
 
-      {SURVEY.map((d, i) => (
+      {rows.map((d, i) => (
         <g key={`pt-${i}`}>
           <circle cx={xH(d.hd)} cy={y(d.tvd)} r={2.4} fill="var(--data-green)" />
-          <circle cx={xA(d.ang)} cy={y(d.tvd)} r={2.4} fill="var(--data-blue)" />
+          <circle cx={xA(d.angle)} cy={y(d.tvd)} r={2.4} fill="var(--data-blue)" />
         </g>
       ))}
 

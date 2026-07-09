@@ -5,8 +5,11 @@ import Link from "next/link";
 import Skeleton from "react-loading-skeleton";
 import { ArrowLeftIcon, ArrowRightIcon, PumpIcon, TrashIcon } from "@/components/icons";
 import { useDeleteProject, useProjectList } from "@/lib/api/projects";
-import { EmptyPanel } from "@/components/workspace/EmptyPanel";
+import { EmptyPanel } from "@/components/workspace/atoms/EmptyPanel";
 import { LockStatusBadge } from "./LockStatusBadge";
+import { Modal } from "@/components/Modal";
+
+type PendingDelete = { id: number; name: string };
 
 const GRID_COLS = "grid-cols-[minmax(0,2.4fr)_minmax(0,1.2fr)_150px_132px_140px]";
 const PAGE_SIZE = 20;
@@ -22,6 +25,7 @@ export const ProjectsTable = () => {
     scope: "all",
   });
   const deleteProject = useDeleteProject();
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
 
   const projects = data?.content ?? [];
   const totalPages = data?.totalPages ?? 0;
@@ -143,18 +147,14 @@ export const ProjectsTable = () => {
                     {project.myPermission === "OWNER" && (
                       <button
                         title="Eliminar proyecto"
-                        onClick={() => {
-                          if (window.confirm(`¿Eliminar el proyecto "${project.name}"?`)) {
-                            deleteProject.mutate(projectId);
-                          }
-                        }}
+                        onClick={() => setPendingDelete({ id: projectId, name: project.name ?? "" })}
                         className="w-8 h-8 rounded-lg border border-border text-text-faint flex items-center justify-center cursor-pointer hover:border-danger hover:text-danger"
                       >
                         <TrashIcon size={14} />
                       </button>
                     )}
                     <Link
-                      href={`/workspace?projectId=${project.id}`}
+                      href={`/workspace/${project.id}`}
                       className="inline-flex items-center gap-[6px] px-[15px] py-[7px] rounded-lg border border-border-strong text-text text-[12.5px] font-semibold hover:border-primary hover:text-primary hover:bg-primary-soft"
                     >
                       Abrir
@@ -191,6 +191,47 @@ export const ProjectsTable = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {pendingDelete && (
+        <Modal onClose={() => setPendingDelete(null)} maxWidthPx={400} zIndex={100}>
+          <div className="px-[22px] pb-[18px] pt-[22px]" role="alertdialog" aria-labelledby="delete-project-title">
+            <div className="flex items-start gap-[14px]">
+              <div className="flex h-[44px] w-[44px] flex-none items-center justify-center rounded-[12px] border border-danger-ring bg-danger-soft text-danger">
+                <TrashIcon size={20} />
+              </div>
+              <div className="min-w-0">
+                <h2 id="delete-project-title" className="m-0 text-[16px] font-bold tracking-[-0.01em] text-text">
+                  ¿Eliminar proyecto?
+                </h2>
+                <p className="mb-5 mt-3 text-[12.5px] leading-[1.55] text-text-dim">
+                  Se eliminará el proyecto <strong className="text-text">{pendingDelete.name}</strong> de forma
+                  permanente. Esta acción no se puede deshacer.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-[10px]">
+              <button
+                type="button"
+                className="cursor-pointer rounded-[9px] border border-border bg-surface-2 px-4 py-[9px] text-[12.5px] font-semibold text-text transition-colors hover:border-border-strong"
+                onClick={() => setPendingDelete(null)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-[9px] border border-danger bg-danger px-4 py-[9px] text-[12.5px] font-bold text-white shadow-[0_5px_16px_var(--danger-ring)] transition-colors hover:border-danger-hover hover:bg-danger-hover"
+                onClick={() => {
+                  deleteProject.mutate(pendingDelete.id);
+                  setPendingDelete(null);
+                }}
+              >
+                <TrashIcon size={15} />
+                Eliminar proyecto
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

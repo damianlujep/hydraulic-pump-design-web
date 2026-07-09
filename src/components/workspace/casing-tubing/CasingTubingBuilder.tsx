@@ -1,16 +1,17 @@
 "use client";
 
 import { DiameterIcon, PlusIcon, SearchIcon, XIcon } from "@/components/icons";
-import { UnitField } from "./UnitField";
-import { useWorkspace } from "./WorkspaceContext";
+import { UnitField } from "../atoms/UnitField";
+import { useWorkspace } from "../state/WorkspaceContext";
+import { sanitizeNumeric } from "../state/numericInput";
 import { buildSections } from "./casingTubing";
 import type { PipeKind } from "@/interfaces/workspace";
 import { cn } from "@/utils/cn";
 
 export const CasingTubingBuilder = ({ kind, title }: { kind: PipeKind; title: string }) => {
-  const { state, dispatch } = useWorkspace();
+  const { state, dispatch, casings, tubings } = useWorkspace();
   const sections = state[kind];
-  const rows = buildSections(kind, sections);
+  const rows = buildSections(sections, kind === "casing" ? casings : tubings);
   const atLimit = sections.length >= 3;
 
   return (
@@ -96,7 +97,7 @@ export const CasingTubingBuilder = ({ kind, title }: { kind: PipeKind; title: st
                   unit="ft"
                   value={sec.length}
                   onChange={(e) =>
-                    dispatch({ type: "SET_SECTION_LENGTH", kind, index: i, length: e.target.value })
+                    dispatch({ type: "SET_SECTION_LENGTH", kind, index: i, length: sanitizeNumeric(e.target.value) })
                   }
                 />
               </label>

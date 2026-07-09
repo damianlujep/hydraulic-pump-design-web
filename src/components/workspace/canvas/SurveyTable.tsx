@@ -1,24 +1,24 @@
 "use client";
 
 import { ChevronRightThinIcon, PencilIcon } from "@/components/icons";
-import { SURVEY } from "@/lib/data";
-import { useWorkspace } from "../WorkspaceContext";
+import { useWorkspace } from "../state/WorkspaceContext";
 
 const GRID_COLS = "grid-cols-[56px_repeat(4,1fr)]";
 
 export const SurveyTable = () => {
-  const { dispatch } = useWorkspace();
+  const { state, dispatch, canEdit } = useWorkspace();
 
   return (
     <div className="bg-surface border border-border rounded-card overflow-hidden flex-none">
       <div className="p-[12px_16px] border-b border-border flex items-center justify-between gap-3">
         <div className="flex items-center gap-[10px]">
           <div className="text-[13px] font-bold tracking-[-.01em]">Survey Direccional</div>
-          <span className="text-[11px] text-text-faint font-mono">20 estaciones</span>
+          <span className="text-[11px] text-text-faint font-mono">{state.survey.length} estaciones</span>
         </div>
         <button
           onClick={() => dispatch({ type: "OPEN_SURVEY_MODAL" })}
-          className="inline-flex items-center gap-[7px] px-[13px] py-[7px] rounded-[9px] bg-primary border-none text-primary-fg text-xs font-semibold cursor-pointer shadow-[0_4px_12px_var(--primary-ring)] hover:bg-primary-hover"
+          disabled={!canEdit}
+          className="inline-flex items-center gap-[7px] px-[13px] py-[7px] rounded-[9px] bg-primary border-none text-primary-fg text-xs font-semibold cursor-pointer shadow-[0_4px_12px_var(--primary-ring)] hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <PencilIcon size={13} />
           Editar survey direccional
@@ -34,13 +34,13 @@ export const SurveyTable = () => {
             <div className="text-right p-[8px_12px] text-[10px] uppercase tracking-[.05em] text-text-faint font-sans">Dist.Hor (ft)</div>
             <div className="text-right p-[8px_12px] text-[10px] uppercase tracking-[.05em] text-text-faint font-sans">Áng (°)</div>
           </div>
-          {SURVEY.map((r) => (
-            <div key={r.n} className={`grid ${GRID_COLS} border-t border-border hover:bg-primary-soft`}>
-              <div className="text-right p-[6px_12px] text-text-faint">{r.n}</div>
+          {state.survey.map((r) => (
+            <div key={r.id} className={`grid ${GRID_COLS} border-t border-border hover:bg-primary-soft`}>
+              <div className="text-right p-[6px_12px] text-text-faint">{r.id}</div>
               <div className="text-right p-[6px_12px] text-text">{r.md}</div>
               <div className="text-right p-[6px_12px] text-text">{r.tvd}</div>
-              <div className="text-right p-[6px_12px] text-text-dim">{r.hd}</div>
-              <div className="text-right p-[6px_12px] text-data-blue">{r.ang}</div>
+              <div className="text-right p-[6px_12px] text-text-dim">{r.hd.toFixed(1)}</div>
+              <div className="text-right p-[6px_12px] text-data-blue">{r.angle.toFixed(1)}</div>
             </div>
           ))}
         </div>

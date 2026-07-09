@@ -46,7 +46,7 @@ export const NewProjectModal = () => {
       {
         onSuccess: (created) => {
           setOpen(false);
-          router.push(created.id != null ? `/workspace?new=1&projectId=${created.id}` : "/workspace?new=1");
+          if (created.id != null) router.push(`/workspace/${created.id}`);
         },
         onError: (err) => {
           if (isErrorResponse(err) && err.code === "DUPLICATE_ENTITY") {

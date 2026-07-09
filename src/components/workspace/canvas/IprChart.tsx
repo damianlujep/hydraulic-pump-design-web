@@ -1,3 +1,6 @@
+import type { IprCalculationResponse } from "@/lib/api/calculations";
+import { buildTicks, niceMax } from "./chartScale";
+
 const W = 560;
 const H = 336;
 const M_L = 58;
@@ -6,39 +9,32 @@ const M_T = 20;
 const M_B = 46;
 const PW = W - M_L - M_R;
 const PH = H - M_T - M_B;
-const Q_MAX = 2200;
-const P_MAX = 2300;
-const PS = 2300;
-const PB = 520;
-const J = 1.002;
 
-const X = (q: number) => M_L + (q / Q_MAX) * PW;
-const Y = (p: number) => M_T + (1 - p / P_MAX) * PH;
-
-const Q_TICKS = [0, 500, 1000, 1500, 2000];
-const P_TICKS = [0, 500, 1000, 1500, 2000, 2300];
-
-const buildIprPoints = () => {
-  const qb = J * (PS - PB);
-  const add = (J * PB) / 1.8;
-  const pts: [number, number][] = [];
-  for (let p = PS; p >= PB; p -= 50) pts.push([J * (PS - p), p]);
-  for (let p = PB; p >= 0; p -= 30) {
-    const q = qb + add * (1 - 0.2 * (p / PB) - 0.8 * Math.pow(p / PB, 2));
-    pts.push([q, p]);
-  }
-  return { pts, qb };
+type IprChartProps = {
+  result: IprCalculationResponse;
+  reservoirPressure: number;
+  bubblePointPressure: number;
 };
 
-export const IprChart = () => {
-  const { pts, qb } = buildIprPoints();
-  const poly = pts.map(([q, p]) => `${X(q)},${Y(p)}`).join(" ");
+export const IprChart = ({ result, reservoirPressure, bubblePointPressure }: IprChartProps) => {
+  const curvePoints = result.curvePoints ?? [];
+  const qMax = niceMax(result.absoluteOpenFlow ?? Math.max(...curvePoints.map((p) => p.totalFlowRate ?? 0), 1));
+  const pMax = niceMax(Math.max(reservoirPressure, ...curvePoints.map((p) => p.flowingBottomholePressure ?? 0)));
+
+  const X = (q: number) => M_L + (q / qMax) * PW;
+  const Y = (p: number) => M_T + (1 - p / pMax) * PH;
+
+  const qTicks = buildTicks(qMax, 5);
+  const pTicks = buildTicks(pMax, 6);
+
+  const poly = curvePoints.map((p) => `${X(p.totalFlowRate ?? 0)},${Y(p.flowingBottomholePressure ?? 0)}`).join(" ");
+  const qb = result.bubblePointFlowRate ?? 0;
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block" }}>
       <rect x={M_L} y={M_T} width={PW} height={PH} fill="var(--chart-plot)" stroke="var(--border)" />
 
-      {Q_TICKS.map((q) => (
+      {qTicks.map((q) => (
         <g key={`q-${q}`}>
           <line x1={X(q)} y1={M_T} x2={X(q)} y2={M_T + PH} stroke="var(--grid)" strokeWidth={1} />
           <text x={X(q)} y={M_T + PH + 15} textAnchor="middle" fontSize={9} fill="var(--text-dim)" fontFamily="IBM Plex Mono">
@@ -47,7 +43,7 @@ export const IprChart = () => {
         </g>
       ))}
 
-      {P_TICKS.map((p) => (
+      {pTicks.map((p) => (
         <g key={`p-${p}`}>
           <line x1={M_L} y1={Y(p)} x2={M_L + PW} y2={Y(p)} stroke="var(--grid)" strokeWidth={1} />
           <text x={M_L - 8} y={Y(p) + 3} textAnchor="end" fontSize={9} fill="var(--text-dim)" fontFamily="IBM Plex Mono">
@@ -56,20 +52,20 @@ export const IprChart = () => {
         </g>
       ))}
 
-      <line x1={X(0)} y1={Y(PS)} x2={X(Q_MAX)} y2={Y(PS)} stroke="var(--data-blue)" strokeWidth={2} />
+      <line x1={X(0)} y1={Y(reservoirPressure)} x2={X(qMax)} y2={Y(reservoirPressure)} stroke="var(--data-blue)" strokeWidth={2} />
       <polyline points={poly} fill="none" stroke="var(--data-orange)" strokeWidth={2.4} strokeLinejoin="round" />
       <line
         x1={X(0)}
-        y1={Y(PB)}
+        y1={Y(bubblePointPressure)}
         x2={X(qb)}
-        y2={Y(PB)}
+        y2={Y(bubblePointPressure)}
         stroke="var(--data-orange)"
         strokeWidth={1}
         strokeDasharray="3 3"
         opacity={0.55}
       />
-      <circle cx={X(qb)} cy={Y(PB)} r={4} fill="var(--data-orange)" />
-      <text x={X(qb) + 8} y={Y(PB) + 4} fontSize={11} fontWeight={600} fill="var(--data-orange)" fontFamily="IBM Plex Mono">
+      <circle cx={X(qb)} cy={Y(bubblePointPressure)} r={4} fill="var(--data-orange)" />
+      <text x={X(qb) + 8} y={Y(bubblePointPressure) + 4} fontSize={11} fontWeight={600} fill="var(--data-orange)" fontFamily="IBM Plex Mono">
         Pb
       </text>
 

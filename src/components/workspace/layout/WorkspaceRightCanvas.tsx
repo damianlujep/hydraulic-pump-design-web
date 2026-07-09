@@ -1,12 +1,12 @@
 "use client";
 
-import { EmptyPanel } from "./EmptyPanel";
-import { SurveyTable } from "./canvas/SurveyTable";
-import { TrajectoryChart } from "./canvas/TrajectoryChart";
-import { IprChart } from "./canvas/IprChart";
-import { PvtChart } from "./canvas/PvtChart";
-import { ChartStats } from "./canvas/ChartStats";
-import { useWorkspace } from "./WorkspaceContext";
+import { EmptyPanel } from "../atoms/EmptyPanel";
+import { SurveyTable } from "../canvas/SurveyTable";
+import { TrajectoryChart } from "../canvas/TrajectoryChart";
+import { IprChart } from "../canvas/IprChart";
+import { PvtChart } from "../canvas/PvtChart";
+import { ChartStats } from "../canvas/ChartStats";
+import { useWorkspace } from "../state/WorkspaceContext";
 
 const LegendDot = ({ color, label }: { color: string; label: string }) => {
   return (
@@ -27,10 +27,10 @@ const LegendLine = ({ color, label }: { color: string; label: string }) => {
 };
 
 export const WorkspaceRightCanvas = () => {
-  const { state, dispatch, runCalc } = useWorkspace();
+  const { state, dispatch, runCalc, stepDone, forms } = useWorkspace();
 
   if (state.activeTab === "completion") {
-    if (state.surveyLoaded) {
+    if (state.survey.length > 0) {
       return (
         <>
           <SurveyTable />
@@ -42,7 +42,7 @@ export const WorkspaceRightCanvas = () => {
                 <LegendDot color="var(--data-green)" label="Trayectoria MD/HD" />
               </div>
             </div>
-            <TrajectoryChart />
+            <TrajectoryChart rows={state.survey} />
           </div>
         </>
       );
@@ -80,6 +80,8 @@ export const WorkspaceRightCanvas = () => {
   }
 
   if (state.activeTab === "ipr") {
+    const iprValues = forms.ipr.getValues();
+    const fluidsValues = forms.fluids.getValues();
     return (
       <div className="bg-surface border border-border rounded-card p-[14px_16px_12px] my-auto">
         <div className="flex items-center justify-between mb-2">
@@ -89,16 +91,20 @@ export const WorkspaceRightCanvas = () => {
             <LegendLine color="var(--data-orange)" label="IPR (Vogel)" />
           </div>
         </div>
-        {state.iprReady ? (
+        {state.iprResult ? (
           <>
-            <IprChart />
+            <IprChart
+              result={state.iprResult}
+              reservoirPressure={Number(iprValues.reservoirPressure)}
+              bubblePointPressure={Number(fluidsValues.bubblePointPressure)}
+            />
             <ChartStats
               stats={[
-                { label: "Ps", value: "2300", unit: "psi" },
-                { label: "Pwf", value: "1781", unit: "psi" },
-                { label: "Pb", value: "520", unit: "psi", color: "var(--data-orange)" },
-                { label: "Qmáx", value: "2073", unit: "bfpd" },
-                { label: "PI (J)", value: "1.00", unit: "bfpd/psi" },
+                { label: "Ps", value: iprValues.reservoirPressure, unit: "psi" },
+                { label: "Pwf", value: iprValues.flowingBottomholePressure, unit: "psi" },
+                { label: "Pb", value: fluidsValues.bubblePointPressure, unit: "psi", color: "var(--data-orange)" },
+                { label: "Qmáx", value: (state.iprResult.absoluteOpenFlow ?? 0).toFixed(0), unit: "bfpd" },
+                { label: "PI (J)", value: (state.iprResult.productivityIndex ?? 0).toFixed(2), unit: "bfpd/psi" },
               ]}
             />
           </>
@@ -128,7 +134,7 @@ export const WorkspaceRightCanvas = () => {
             <LegendLine color="var(--data-green)" label="μo" />
           </div>
         </div>
-        {state.pvtReady ? (
+        {stepDone.fluids ? (
           <>
             <PvtChart />
             <ChartStats
@@ -144,9 +150,9 @@ export const WorkspaceRightCanvas = () => {
         ) : (
           <EmptyPanel
             title="Sin propiedades PVT calculadas"
-            message="Defina la composición del fluido y las correlaciones para generar las curvas Bo, Rs y μo vs presión."
-            cta="Calcular propiedades PVT"
-            onCta={() => dispatch({ type: "SET_PVT_READY" })}
+            message="Complete todos los campos de fluidos y PVT para generar las curvas Bo, Rs y μo vs presión."
+            cta="Ver campos pendientes"
+            onCta={() => void forms.fluids.trigger()}
           />
         )}
       </div>

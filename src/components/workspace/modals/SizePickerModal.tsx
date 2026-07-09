@@ -2,21 +2,22 @@
 
 import { Modal } from "@/components/Modal";
 import { CheckThinIcon, SearchIcon, XIcon } from "@/components/icons";
-import { useWorkspace } from "./WorkspaceContext";
-import { catalogFor } from "./casingTubing";
+import { useWorkspace } from "../state/WorkspaceContext";
 import { cn } from "@/utils/cn";
 
 export const SizePickerModal = () => {
-  const { state, dispatch } = useWorkspace();
+  const { state, dispatch, casings, tubings } = useWorkspace();
   const { sizeModal } = state;
   if (!sizeModal.open) return null;
 
-  const catalog = catalogFor(sizeModal.kind);
+  const catalog = sizeModal.kind === "tubing" ? tubings : casings;
   const query = sizeModal.search.trim().toLowerCase();
   const current = state[sizeModal.kind][sizeModal.target];
-  const rows = catalog
-    .map((c, idx) => ({ c, idx }))
-    .filter(({ c }) => !query || `${c.n} ${c.od} ${c.id} ${c.w}`.toLowerCase().includes(query));
+  const rows = catalog.filter(
+    (t) =>
+      !query ||
+      `${t.outerDiameter} ${t.innerDiameter} ${t.nominalWeight} ${t.grade}`.toLowerCase().includes(query),
+  );
 
   const title = sizeModal.kind === "tubing" ? "Catálogo de tubería de producción" : "Catálogo de revestimiento";
 
@@ -38,7 +39,7 @@ export const SizePickerModal = () => {
           <input
             value={sizeModal.search}
             onChange={(e) => dispatch({ type: "SET_SIZE_SEARCH", search: e.target.value })}
-            placeholder="Buscar por tamaño, Ø o peso (ej. 7, 26)"
+            placeholder="Buscar por tamaño, Ø, grado o peso (ej. 9.625, K-55)"
             className="flex-1 py-[10px] bg-transparent border-none outline-none text-text text-[13px]"
           />
         </span>
@@ -52,12 +53,12 @@ export const SizePickerModal = () => {
           <span className="text-right font-mono">lb/ft</span>
         </div>
 
-        {rows.map(({ c, idx }) => {
-          const selected = !!current && current.sizeIdx === idx;
+        {rows.map((t) => {
+          const selected = !!current && current.catalogId === t.id;
           return (
             <button
-              key={idx}
-              onClick={() => dispatch({ type: "PICK_SIZE", idx })}
+              key={t.id}
+              onClick={() => t.id != null && dispatch({ type: "PICK_SIZE", catalogId: t.id })}
               className={cn(
                 "block w-full text-left p-[9px_14px] my-px rounded-[9px] border cursor-pointer hover:bg-surface-2",
                 selected ? "bg-primary-soft border-primary-ring" : "bg-transparent border-transparent",
@@ -70,11 +71,11 @@ export const SizePickerModal = () => {
                       <CheckThinIcon size={14} />
                     </span>
                   )}
-                  {c.n}
+                  {t.outerDiameter}″ · {t.grade}
                 </span>
-                <span className="text-right font-mono text-[12.5px] text-text-dim">{c.od}</span>
-                <span className="text-right font-mono text-[12.5px] text-text-dim">{c.id}</span>
-                <span className="text-right font-mono text-[12.5px] text-data-blue">{c.w}</span>
+                <span className="text-right font-mono text-[12.5px] text-text-dim">{t.outerDiameter?.toFixed(3)}</span>
+                <span className="text-right font-mono text-[12.5px] text-text-dim">{t.innerDiameter?.toFixed(3)}</span>
+                <span className="text-right font-mono text-[12.5px] text-data-blue">{t.nominalWeight}</span>
               </span>
             </button>
           );

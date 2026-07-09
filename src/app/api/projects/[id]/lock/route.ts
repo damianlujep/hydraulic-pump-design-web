@@ -1,25 +1,19 @@
 import { createServerClient, forwardOpenApiResponse, forwardOpenApiVoidResponse } from "@/lib/api/server-client";
-import type { components } from "@/lib/api/schema";
 
-export const GET = async (_req: Request, { params }: { params: Promise<{ id: string }> }) => {
+export const POST = async (_req: Request, { params }: { params: Promise<{ id: string }> }) => {
   const [{ id }, client] = await Promise.all([params, createServerClient()]);
 
-  const result = await client.GET("/api/v1/projects/{id}", {
+  const result = await client.POST("/api/v1/projects/{id}/lock", {
     params: { path: { id: Number(id) } },
   });
   return forwardOpenApiResponse(result);
 };
 
-export const PATCH = async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
-  const [{ id }, body, client] = await Promise.all([
-    params,
-    req.json() as Promise<components["schemas"]["UpdateProjectMetadataRequest"]>,
-    createServerClient(),
-  ]);
+export const PUT = async (_req: Request, { params }: { params: Promise<{ id: string }> }) => {
+  const [{ id }, client] = await Promise.all([params, createServerClient()]);
 
-  const result = await client.PATCH("/api/v1/projects/{id}", {
+  const result = await client.PUT("/api/v1/projects/{id}/lock", {
     params: { path: { id: Number(id) } },
-    body,
   });
   return forwardOpenApiResponse(result);
 };
@@ -27,7 +21,7 @@ export const PATCH = async (req: Request, { params }: { params: Promise<{ id: st
 export const DELETE = async (_req: Request, { params }: { params: Promise<{ id: string }> }) => {
   const [{ id }, client] = await Promise.all([params, createServerClient()]);
 
-  const result = await client.DELETE("/api/v1/projects/{id}", {
+  const result = await client.DELETE("/api/v1/projects/{id}/lock", {
     params: { path: { id: Number(id) } },
   });
   return forwardOpenApiVoidResponse(result);

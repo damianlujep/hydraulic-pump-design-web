@@ -681,7 +681,7 @@ export interface components {
             testPoints: components["schemas"]["TestPoint"][];
             /**
              * Format: int32
-             * @description Curve points to generate; engine defaults to 20
+             * @description Curve points to generate; engine defaults to 101
              */
             curvePointCount?: number;
         };
@@ -738,28 +738,28 @@ export interface components {
              * @enum {string}
              */
             correlation?: "VOGEL" | "FETKOVICH";
-            /** @description Points on the IPR curve, evenly spaced in total flow rate from 0 to absoluteOpenFlow */
+            /** @description Points on the IPR curve, evenly spaced in total flow rate from 0 to absoluteOpenFlow; each value rounded to 2 decimals */
             curvePoints?: components["schemas"]["IprCurvePoint"][];
         };
         IprCurvePoint: {
             /**
              * Format: double
-             * @description Flowing bottomhole pressure in psia
+             * @description Flowing bottomhole pressure in psia, rounded to 2 decimals
              */
             flowingBottomholePressure?: number;
             /**
              * Format: double
-             * @description Total flow rate in STB/d
+             * @description Total flow rate in STB/d, rounded to 2 decimals
              */
             totalFlowRate?: number;
             /**
              * Format: double
-             * @description Oil flow rate in STB/d
+             * @description Oil flow rate in STB/d, rounded to 2 decimals
              */
             oilFlowRate?: number;
             /**
              * Format: double
-             * @description Water flow rate in STB/d
+             * @description Water flow rate in STB/d, rounded to 2 decimals
              */
             waterFlowRate?: number;
         };

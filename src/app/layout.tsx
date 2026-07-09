@@ -4,6 +4,7 @@ import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { ReactQueryProvider } from "@/context/ReactQueryProvider";
 import { AuthProvider } from "@/lib/auth/auth-context";
+import { AppToaster } from "@/components/AppToaster";
 import { createServerClient } from "@/lib/api/server-client";
 import { ACCESS_TOKEN_COOKIE } from "@/lib/api/cookies";
 import type { User } from "@/interfaces/user";
@@ -74,7 +75,10 @@ const RootLayout = async ({
       <body className="h-full bg-bg text-text font-sans antialiased">
         <ThemeProvider>
           <ReactQueryProvider>
-            <AuthProvider initialUser={initialUser}>{children}</AuthProvider>
+            <AuthProvider initialUser={initialUser}>
+              {children}
+              <AppToaster />
+            </AuthProvider>
           </ReactQueryProvider>
         </ThemeProvider>
       </body>

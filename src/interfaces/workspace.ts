@@ -1,33 +1,21 @@
 export type TabId = "completion" | "fluids" | "ipr" | "calc";
-export type CalcStatus = "idle" | "running" | "done";
+export type CalcStatus = "idle" | "running" | "done" | "error";
 export type PipeKind = "casing" | "tubing";
-
-export type CatalogEntry = {
-  n: string;
-  od: string;
-  id: string;
-  w: string;
-};
+export type SaveStatus = "idle" | "dirty" | "saving" | "saved" | "error" | "conflict";
+export type StepId = "completion" | "fluids" | "ipr";
+export type StepDoneMap = Record<StepId, boolean>;
 
 export type PipeSection = {
-  sizeIdx: number;
+  catalogId: number | null;
   length: string;
 };
 
-export type SurveyStation = {
-  n: number;
+export type SurveyRow = {
+  id: number;
   md: number;
   tvd: number;
   hd: number;
-  ang: number;
-};
-
-export type SurveyFullStation = {
-  n: number;
-  md: string;
-  tvd: string;
-  hd: string;
-  ang: number;
+  angle: number;
 };
 
 export type SizeModalState = {
@@ -36,3 +24,10 @@ export type SizeModalState = {
   target: number;
   search: string;
 };
+
+export type LockView =
+  | { status: "acquiring" }
+  | { status: "mine"; lockedUntil?: string }
+  | { status: "held-by-other"; holderName: string; lockedUntil?: string }
+  | { status: "no-permission" }
+  | { status: "error" };

@@ -1,12 +1,7 @@
-import { Suspense } from "react";
-import { WorkspaceScreen } from "@/components/workspace/WorkspaceScreen";
+import { redirect } from "next/navigation";
 
-const WorkspacePage = () => {
-  return (
-    <Suspense>
-      <WorkspaceScreen />
-    </Suspense>
-  );
+const WorkspaceIndexPage = () => {
+  redirect("/");
 };
 
-export default WorkspacePage;
+export default WorkspaceIndexPage;

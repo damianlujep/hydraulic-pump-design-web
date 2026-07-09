@@ -215,3 +215,23 @@ button {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+.app-toast {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-card) !important;
+  box-shadow: var(--shadow-app) !important;
+}
+.app-toast[data-type="error"] {
+  border-color: var(--danger-ring) !important;
+}
+.app-toast[data-type="success"] {
+  border-color: var(--green-soft) !important;
+}
+.app-toast-title {
+  color: var(--text) !important;
+}
+.app-toast-desc {
+  color: var(--text-dim) !important;
+}
