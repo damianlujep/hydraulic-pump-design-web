@@ -38,7 +38,7 @@ Accent (`indigo` default, `cyan`, `emerald`, `amber`) only overrides the primary
 | Dashboard/canvas card | 12px | `rounded-card` |
 | Buttons | 9–11px | `rounded-[9px]` / `rounded-[10px]` / `rounded-[11px]` |
 | Pills / tabs | full | `rounded-full` |
-| Modals | 16px | `rounded-[16px]` |
+| Modals / auth card | 16px | `rounded-[16px]` / `rounded-2xl` |
 
 ### Density scale (reused verbatim everywhere)
 - Data-entry group card: header padding `10px 14px`, body padding `6px` (`GroupCard`).
@@ -92,6 +92,11 @@ Fixed 238px sidebar (logo lockup, grouped nav with active-item soft-primary back
 
 ### Workspace (`/workspace`)
 58px navbar (back button, project identity, cloud-save status, theme toggle, `UserMenu`) → chevron progress-tab bar (Completación ✓ / Fluidos y PVT ✓ / IPR y OPR active / Cálculos locked) → 45/55 split: left column scrolls (data-entry forms per active tab), right column is a fixed-width canvas stack (charts/tables per active tab) on a `surface-2` background.
+
+### Login (`/login`)
+Full-viewport shell — `radial-gradient(130% 100% at 50% 0%, var(--surface-2), var(--bg))` behind a subtle 30px technical grid overlay (`--grid`, opacity .5, `pointer-events-none`) — lives in `(auth)/layout.tsx`, not the page, so any future auth screen (signup, forgot-password) reuses it for free. `login/page.tsx` (server component) renders only the centered 372px card (`rounded-2xl`, `shadow-app`, padding `34px 34px 28px`) with the logo mark/title/subtitle header, then hands off to `LoginForm` (client component) for the interactive form. Single column at all sizes — the card just narrows on mobile, no reflow. No theme toggle on this screen (first-time visitors get the OS-preferred theme from the no-flash script; returning users keep whatever they last set in the authenticated app).
+
+Fields (email, password) share one wrapper style: `bg-surface-3` border, `focus-within:` primary ring, swapping to a `border-danger` + `--danger-ring` ring when that field has a validation error — invalid state always wins over focus state. Password has a trailing eye-icon toggle (`EyeIcon`) that flips the input between `password`/`text`. Validation is `react-hook-form` + `zodResolver` against `loginSchema.ts`: errors are silent until first submit, then recompute live as the user types. A submitted server-side auth failure (e.g. 401) renders the same error-row style between the password field and the submit button. The submit button has three label/visual states: idle ("Iniciar sesión") → pending ("Verificando…" + a left-aligned `SpinnerIcon` spinning via `animate-spin-fast`, button dimmed) → success ("Sesión iniciada", shown briefly while the redirect resolves).
 
 ## 4. State & interactions
 
