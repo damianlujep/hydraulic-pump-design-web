@@ -400,11 +400,6 @@ export interface components {
             /** Format: int32 */
             numberCasingPipes?: number;
             /**
-             * Format: int32
-             * @description Reference id into the casing catalog (modules:tubular)
-             */
-            casingSelectionId?: number;
-            /**
              * Format: double
              * @description ft
              */
@@ -419,6 +414,11 @@ export interface components {
              * @description in
              */
             casingUpperInnerDiameter?: number;
+            /**
+             * Format: int32
+             * @description Reference id into the casing catalog (modules:tubular)
+             */
+            casingUpperSelectionId?: number;
             /**
              * Format: double
              * @description ft
@@ -435,6 +435,11 @@ export interface components {
              */
             casingMiddleInnerDiameter?: number;
             /**
+             * Format: int32
+             * @description Reference id into the casing catalog (modules:tubular)
+             */
+            casingMiddleSelectionId?: number;
+            /**
              * Format: double
              * @description ft
              */
@@ -449,13 +454,13 @@ export interface components {
              * @description in
              */
             casingBottomInnerDiameter?: number;
-            /** Format: int32 */
-            numberProductionTubings?: number;
             /**
              * Format: int32
-             * @description Reference id into the tubing catalog (modules:tubular)
+             * @description Reference id into the casing catalog (modules:tubular)
              */
-            tubingSelectionId?: number;
+            casingBottomSelectionId?: number;
+            /** Format: int32 */
+            numberProductionTubings?: number;
             /**
              * Format: double
              * @description ft
@@ -472,6 +477,11 @@ export interface components {
              */
             tubingUpperInnerDiameter?: number;
             /**
+             * Format: int32
+             * @description Reference id into the tubing catalog (modules:tubular)
+             */
+            tubingUpperSelectionId?: number;
+            /**
              * Format: double
              * @description ft
              */
@@ -487,6 +497,11 @@ export interface components {
              */
             tubingMiddleInnerDiameter?: number;
             /**
+             * Format: int32
+             * @description Reference id into the tubing catalog (modules:tubular)
+             */
+            tubingMiddleSelectionId?: number;
+            /**
              * Format: double
              * @description ft
              */
@@ -501,11 +516,18 @@ export interface components {
              * @description in
              */
             tubingBottomInnerDiameter?: number;
+            /**
+             * Format: int32
+             * @description Reference id into the tubing catalog (modules:tubular)
+             */
+            tubingBottomSelectionId?: number;
         };
         DesignDataDto: {
             newProjectInfo?: components["schemas"]["StepDtoNewProjectInfoDto"];
             completion?: components["schemas"]["StepDtoCompletionDto"];
             directionalSurvey?: components["schemas"]["StepDtoListDirectionalSurveyRowDto"];
+            fluids?: components["schemas"]["StepDtoFluidsDto"];
+            ipr?: components["schemas"]["StepDtoIprDto"];
         };
         DirectionalSurveyRowDto: {
             /** Format: int32 */
@@ -531,6 +553,239 @@ export interface components {
              */
             angle?: number;
         };
+        FluidsDto: {
+            /**
+             * Format: double
+             * @description Injected fluid gravity, °API
+             */
+            oilGravityInjected?: number;
+            /**
+             * Format: double
+             * @description psi
+             */
+            separatorPressure?: number;
+            /**
+             * Format: double
+             * @description °F
+             */
+            separatorTemperature?: number;
+            /**
+             * Format: double
+             * @description Gas-oil ratio, scf/stb
+             */
+            gor?: number;
+            /**
+             * Format: double
+             * @description Produced fluid gravity, °API
+             */
+            oilGravity?: number;
+            /**
+             * Format: double
+             * @description Specific gravity, gas
+             */
+            sgg?: number;
+            /**
+             * Format: double
+             * @description Formation water salinity, ppm Cl⁻
+             */
+            salinity?: number;
+            /**
+             * Format: double
+             * @description Specific gravity, injected water
+             */
+            sgw?: number;
+            /**
+             * Format: double
+             * @description BSW, fraction 0-1
+             */
+            waterCut?: number;
+            /**
+             * Format: double
+             * @description Pb, psi
+             */
+            bubblePointPressure?: number;
+            /** @enum {string} */
+            injectedFluidType?: "OIL" | "WATER";
+            /** @enum {string} */
+            gasSolubilityCorrelation?: "VELARDE_BLASINGAME" | "STANDING" | "VASQUEZ_BEGGS";
+            /** @enum {string} */
+            oilFvfCorrelation?: "VALKO_MCCAIN_SPIVEY" | "STANDING";
+            /** @enum {string} */
+            saturatedOilViscosityCorrelation?: "BEGGS_ROBINSON" | "CHEW_CONNALLY";
+            /** @enum {string} */
+            undersaturatedOilViscosityCorrelation?: "PETROSKY_FARSHAD" | "VASQUEZ_BEGGS";
+            /** @enum {string} */
+            deadOilViscosityCorrelation?: "RODA_V80_120" | "BEAL" | "GLASO";
+            /** @enum {string} */
+            waterFvfViscosityCorrelation?: "MCCAIN" | "MEEHAN";
+            /** @enum {string} */
+            gasViscosityCorrelation?: "LEE" | "CARR_KOBAYASHI";
+            /** @enum {string} */
+            gasCompressibilityCorrelation?: "ABOU_KASSEM" | "HALL_YARBOROUGH";
+            /** @enum {string} */
+            waterSurfaceTensionCorrelation?: "JENNINGS_NEWMAN";
+            /** @enum {string} */
+            oilSurfaceTensionCorrelation?: "ABDUL_MAJEED" | "BAKER_SWERDLOFF";
+        };
+        IprCurvePoint: {
+            /**
+             * Format: double
+             * @description Flowing bottomhole pressure in psia, rounded to 2 decimals
+             */
+            flowingBottomholePressure?: number;
+            /**
+             * Format: double
+             * @description Total flow rate in STB/d, rounded to 2 decimals
+             */
+            totalFlowRate?: number;
+            /**
+             * Format: double
+             * @description Oil flow rate in STB/d, rounded to 2 decimals
+             */
+            oilFlowRate?: number;
+            /**
+             * Format: double
+             * @description Water flow rate in STB/d, rounded to 2 decimals
+             */
+            waterFlowRate?: number;
+        };
+        IprDto: {
+            /**
+             * Format: double
+             * @description °F
+             */
+            bottomholeTemperature?: number;
+            /**
+             * Format: double
+             * @description °F
+             */
+            wellheadTemperature?: number;
+            /**
+             * Format: double
+             * @description Ps, psi
+             */
+            reservoirPressure?: number;
+            /**
+             * Format: double
+             * @description Pwf, psi
+             */
+            flowingBottomholePressure?: number;
+            /**
+             * Format: double
+             * @description psi
+             */
+            pumpIntakePressure?: number;
+            /**
+             * Format: double
+             * @description bfpd
+             */
+            testFlowRate?: number;
+            /**
+             * Format: double
+             * @description bipd
+             */
+            maxInjectedVolume?: number;
+            /**
+             * Format: double
+             * @description psi
+             */
+            maxInjectionPressure?: number;
+            /**
+             * Format: double
+             * @description Qt/Qcavitación
+             */
+            jetMaxRatio?: number;
+            /**
+             * Format: double
+             * @description %
+             */
+            jetMinEfficiency?: number;
+            /**
+             * Format: double
+             * @description GPM/GPMmáx
+             */
+            pistonMaxRatio?: number;
+            /**
+             * Format: double
+             * @description bfpd
+             */
+            designFlowRate?: number;
+            /**
+             * Format: double
+             * @description psi
+             */
+            flowingWellheadPressure?: number;
+            /**
+             * Format: double
+             * @description bipd
+             */
+            maxRefInjectionRate?: number;
+            /**
+             * Format: double
+             * @description psi
+             */
+            maxInjectionPressureAdjusted?: number;
+            /** @enum {string} */
+            injectedFluidHydraulicCorrelation?: "DARCY_WEISBACH" | "HAZEN_WILLIAMS";
+            /** @enum {string} */
+            multiphaseFlowCorrelation?: "GRIFFITH" | "BEGGS_BRILL" | "HAGEDORN_BROWN";
+            /** @description Last successful IPR calculation result, stored as-is for reload without recalculating */
+            lastResult?: components["schemas"]["IprResultDto"];
+            /**
+             * @description Correlation used for lastResult
+             * @enum {string}
+             */
+            lastCorrelation?: "VOGEL" | "FETKOVICH";
+            /**
+             * Format: int32
+             * @description curvePointCount used for lastResult
+             */
+            lastCurvePointCount?: number;
+        };
+        IprResultDto: {
+            /**
+             * Format: double
+             * @description Productivity index (J) in STB/d/psi
+             */
+            productivityIndex?: number;
+            /**
+             * Format: double
+             * @description Total flow rate at the bubble point (qb) in STB/d
+             */
+            bubblePointFlowRate?: number;
+            /**
+             * Format: double
+             * @description Absolute open flow potential (AOF) in STB/d
+             */
+            absoluteOpenFlow?: number;
+            /**
+             * Format: double
+             * @description Flow rate at the model's internal operating point in STB/d
+             */
+            operatingPointFlowRate?: number;
+            /**
+             * Format: double
+             * @description Flowing bottomhole pressure at the operating point in psia
+             */
+            operatingPointPressure?: number;
+            /**
+             * Format: double
+             * @description Slope of the final linear segment beyond the operating point, in psi/(STB/d)
+             */
+            finalSegmentSlope?: number;
+            /**
+             * Format: double
+             * @description Regressed Fetkovich exponent (n); null for VOGEL
+             */
+            fetkovichExponent?: number;
+            /**
+             * @description Correlation applied
+             * @enum {string}
+             */
+            correlation?: "VOGEL" | "FETKOVICH";
+            /** @description Points on the IPR curve, evenly spaced in total flow rate from 0 to absoluteOpenFlow; each value rounded to 2 decimals */
+            curvePoints?: components["schemas"]["IprCurvePoint"][];
+        };
         NewProjectInfoDto: {
             newProjectName?: string;
             companyName?: string;
@@ -547,6 +802,14 @@ export interface components {
         StepDtoCompletionDto: {
             dataEntered?: boolean;
             data?: components["schemas"]["CompletionDto"];
+        };
+        StepDtoFluidsDto: {
+            dataEntered?: boolean;
+            data?: components["schemas"]["FluidsDto"];
+        };
+        StepDtoIprDto: {
+            dataEntered?: boolean;
+            data?: components["schemas"]["IprDto"];
         };
         StepDtoListDirectionalSurveyRowDto: {
             dataEntered?: boolean;
@@ -740,28 +1003,6 @@ export interface components {
             correlation?: "VOGEL" | "FETKOVICH";
             /** @description Points on the IPR curve, evenly spaced in total flow rate from 0 to absoluteOpenFlow; each value rounded to 2 decimals */
             curvePoints?: components["schemas"]["IprCurvePoint"][];
-        };
-        IprCurvePoint: {
-            /**
-             * Format: double
-             * @description Flowing bottomhole pressure in psia, rounded to 2 decimals
-             */
-            flowingBottomholePressure?: number;
-            /**
-             * Format: double
-             * @description Total flow rate in STB/d, rounded to 2 decimals
-             */
-            totalFlowRate?: number;
-            /**
-             * Format: double
-             * @description Oil flow rate in STB/d, rounded to 2 decimals
-             */
-            oilFlowRate?: number;
-            /**
-             * Format: double
-             * @description Water flow rate in STB/d, rounded to 2 decimals
-             */
-            waterFlowRate?: number;
         };
         AuthResponse: {
             accessToken?: string;

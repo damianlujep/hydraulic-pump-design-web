@@ -51,6 +51,7 @@ const DATA_ACTIONS = new Set<WorkspaceAction["type"]>([
   "REMOVE_SECTION",
   "SET_SECTION_LENGTH",
   "MARK_DIRTY",
+  "CALC_SUCCESS",
 ]);
 
 export const createInitialState = (input: {
@@ -58,14 +59,16 @@ export const createInitialState = (input: {
   casing: PipeSection[];
   tubing: PipeSection[];
   survey: SurveyRow[];
+  iprResult: IprCalculationResponse | null;
+  iprFingerprint: string | null;
 }): WorkspaceState => ({
   activeTab: "completion",
   calcStatus: "idle",
   survey: input.survey,
   casing: input.casing,
   tubing: input.tubing,
-  iprResult: null,
-  iprFingerprint: null,
+  iprResult: input.iprResult,
+  iprFingerprint: input.iprFingerprint,
   newProjectInfo: input.project.designData?.newProjectInfo,
   version: input.project.version ?? 0,
   revision: 0,

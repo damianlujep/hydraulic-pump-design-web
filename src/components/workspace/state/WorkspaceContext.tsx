@@ -6,23 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { createInitialState, workspaceReducer, type WorkspaceAction, type WorkspaceState } from "./reducer";
 import { completionSchema, fluidsSchema, iprSchema, type CompletionFormValues, type FluidsFormValues, type IprFormValues } from "./schemas";
-import { buildIprRequest, fromCompletionDto, fromSurveyDto, toDesignDataDto } from "./designData";
+import { buildIprRequest, computeIprFingerprint, fromCompletionDto, fromFluidsDto, fromIprDto, fromSurveyDto, toDesignDataDto } from "./designData";
 import { useEditLock } from "./useEditLock";
-import {
-  INJECTED_FLUID_TYPE_OPTIONS,
-  GAS_SOLUBILITY_CORRELATION_OPTIONS,
-  OIL_FVF_CORRELATION_OPTIONS,
-  SATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS,
-  UNDERSATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS,
-  DEAD_OIL_VISCOSITY_CORRELATION_OPTIONS,
-  WATER_FVF_VISCOSITY_CORRELATION_OPTIONS,
-  GAS_VISCOSITY_CORRELATION_OPTIONS,
-  GAS_COMPRESSIBILITY_CORRELATION_OPTIONS,
-  WATER_SURFACE_TENSION_CORRELATION_OPTIONS,
-  OIL_SURFACE_TENSION_CORRELATION_OPTIONS,
-  INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS,
-  MULTIPHASE_FLOW_CORRELATION_OPTIONS,
-} from "./correlations";
 import { useSaveDesignData, type ProjectResponse } from "@/lib/api/projects";
 import { useCalculateIpr } from "@/lib/api/calculations";
 import type { TubularItem } from "@/lib/api/casings";
@@ -55,51 +40,6 @@ const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 const AUTOSAVE_DEBOUNCE_MS = 2000;
 const AUTOSAVE_MAX_WAIT_MS = 10000;
 
-const EMPTY_FLUIDS: FluidsFormValues = {
-  oilGravityInjected: "",
-  separatorPressure: "",
-  separatorTemperature: "",
-  gor: "",
-  oilGravity: "",
-  sgg: "",
-  salinity: "",
-  sgw: "",
-  waterCut: "",
-  bubblePointPressure: "",
-  // Correlation/fluid-type selects always start on their current default — unlike the numeric
-  // fields above, these aren't user-blank-required.
-  injectedFluidType: INJECTED_FLUID_TYPE_OPTIONS[0].value,
-  gasSolubilityCorrelation: GAS_SOLUBILITY_CORRELATION_OPTIONS[0].value,
-  oilFvfCorrelation: OIL_FVF_CORRELATION_OPTIONS[0].value,
-  saturatedOilViscosityCorrelation: SATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS[0].value,
-  undersaturatedOilViscosityCorrelation: UNDERSATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS[0].value,
-  deadOilViscosityCorrelation: DEAD_OIL_VISCOSITY_CORRELATION_OPTIONS[0].value,
-  waterFvfViscosityCorrelation: WATER_FVF_VISCOSITY_CORRELATION_OPTIONS[0].value,
-  gasViscosityCorrelation: GAS_VISCOSITY_CORRELATION_OPTIONS[0].value,
-  gasCompressibilityCorrelation: GAS_COMPRESSIBILITY_CORRELATION_OPTIONS[0].value,
-  waterSurfaceTensionCorrelation: WATER_SURFACE_TENSION_CORRELATION_OPTIONS[0].value,
-  oilSurfaceTensionCorrelation: OIL_SURFACE_TENSION_CORRELATION_OPTIONS[0].value,
-};
-const EMPTY_IPR: IprFormValues = {
-  bottomholeTemperature: "",
-  wellheadTemperature: "",
-  reservoirPressure: "",
-  flowingBottomholePressure: "",
-  pumpIntakePressure: "",
-  testFlowRate: "",
-  maxInjectedVolume: "",
-  maxInjectionPressure: "",
-  jetMaxRatio: "",
-  jetMinEfficiency: "",
-  pistonMaxRatio: "",
-  designFlowRate: "",
-  flowingWellheadPressure: "",
-  maxRefInjectionRate: "",
-  maxInjectionPressureAdjusted: "",
-  injectedFluidHydraulicCorrelation: INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS[0].value,
-  multiphaseFlowCorrelation: MULTIPHASE_FLOW_CORRELATION_OPTIONS[0].value,
-};
-
 type WorkspaceProviderProps = {
   project: ProjectResponse;
   casings: TubularItem[];
@@ -112,10 +52,25 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
   const projectId = project.id ?? 0;
   const hydrated = fromCompletionDto(project.designData?.completion?.data, casings, tubings);
   const survey = fromSurveyDto(project.designData?.directionalSurvey?.data);
+  const hydratedFluids = fromFluidsDto(project.designData?.fluids?.data);
+  const hydratedIpr = fromIprDto(project.designData?.ipr?.data);
+  // Trust a stored result on reload — the fingerprint is seeded from the hydrated form values
+  // themselves, so any edit after this point still reverts the step pill via the usual mechanism.
+  const hydratedIprResult = project.designData?.ipr?.data?.lastResult ?? null;
+  const hydratedIprFingerprint = hydratedIprResult
+    ? computeIprFingerprint({ ipr: hydratedIpr, fluids: hydratedFluids })
+    : null;
 
   const [state, dispatch] = useReducer(
     workspaceReducer,
-    { project, casing: hydrated.casing, tubing: hydrated.tubing, survey },
+    {
+      project,
+      casing: hydrated.casing,
+      tubing: hydrated.tubing,
+      survey,
+      iprResult: hydratedIprResult,
+      iprFingerprint: hydratedIprFingerprint,
+    },
     createInitialState,
   );
 
@@ -127,12 +82,12 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
   const fluidsForm = useForm<FluidsFormValues>({
     resolver: zodResolver(fluidsSchema),
     mode: "onTouched",
-    defaultValues: EMPTY_FLUIDS,
+    defaultValues: hydratedFluids,
   });
   const iprForm = useForm<IprFormValues>({
     resolver: zodResolver(iprSchema),
     mode: "onTouched",
-    defaultValues: EMPTY_IPR,
+    defaultValues: hydratedIpr,
   });
 
   // Compute isValid accurately from mount (without a resolver, RHF only knows validity after the
@@ -184,16 +139,19 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
     }
 
     const revisionAtSave = state.revision;
-    const payload = toDesignDataDto(
-      completionForm.getValues(),
-      state.casing,
-      state.tubing,
-      state.survey,
+    const payload = toDesignDataDto({
+      completion: completionForm.getValues(),
+      fluids: fluidsForm.getValues(),
+      ipr: iprForm.getValues(),
+      casingSections: state.casing,
+      tubingSections: state.tubing,
+      survey: state.survey,
       casings,
       tubings,
-      state.newProjectInfo,
-      completionDone,
-    );
+      newProjectInfo: state.newProjectInfo,
+      iprResult: state.iprResult,
+      stepDone,
+    });
     const serialized = JSON.stringify(payload);
     if (serialized === lastSavedPayloadRef.current) return;
 
@@ -240,16 +198,19 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
   useEffect(() => {
     const onPageHide = () => {
       if (state.saveStatus === "dirty" && canEdit && projectId) {
-        const payload = toDesignDataDto(
-          completionForm.getValues(),
-          state.casing,
-          state.tubing,
-          state.survey,
+        const payload = toDesignDataDto({
+          completion: completionForm.getValues(),
+          fluids: fluidsForm.getValues(),
+          ipr: iprForm.getValues(),
+          casingSections: state.casing,
+          tubingSections: state.tubing,
+          survey: state.survey,
           casings,
           tubings,
-          state.newProjectInfo,
-          completionDone,
-        );
+          newProjectInfo: state.newProjectInfo,
+          iprResult: state.iprResult,
+          stepDone,
+        });
         void fetch(`/api/projects/${projectId}/design-data`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -263,10 +224,16 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.saveStatus, state.version, canEdit, projectId]);
 
-  // Mark the reducer dirty whenever the persisted (completion-step) form fields change.
+  // Mark the reducer dirty whenever any persistable form's fields change.
   useEffect(() => {
-    const subscription = completionForm.watch(() => dispatch({ type: "MARK_DIRTY" }));
-    return () => subscription.unsubscribe();
+    const completionSub = completionForm.watch(() => dispatch({ type: "MARK_DIRTY" }));
+    const fluidsSub = fluidsForm.watch(() => dispatch({ type: "MARK_DIRTY" }));
+    const iprSub = iprForm.watch(() => dispatch({ type: "MARK_DIRTY" }));
+    return () => {
+      completionSub.unsubscribe();
+      fluidsSub.unsubscribe();
+      iprSub.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
