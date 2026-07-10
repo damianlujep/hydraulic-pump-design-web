@@ -5,10 +5,23 @@ import { LockIcon } from "@/components/icons";
 import { GroupCard } from "../atoms/GroupCard";
 import { InputRow } from "../atoms/InputRow";
 import { UnitField } from "../atoms/UnitField";
-import { SelectField } from "../atoms/SelectField";
 import { useWorkspace } from "../state/WorkspaceContext";
 import type { FluidsFormValues } from "../state/schemas";
 import { registerNumeric } from "../state/numericInput";
+import { CorrelationFieldSelect } from "../state/CorrelationFieldSelect";
+import {
+  INJECTED_FLUID_TYPE_OPTIONS,
+  GAS_SOLUBILITY_CORRELATION_OPTIONS,
+  OIL_FVF_CORRELATION_OPTIONS,
+  SATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS,
+  UNDERSATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS,
+  DEAD_OIL_VISCOSITY_CORRELATION_OPTIONS,
+  WATER_FVF_VISCOSITY_CORRELATION_OPTIONS,
+  GAS_VISCOSITY_CORRELATION_OPTIONS,
+  GAS_COMPRESSIBILITY_CORRELATION_OPTIONS,
+  WATER_SURFACE_TENSION_CORRELATION_OPTIONS,
+  OIL_SURFACE_TENSION_CORRELATION_OPTIONS,
+} from "../state/correlations";
 
 const PLAIN_NUMBER_CLASS =
   "w-[150px] p-[5px_9px] font-mono text-[13px] font-medium text-left bg-surface-3 border border-border rounded-[6px] text-text outline-none focus:border-primary focus:shadow-[0_0_0_2px_var(--primary-ring)]";
@@ -44,10 +57,7 @@ export const FluidsForm = () => {
     <div className="flex flex-col gap-[14px]">
       <GroupCard title="Fluido motriz inyectado">
         <InputRow label="Fluido motriz inyectado">
-          <SelectField defaultValue="Petróleo">
-            <option>Petróleo</option>
-            <option>Agua</option>
-          </SelectField>
+          <CorrelationFieldSelect form={fluids} name="injectedFluidType" catalog={INJECTED_FLUID_TYPE_OPTIONS} />
         </InputRow>
         <InputRow label="Gravedad del petróleo inyectado" error={errorFor("oilGravityInjected")}>
           <FieldUnit form={fluids} name="oilGravityInjected" unit="°API" error={errorFor("oilGravityInjected")} />
@@ -90,66 +100,97 @@ export const FluidsForm = () => {
             <span className="inline-flex text-text-faint">
               <LockIcon size={13} />
             </span>
-            <SelectField widthPx={180} fontSizePx={12} defaultValue="Velarde - Blasingame" disabled>
-              <option>Velarde - Blasingame</option>
-              <option>Standing</option>
-              <option>Vasquez - Beggs</option>
-            </SelectField>
+            <CorrelationFieldSelect
+              form={fluids}
+              name="gasSolubilityCorrelation"
+              catalog={GAS_SOLUBILITY_CORRELATION_OPTIONS}
+              widthPx={180}
+              fontSizePx={12}
+              disabled
+            />
           </div>
         </InputRow>
         <InputRow label="Factor volumétrico Bo (rb/stb)">
-          <SelectField widthPx={180} fontSizePx={12} defaultValue="Valko - McCain - Spivey">
-            <option>Valko - McCain - Spivey</option>
-            <option>Standing</option>
-          </SelectField>
+          <CorrelationFieldSelect form={fluids} name="oilFvfCorrelation" catalog={OIL_FVF_CORRELATION_OPTIONS} widthPx={180} fontSizePx={12} disabled />
         </InputRow>
         <InputRow label="Viscosidad Uo saturado (cp)">
-          <SelectField widthPx={180} fontSizePx={12} defaultValue="Beggs - Robinson">
-            <option>Beggs - Robinson</option>
-            <option>Chew - Connally</option>
-          </SelectField>
+          <CorrelationFieldSelect
+            form={fluids}
+            name="saturatedOilViscosityCorrelation"
+            catalog={SATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS}
+            widthPx={180}
+            fontSizePx={12}
+            disabled
+          />
         </InputRow>
         <InputRow label="Viscosidad Uo subsaturado (cp)">
-          <SelectField widthPx={180} fontSizePx={12} defaultValue="Petrosky - Farshad">
-            <option>Petrosky - Farshad</option>
-            <option>Vasquez - Beggs</option>
-          </SelectField>
+          <CorrelationFieldSelect
+            form={fluids}
+            name="undersaturatedOilViscosityCorrelation"
+            catalog={UNDERSATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS}
+            widthPx={180}
+            fontSizePx={12}
+            disabled
+          />
         </InputRow>
         <InputRow label="Viscosidad Uo muerto (cp)">
-          <SelectField widthPx={180} fontSizePx={12} defaultValue="RODA V80-120">
-            <option>RODA V80-120</option>
-            <option>Beal</option>
-            <option>Glaso</option>
-          </SelectField>
+          <CorrelationFieldSelect
+            form={fluids}
+            name="deadOilViscosityCorrelation"
+            catalog={DEAD_OIL_VISCOSITY_CORRELATION_OPTIONS}
+            widthPx={180}
+            fontSizePx={12}
+          />
         </InputRow>
         <InputRow label="Agua, Bw (rb/stb), Uw (cp)">
-          <SelectField widthPx={180} fontSizePx={12} defaultValue="McCain">
-            <option>McCain</option>
-            <option>Meehan</option>
-          </SelectField>
+          <CorrelationFieldSelect
+            form={fluids}
+            name="waterFvfViscosityCorrelation"
+            catalog={WATER_FVF_VISCOSITY_CORRELATION_OPTIONS}
+            widthPx={180}
+            fontSizePx={12}
+            disabled
+          />
         </InputRow>
         <InputRow label="Viscosidad del gas, Ug (cp)">
-          <SelectField widthPx={180} fontSizePx={12} defaultValue="Lee">
-            <option>Lee</option>
-            <option>Carr - Kobayashi</option>
-          </SelectField>
+          <CorrelationFieldSelect
+            form={fluids}
+            name="gasViscosityCorrelation"
+            catalog={GAS_VISCOSITY_CORRELATION_OPTIONS}
+            widthPx={180}
+            fontSizePx={12}
+            disabled
+          />
         </InputRow>
         <InputRow label="Factor de compresibilidad, Z">
-          <SelectField widthPx={180} fontSizePx={12} defaultValue="Abou - Kassem">
-            <option>Abou - Kassem</option>
-            <option>Hall - Yarborough</option>
-          </SelectField>
+          <CorrelationFieldSelect
+            form={fluids}
+            name="gasCompressibilityCorrelation"
+            catalog={GAS_COMPRESSIBILITY_CORRELATION_OPTIONS}
+            widthPx={180}
+            fontSizePx={12}
+            disabled
+          />
         </InputRow>
         <InputRow label="Tensión superficial agua (dina/cm)">
-          <SelectField widthPx={180} fontSizePx={12} defaultValue="Jennings - Newman">
-            <option>Jennings - Newman</option>
-          </SelectField>
+          <CorrelationFieldSelect
+            form={fluids}
+            name="waterSurfaceTensionCorrelation"
+            catalog={WATER_SURFACE_TENSION_CORRELATION_OPTIONS}
+            widthPx={180}
+            fontSizePx={12}
+            disabled
+          />
         </InputRow>
         <InputRow label="Tensión superficial petróleo (dina/cm)">
-          <SelectField widthPx={180} fontSizePx={12} defaultValue="Abdul - Majeed">
-            <option>Abdul - Majeed</option>
-            <option>Baker - Swerdloff</option>
-          </SelectField>
+          <CorrelationFieldSelect
+            form={fluids}
+            name="oilSurfaceTensionCorrelation"
+            catalog={OIL_SURFACE_TENSION_CORRELATION_OPTIONS}
+            widthPx={180}
+            fontSizePx={12}
+            disabled
+          />
         </InputRow>
       </GroupCard>
     </div>

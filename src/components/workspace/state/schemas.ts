@@ -1,4 +1,20 @@
 import { z } from "zod";
+import {
+  optionValues,
+  INJECTED_FLUID_TYPE_OPTIONS,
+  GAS_SOLUBILITY_CORRELATION_OPTIONS,
+  OIL_FVF_CORRELATION_OPTIONS,
+  SATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS,
+  UNDERSATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS,
+  DEAD_OIL_VISCOSITY_CORRELATION_OPTIONS,
+  WATER_FVF_VISCOSITY_CORRELATION_OPTIONS,
+  GAS_VISCOSITY_CORRELATION_OPTIONS,
+  GAS_COMPRESSIBILITY_CORRELATION_OPTIONS,
+  WATER_SURFACE_TENSION_CORRELATION_OPTIONS,
+  OIL_SURFACE_TENSION_CORRELATION_OPTIONS,
+  INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS,
+  MULTIPHASE_FLOW_CORRELATION_OPTIONS,
+} from "./correlations";
 
 const requiredNumber = (message = "Campo requerido") =>
   z
@@ -33,6 +49,19 @@ export const fluidsSchema = z.object({
   sgw: positiveNumber(),
   waterCut: requiredNumber().refine((v) => Number(v) >= 0 && Number(v) <= 1, "Debe estar entre 0 y 1"),
   bubblePointPressure: positiveNumber(),
+  // Correlation/fluid-type selects — always have a valid default (most are fixed/disabled in the
+  // UI for now), so these never block step validity the way the numeric fields above can.
+  injectedFluidType: z.enum(optionValues(INJECTED_FLUID_TYPE_OPTIONS)),
+  gasSolubilityCorrelation: z.enum(optionValues(GAS_SOLUBILITY_CORRELATION_OPTIONS)),
+  oilFvfCorrelation: z.enum(optionValues(OIL_FVF_CORRELATION_OPTIONS)),
+  saturatedOilViscosityCorrelation: z.enum(optionValues(SATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS)),
+  undersaturatedOilViscosityCorrelation: z.enum(optionValues(UNDERSATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS)),
+  deadOilViscosityCorrelation: z.enum(optionValues(DEAD_OIL_VISCOSITY_CORRELATION_OPTIONS)),
+  waterFvfViscosityCorrelation: z.enum(optionValues(WATER_FVF_VISCOSITY_CORRELATION_OPTIONS)),
+  gasViscosityCorrelation: z.enum(optionValues(GAS_VISCOSITY_CORRELATION_OPTIONS)),
+  gasCompressibilityCorrelation: z.enum(optionValues(GAS_COMPRESSIBILITY_CORRELATION_OPTIONS)),
+  waterSurfaceTensionCorrelation: z.enum(optionValues(WATER_SURFACE_TENSION_CORRELATION_OPTIONS)),
+  oilSurfaceTensionCorrelation: z.enum(optionValues(OIL_SURFACE_TENSION_CORRELATION_OPTIONS)),
 });
 export type FluidsFormValues = z.infer<typeof fluidsSchema>;
 
@@ -59,6 +88,11 @@ export const iprSchema = z
     flowingWellheadPressure: positiveNumber(),
     maxRefInjectionRate: positiveNumber(),
     maxInjectionPressureAdjusted: positiveNumber(),
+    // Hydraulic correlation selects — always have a valid default. "Modelo de reservorio" (Vogel)
+    // is intentionally not modeled here: it's the real IprCalculationRequest.correlation field,
+    // hardcoded "VOGEL" until the Fetkovich follow-up lands.
+    injectedFluidHydraulicCorrelation: z.enum(optionValues(INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS)),
+    multiphaseFlowCorrelation: z.enum(optionValues(MULTIPHASE_FLOW_CORRELATION_OPTIONS)),
   })
   .refine((v) => Number(v.flowingBottomholePressure) < Number(v.reservoirPressure), {
     message: "Pwf debe ser menor que Ps",

@@ -1,4 +1,4 @@
-import type { SelectHTMLAttributes } from "react";
+import { forwardRef, type SelectHTMLAttributes } from "react";
 import { cn } from "@/utils/cn";
 
 type SelectFieldProps = SelectHTMLAttributes<HTMLSelectElement> & {
@@ -6,19 +6,23 @@ type SelectFieldProps = SelectHTMLAttributes<HTMLSelectElement> & {
   fontSizePx?: number;
 };
 
-export const SelectField = ({ widthPx = 150, fontSizePx = 12.5, className = "", style, disabled, ...props }: SelectFieldProps) => {
-  return (
-    <select
-      disabled={disabled}
-      className={cn(
-        "rounded-[6px] border outline-none focus:border-primary",
-        disabled
-          ? "bg-surface-2 border-border text-text-faint cursor-not-allowed opacity-70"
-          : "bg-surface-3 border-border text-text cursor-pointer",
-        className,
-      )}
-      style={{ width: widthPx, fontSize: fontSizePx, padding: "5px 8px", ...style }}
-      {...props}
-    />
-  );
-};
+export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
+  ({ widthPx = 150, fontSizePx = 12.5, className = "", style, disabled, ...props }, ref) => {
+    return (
+      <select
+        ref={ref}
+        disabled={disabled}
+        className={cn(
+          "rounded-[6px] border outline-none focus:border-primary",
+          disabled
+            ? "bg-surface-2 border-border text-text-faint cursor-not-allowed opacity-70"
+            : "bg-surface-3 border-border text-text cursor-pointer",
+          className,
+        )}
+        style={{ width: widthPx, fontSize: fontSizePx, padding: "5px 8px", ...style }}
+        {...props}
+      />
+    );
+  },
+);
+SelectField.displayName = "SelectField";

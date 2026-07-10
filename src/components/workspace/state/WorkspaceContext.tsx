@@ -8,6 +8,21 @@ import { createInitialState, workspaceReducer, type WorkspaceAction, type Worksp
 import { completionSchema, fluidsSchema, iprSchema, type CompletionFormValues, type FluidsFormValues, type IprFormValues } from "./schemas";
 import { buildIprRequest, fromCompletionDto, fromSurveyDto, toDesignDataDto } from "./designData";
 import { useEditLock } from "./useEditLock";
+import {
+  INJECTED_FLUID_TYPE_OPTIONS,
+  GAS_SOLUBILITY_CORRELATION_OPTIONS,
+  OIL_FVF_CORRELATION_OPTIONS,
+  SATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS,
+  UNDERSATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS,
+  DEAD_OIL_VISCOSITY_CORRELATION_OPTIONS,
+  WATER_FVF_VISCOSITY_CORRELATION_OPTIONS,
+  GAS_VISCOSITY_CORRELATION_OPTIONS,
+  GAS_COMPRESSIBILITY_CORRELATION_OPTIONS,
+  WATER_SURFACE_TENSION_CORRELATION_OPTIONS,
+  OIL_SURFACE_TENSION_CORRELATION_OPTIONS,
+  INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS,
+  MULTIPHASE_FLOW_CORRELATION_OPTIONS,
+} from "./correlations";
 import { useSaveDesignData, type ProjectResponse } from "@/lib/api/projects";
 import { useCalculateIpr } from "@/lib/api/calculations";
 import type { TubularItem } from "@/lib/api/casings";
@@ -51,6 +66,19 @@ const EMPTY_FLUIDS: FluidsFormValues = {
   sgw: "",
   waterCut: "",
   bubblePointPressure: "",
+  // Correlation/fluid-type selects always start on their current default — unlike the numeric
+  // fields above, these aren't user-blank-required.
+  injectedFluidType: INJECTED_FLUID_TYPE_OPTIONS[0].value,
+  gasSolubilityCorrelation: GAS_SOLUBILITY_CORRELATION_OPTIONS[0].value,
+  oilFvfCorrelation: OIL_FVF_CORRELATION_OPTIONS[0].value,
+  saturatedOilViscosityCorrelation: SATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS[0].value,
+  undersaturatedOilViscosityCorrelation: UNDERSATURATED_OIL_VISCOSITY_CORRELATION_OPTIONS[0].value,
+  deadOilViscosityCorrelation: DEAD_OIL_VISCOSITY_CORRELATION_OPTIONS[0].value,
+  waterFvfViscosityCorrelation: WATER_FVF_VISCOSITY_CORRELATION_OPTIONS[0].value,
+  gasViscosityCorrelation: GAS_VISCOSITY_CORRELATION_OPTIONS[0].value,
+  gasCompressibilityCorrelation: GAS_COMPRESSIBILITY_CORRELATION_OPTIONS[0].value,
+  waterSurfaceTensionCorrelation: WATER_SURFACE_TENSION_CORRELATION_OPTIONS[0].value,
+  oilSurfaceTensionCorrelation: OIL_SURFACE_TENSION_CORRELATION_OPTIONS[0].value,
 };
 const EMPTY_IPR: IprFormValues = {
   bottomholeTemperature: "",
@@ -68,6 +96,8 @@ const EMPTY_IPR: IprFormValues = {
   flowingWellheadPressure: "",
   maxRefInjectionRate: "",
   maxInjectionPressureAdjusted: "",
+  injectedFluidHydraulicCorrelation: INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS[0].value,
+  multiphaseFlowCorrelation: MULTIPHASE_FLOW_CORRELATION_OPTIONS[0].value,
 };
 
 type WorkspaceProviderProps = {

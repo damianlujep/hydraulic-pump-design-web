@@ -9,6 +9,8 @@ import { SelectField } from "../atoms/SelectField";
 import { useWorkspace } from "../state/WorkspaceContext";
 import type { IprFormValues } from "../state/schemas";
 import { registerNumeric } from "../state/numericInput";
+import { CorrelationFieldSelect } from "../state/CorrelationFieldSelect";
+import { INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS, MULTIPHASE_FLOW_CORRELATION_OPTIONS } from "../state/correlations";
 
 const PLAIN_NUMBER_CLASS =
   "w-[150px] p-[5px_9px] font-mono text-[13px] font-medium text-left bg-surface-3 border border-border rounded-[6px] text-text outline-none focus:border-primary focus:shadow-[0_0_0_2px_var(--primary-ring)]";
@@ -85,17 +87,10 @@ export const IprForm = () => {
 
       <GroupCard title="C · Correlaciones hidráulicas" bullet>
         <InputRow label="Correlación para fluido inyectado">
-          <SelectField widthPx={180} defaultValue="Darcy - Weisbach">
-            <option>Darcy - Weisbach</option>
-            <option>Hazen - Williams</option>
-          </SelectField>
+          <CorrelationFieldSelect form={ipr} name="injectedFluidHydraulicCorrelation" catalog={INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS} widthPx={180} />
         </InputRow>
         <InputRow label="Correlación para flujo multifásico">
-          <SelectField widthPx={180} defaultValue="Griffith">
-            <option>Griffith</option>
-            <option>Beggs - Brill</option>
-            <option>Hagedorn - Brown</option>
-          </SelectField>
+          <CorrelationFieldSelect form={ipr} name="multiphaseFlowCorrelation" catalog={MULTIPHASE_FLOW_CORRELATION_OPTIONS} widthPx={180} />
         </InputRow>
       </GroupCard>
 
