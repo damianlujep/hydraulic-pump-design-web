@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { DiameterIcon, PlusIcon, SearchIcon, XIcon } from "@/components/icons";
 import { UnitField } from "../atoms/UnitField";
 import { useWorkspace } from "../state/WorkspaceContext";
@@ -13,6 +14,7 @@ export const CasingTubingBuilder = ({ kind, title }: { kind: PipeKind; title: st
   const sections = state[kind];
   const rows = buildSections(sections, kind === "casing" ? casings : tubings);
   const atLimit = sections.length >= 3;
+  const [touchedLength, setTouchedLength] = useState<Set<number>>(new Set());
 
   return (
     <div className="rounded-[11px] border border-border bg-surface overflow-hidden">
@@ -22,7 +24,9 @@ export const CasingTubingBuilder = ({ kind, title }: { kind: PipeKind; title: st
       </div>
 
       <div className="p-2 flex flex-col gap-2">
-        {rows.map((sec, i) => (
+        {rows.map((sec, i) => {
+          const lengthMissing = touchedLength.has(i) && sec.length.trim() === "";
+          return (
           <div
             key={i}
             className="rounded-[9px] border border-border overflow-hidden"
@@ -95,15 +99,18 @@ export const CasingTubingBuilder = ({ kind, title }: { kind: PipeKind; title: st
                 <span className="text-[12.5px] text-text-dim">Longitud</span>
                 <UnitField
                   unit="ft"
+                  error={lengthMissing}
                   value={sec.length}
                   onChange={(e) =>
                     dispatch({ type: "SET_SECTION_LENGTH", kind, index: i, length: sanitizeNumeric(e.target.value) })
                   }
+                  onBlur={() => setTouchedLength((prev) => new Set(prev).add(i))}
                 />
               </label>
             </div>
           </div>
-        ))}
+          );
+        })}
 
         <button
           onClick={() => dispatch({ type: "ADD_SECTION", kind })}
