@@ -2,6 +2,7 @@ import { DownloadIcon } from "@/components/icons";
 import { Sidebar } from "@/components/explorer/Sidebar";
 import { ExplorerHeader } from "@/components/explorer/ExplorerHeader";
 import { StatCard } from "@/components/explorer/StatCard";
+import { ActiveProjectsStat } from "@/components/explorer/ActiveProjectsStat";
 import { FilterPills } from "@/components/explorer/FilterPills";
 import { ProjectsTable } from "@/components/explorer/ProjectsTable";
 import { NewProjectModal } from "@/components/explorer/NewProjectModal";
@@ -35,7 +36,7 @@ const ExplorerPage = () => {
           </div>
 
           <div className="grid grid-cols-4 gap-[14px] mb-[22px]">
-            <StatCard label="Proyectos activos" value="24" />
+            <ActiveProjectsStat />
             <StatCard label="Pozos en diseño" value="11" />
             <StatCard label="Simulaciones (mes)" value="187" />
             <StatCard label="Sincronizados" value="92%" accent />

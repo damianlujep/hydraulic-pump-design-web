@@ -3,11 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import Skeleton from "react-loading-skeleton";
+import { toast } from "sonner";
 import { ArrowLeftIcon, ArrowRightIcon, PumpIcon, TrashIcon } from "@/components/icons";
 import { useDeleteProject, useProjectList } from "@/lib/api/projects";
 import { EmptyPanel } from "@/components/workspace/atoms/EmptyPanel";
+import { isErrorResponse } from "@/lib/api/errors";
 import { LockStatusBadge } from "./LockStatusBadge";
 import { Modal } from "@/components/Modal";
+import { useExplorerFilters } from "./useExplorerFilters";
 
 type PendingDelete = { id: number; name: string };
 
@@ -17,12 +20,15 @@ const PAGE_SIZE = 20;
 const dateFormatter = new Intl.DateTimeFormat("es", { day: "2-digit", month: "short", year: "numeric" });
 
 export const ProjectsTable = () => {
-  const [page, setPage] = useState(0);
+  const { page, q, setFilters } = useExplorerFilters();
+  const goToPage = (nextPage: number) => setFilters({ page: nextPage });
+
   const { data, isPending, isError, refetch } = useProjectList({
     page,
     size: PAGE_SIZE,
     sort: "-updatedAt",
     scope: "all",
+    q,
   });
   const deleteProject = useDeleteProject();
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
@@ -175,7 +181,7 @@ export const ProjectsTable = () => {
           <div className="flex items-center gap-2">
             <button
               disabled={page === 0}
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              onClick={() => goToPage(Math.max(0, page - 1))}
               className="inline-flex items-center gap-[6px] px-3 py-[6px] rounded-lg border border-border text-text-dim text-[12px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed hover:border-border-strong"
             >
               <ArrowLeftIcon size={13} />
@@ -183,7 +189,7 @@ export const ProjectsTable = () => {
             </button>
             <button
               disabled={page + 1 >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => goToPage(page + 1)}
               className="inline-flex items-center gap-[6px] px-3 py-[6px] rounded-lg border border-border text-text-dim text-[12px] font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed hover:border-border-strong"
             >
               Siguiente
@@ -222,7 +228,9 @@ export const ProjectsTable = () => {
                 type="button"
                 className="inline-flex cursor-pointer items-center gap-2 rounded-[9px] border border-danger bg-danger px-4 py-[9px] text-[12.5px] font-bold text-white shadow-[0_5px_16px_var(--danger-ring)] transition-colors hover:border-danger-hover hover:bg-danger-hover"
                 onClick={() => {
-                  deleteProject.mutate(pendingDelete.id);
+                  deleteProject.mutate(pendingDelete.id, {
+                    onError: (err) => toast.error(isErrorResponse(err) ? err.message : "No se pudo eliminar el proyecto"),
+                  });
                   setPendingDelete(null);
                 }}
               >

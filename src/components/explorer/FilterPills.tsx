@@ -1,6 +1,15 @@
+"use client";
+
+import { useProjectList } from "@/lib/api/projects";
+import { useExplorerFilters } from "./useExplorerFilters";
+
 const FILTERS = ["Todos", "Sincronizados", "Caché local"];
+const PAGE_SIZE = 20;
 
 export const FilterPills = () => {
+  const { page, q } = useExplorerFilters();
+  const { data, isPending } = useProjectList({ page, size: PAGE_SIZE, sort: "-updatedAt", scope: "all", q });
+
   return (
     <div className="flex items-center gap-[10px] mb-3">
       <div className="flex gap-[6px]">
@@ -22,7 +31,11 @@ export const FilterPills = () => {
           )
         )}
       </div>
-      <span className="ml-auto text-[11.5px] text-text-faint font-mono">6 de 24 proyectos</span>
+      {!isPending && data && (
+        <span className="ml-auto text-[11.5px] text-text-faint font-mono">
+          {data.content?.length ?? 0} de {data.totalElements ?? 0} proyectos
+        </span>
+      )}
     </div>
   );
 };

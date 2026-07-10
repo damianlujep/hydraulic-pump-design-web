@@ -1,8 +1,28 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { ChevronDownIcon, LockBadgeIcon, SearchIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "./UserMenu";
+import { useExplorerFilters } from "./useExplorerFilters";
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 export const ExplorerHeader = () => {
+  const { q, setFilters } = useExplorerFilters();
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, []);
+
+  const onSearchChange = (value: string) => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => setFilters({ q: value || null, page: 0 }), SEARCH_DEBOUNCE_MS);
+  };
+
   return (
     <header className="h-[60px] flex-none flex items-center gap-4 px-6 border-b border-border bg-surface">
       <div className="flex items-center gap-[11px] whitespace-nowrap">
@@ -31,6 +51,8 @@ export const ExplorerHeader = () => {
       <div className="flex-1 max-w-[440px] ml-1.5 relative flex items-center">
         <SearchIcon size={15} className="absolute left-[11px] text-text-faint" />
         <input
+          defaultValue={q ?? ""}
+          onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Buscar activos, campos o pozos..."
           className="w-full py-2 pr-3 pl-[34px] bg-surface-2 border border-border rounded-[9px] text-[13px] text-text outline-none focus:border-primary focus:shadow-[0_0_0_2px_var(--primary-ring)]"
         />
