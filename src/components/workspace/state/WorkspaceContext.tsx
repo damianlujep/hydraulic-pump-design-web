@@ -8,11 +8,12 @@ import { createInitialState, workspaceReducer, type WorkspaceAction, type Worksp
 import { completionSchema, fluidsSchema, iprSchema, type CompletionFormValues, type FluidsFormValues, type IprFormValues } from "./schemas";
 import { buildIprRequest, computeIprFingerprint, fromCompletionDto, fromFluidsDto, fromIprDto, fromSurveyDto, toDesignDataDto } from "./designData";
 import { useEditLock } from "./useEditLock";
-import { useSaveDesignData, type ProjectResponse } from "@/lib/api/projects";
+import { useSaveDesignData, useUpdateProjectMetadata, type ProjectResponse } from "@/lib/api/projects";
 import { useCalculateIpr } from "@/lib/api/calculations";
 import type { TubularItem } from "@/lib/api/casings";
 import { isErrorResponse } from "@/lib/api/errors";
 import type { LockView, StepDoneMap } from "@/interfaces/workspace";
+import { toNewProjectInfoDto, type ProjectInfoFormValues } from "@/lib/validation/projectInfo";
 
 type WorkspaceContextValue = {
   state: WorkspaceState;
@@ -26,6 +27,10 @@ type WorkspaceContextValue = {
   casings: TubularItem[];
   tubings: TubularItem[];
   projectName: string;
+  visibility: ProjectResponse["visibility"];
+  isOwner: boolean;
+  saveProjectInfo: (input: ProjectInfoFormValues) => Promise<void>;
+  savingProjectInfo: boolean;
   forms: {
     completion: UseFormReturn<CompletionFormValues>;
     fluids: UseFormReturn<FluidsFormValues>;
@@ -125,6 +130,7 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
   const savingRef = useRef(false);
   const pendingRef = useRef(false);
   const lastSavedPayloadRef = useRef<string | null>(null);
+  const inFlightSaveRef = useRef<Promise<unknown> | null>(null);
 
   const flushSave = () => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -157,29 +163,30 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
 
     savingRef.current = true;
     dispatch({ type: "SAVE_STARTED" });
-    saveDesignData.mutate(
-      { designData: payload, version: state.version },
-      {
-        onSuccess: (fresh) => {
-          savingRef.current = false;
-          lastSavedPayloadRef.current = serialized;
-          dispatch({ type: "SAVE_SUCCESS", version: fresh.version ?? state.version, revision: revisionAtSave });
-          if (pendingRef.current) {
-            pendingRef.current = false;
-            flushSave();
-          }
-        },
-        onError: (err) => {
-          savingRef.current = false;
-          if (isErrorResponse(err) && err.code === "VERSION_CONFLICT") {
-            dispatch({ type: "SAVE_CONFLICT" });
-          } else {
-            dispatch({ type: "SAVE_ERROR" });
-            toast.error("No se pudo guardar los cambios");
-          }
-        },
-      },
-    );
+    const settled = saveDesignData
+      .mutateAsync({ designData: payload, version: state.version })
+      .then((fresh) => {
+        savingRef.current = false;
+        lastSavedPayloadRef.current = serialized;
+        dispatch({ type: "SAVE_SUCCESS", version: fresh.version ?? state.version, revision: revisionAtSave });
+        if (pendingRef.current) {
+          pendingRef.current = false;
+          flushSave();
+        }
+      })
+      .catch((err: unknown) => {
+        savingRef.current = false;
+        if (isErrorResponse(err) && err.code === "VERSION_CONFLICT") {
+          dispatch({ type: "SAVE_CONFLICT" });
+        } else {
+          dispatch({ type: "SAVE_ERROR" });
+          toast.error("No se pudo guardar los cambios");
+        }
+      })
+      .finally(() => {
+        if (inFlightSaveRef.current === settled) inFlightSaveRef.current = null;
+      });
+    inFlightSaveRef.current = settled;
   };
 
   useEffect(() => {
@@ -269,7 +276,27 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
     });
   };
 
+  const updateMetadata = useUpdateProjectMetadata(projectId);
+  const saveProjectInfo = async (input: ProjectInfoFormValues) => {
+    const metadataChanged = input.name !== projectName || input.visibility !== project.visibility;
+    if (metadataChanged) {
+      if (inFlightSaveRef.current) await inFlightSaveRef.current;
+      savingRef.current = true;
+      try {
+        const fresh = await updateMetadata.mutateAsync({ name: input.name, visibility: input.visibility });
+        dispatch({ type: "METADATA_SAVED", version: fresh.version ?? state.version });
+      } finally {
+        savingRef.current = false;
+      }
+    }
+    const nextInfo = toNewProjectInfoDto(input.name, input);
+    if (JSON.stringify(nextInfo) !== JSON.stringify(state.newProjectInfo?.data)) {
+      dispatch({ type: "SET_PROJECT_INFO", data: nextInfo });
+    }
+  };
+
   const projectName = project.name ?? "";
+  const isOwner = project.myPermission === "OWNER";
 
   return (
     <WorkspaceContext.Provider
@@ -285,6 +312,10 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
         casings,
         tubings,
         projectName,
+        visibility: project.visibility,
+        isOwner,
+        saveProjectInfo,
+        savingProjectInfo: updateMetadata.isPending,
         forms: { completion: completionForm, fluids: fluidsForm, ipr: iprForm },
         requestReload: onReloadRequested,
         dismissConflict: () => dispatch({ type: "DISMISS_CONFLICT" }),

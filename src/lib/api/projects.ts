@@ -11,6 +11,8 @@ export type ProjectPage = components["schemas"]["PageResponseProjectSummaryRespo
 export type DesignDataDto = components["schemas"]["DesignDataDto"];
 export type UpdateDesignDataRequest = components["schemas"]["UpdateDesignDataRequest"];
 export type LockStatusResponse = components["schemas"]["LockStatusResponse"];
+export type UpdateProjectMetadataRequest = components["schemas"]["UpdateProjectMetadataRequest"];
+export type NewProjectInfoDto = components["schemas"]["NewProjectInfoDto"];
 
 export const useProjectList = (params: ProjectListParams) => {
   return useQuery({
@@ -80,6 +82,30 @@ export const useSaveDesignData = (id: number) => {
     onSuccess: (fresh) => {
       qc.setQueryData(queryKeys.projects.detail(id), fresh);
       void qc.invalidateQueries({ queryKey: queryKeys.projects.all });
+    },
+  });
+};
+
+export const useUpdateProjectMetadata = (id: number) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: UpdateProjectMetadataRequest): Promise<ProjectResponse> => {
+      const res = await apiFetch(`/api/projects/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err: unknown = await res.json().catch(() => ({}));
+        throw err;
+      }
+      return res.json();
+    },
+    onSuccess: (fresh) => {
+      // Seed the detail cache directly (it's already fresh) and only invalidate the list —
+      // invalidating `projects.all` would immediately re-fetch the detail entry we just set.
+      qc.setQueryData(queryKeys.projects.detail(id), fresh);
+      void qc.invalidateQueries({ queryKey: ["projects", "list"] });
     },
   });
 };

@@ -1,5 +1,5 @@
 import type { CalcStatus, PipeKind, PipeSection, SaveStatus, SizeModalState, SurveyRow, TabId } from "@/interfaces/workspace";
-import type { DesignDataDto } from "@/lib/api/projects";
+import type { DesignDataDto, NewProjectInfoDto } from "@/lib/api/projects";
 import type { IprCalculationResponse } from "@/lib/api/calculations";
 
 export type WorkspaceState = {
@@ -39,7 +39,9 @@ export type WorkspaceAction =
   | { type: "SAVE_SUCCESS"; version: number; revision: number }
   | { type: "SAVE_ERROR" }
   | { type: "SAVE_CONFLICT" }
-  | { type: "DISMISS_CONFLICT" };
+  | { type: "DISMISS_CONFLICT" }
+  | { type: "METADATA_SAVED"; version: number }
+  | { type: "SET_PROJECT_INFO"; data: NewProjectInfoDto };
 
 // Actions that mutate persistable document data — they bump `revision` and mark the project dirty
 // so the autosave effect (keyed on `revision`) picks them up. Field edits inside the RHF-controlled
@@ -52,6 +54,7 @@ const DATA_ACTIONS = new Set<WorkspaceAction["type"]>([
   "SET_SECTION_LENGTH",
   "MARK_DIRTY",
   "CALC_SUCCESS",
+  "SET_PROJECT_INFO",
 ]);
 
 export const createInitialState = (input: {
@@ -133,6 +136,10 @@ const applyAction = (state: WorkspaceState, action: WorkspaceAction): WorkspaceS
       return { ...state, saveStatus: "conflict" };
     case "DISMISS_CONFLICT":
       return { ...state, saveStatus: "dirty" };
+    case "METADATA_SAVED":
+      return { ...state, version: action.version };
+    case "SET_PROJECT_INFO":
+      return { ...state, newProjectInfo: { dataEntered: true, data: action.data } };
     default:
       return state;
   }

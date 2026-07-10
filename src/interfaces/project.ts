@@ -1,3 +1,5 @@
+export type ProjectVisibility = "PRIVATE" | "ORGANIZATION";
+
 export type ProjectListParams = {
   page: number;
   size: number;

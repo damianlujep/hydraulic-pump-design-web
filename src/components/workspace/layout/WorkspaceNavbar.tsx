@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeftIcon, PumpIcon, SpinnerIcon } from "@/components/icons";
+import { ArrowLeftIcon, PencilIcon, PumpIcon, SpinnerIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/explorer/UserMenu";
 import { useWorkspace } from "../state/WorkspaceContext";
+import { ProjectMetadataModal } from "../modals/ProjectMetadataModal";
 
 const SaveStatusBadge = () => {
   const { state, canEdit } = useWorkspace();
@@ -53,7 +55,8 @@ const SaveStatusBadge = () => {
 
 export const WorkspaceNavbar = () => {
   const router = useRouter();
-  const { state, projectName } = useWorkspace();
+  const { state, projectName, isOwner, canEdit } = useWorkspace();
+  const [editOpen, setEditOpen] = useState(false);
   const info = state.newProjectInfo?.data;
   const subtitleParts = [
     info?.wellName ? `Pozo Activo: ${info.wellName}` : null,
@@ -76,7 +79,19 @@ export const WorkspaceNavbar = () => {
           <PumpIcon size={16} strokeWidth={1.9} />
         </div>
         <div className="leading-[1.3]">
-          <div className="text-sm font-bold tracking-[-.01em]">{projectName}</div>
+          <div className="flex items-center gap-[7px]">
+            <div className="text-sm font-bold tracking-[-.01em]">{projectName}</div>
+            {isOwner && canEdit && (
+              <button
+                title="Editar información del proyecto"
+                aria-label="Editar información del proyecto"
+                onClick={() => setEditOpen(true)}
+                className="text-text-faint cursor-pointer hover:text-text"
+              >
+                <PencilIcon size={13} />
+              </button>
+            )}
+          </div>
           {subtitleParts.length > 0 && (
             <div className="text-[11px] text-text-dim font-mono">{subtitleParts.join(" · ")}</div>
           )}
@@ -89,6 +104,7 @@ export const WorkspaceNavbar = () => {
         <div className="w-px h-6 bg-border" />
         <UserMenu />
       </div>
+      {editOpen && <ProjectMetadataModal onClose={() => setEditOpen(false)} />}
     </header>
   );
 };
