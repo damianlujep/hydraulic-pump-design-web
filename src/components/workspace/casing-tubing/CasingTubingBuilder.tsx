@@ -101,9 +101,14 @@ export const CasingTubingBuilder = ({ kind, title }: { kind: PipeKind; title: st
                   unit="ft"
                   error={lengthMissing}
                   value={sec.length}
-                  onChange={(e) =>
-                    dispatch({ type: "SET_SECTION_LENGTH", kind, index: i, length: sanitizeNumeric(e.target.value) })
-                  }
+                  onChange={(e) => {
+                    const sanitized = sanitizeNumeric(e.target.value);
+                    // Controlled input: force the DOM back in sync even when we skip the dispatch
+                    // below, since a same-value dispatch wouldn't trigger a re-render to do it for us.
+                    if (sanitized !== e.target.value) e.target.value = sanitized;
+                    if (sanitized === sec.length) return;
+                    dispatch({ type: "SET_SECTION_LENGTH", kind, index: i, length: sanitized });
+                  }}
                   onBlur={() => setTouchedLength((prev) => new Set(prev).add(i))}
                 />
               </label>

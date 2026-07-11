@@ -23,6 +23,7 @@ export const registerNumeric = <T extends FieldValues>(form: UseFormReturn<T>, n
     onChange: (e: ChangeEvent<HTMLInputElement>) => {
       const sanitized = sanitizeNumeric(e.target.value);
       if (sanitized !== e.target.value) e.target.value = sanitized;
+      if (sanitized === form.getValues(name)) return;
       return field.onChange(e);
     },
   };

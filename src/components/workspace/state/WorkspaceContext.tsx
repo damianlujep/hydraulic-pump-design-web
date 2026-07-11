@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useReducer, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useReducer, useRef } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -146,7 +146,29 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
   const maxWaitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
   const pendingRef = useRef(false);
+
+  const buildCurrentPayload = () =>
+    toDesignDataDto({
+      completion: completionForm.getValues(),
+      fluids: fluidsForm.getValues(),
+      ipr: iprForm.getValues(),
+      casingSections: state.casing,
+      tubingSections: state.tubing,
+      survey: state.survey,
+      casings,
+      tubings,
+      newProjectInfo: state.newProjectInfo,
+      iprResult: state.iprResult,
+      stepDone,
+    });
+
   const lastSavedPayloadRef = useRef<string | null>(null);
+  // Lazy-init on first render only, seeded with the hydrated payload (not null) so a no-op revision
+  // bump before the first real save (e.g. a rejected keystroke, or toggling the non-persisted
+  // correlation select) dedupes into SAVE_NOOP instead of firing a real PUT of unchanged data.
+  if (lastSavedPayloadRef.current === null) {
+    lastSavedPayloadRef.current = JSON.stringify(buildCurrentPayload());
+  }
   const inFlightSaveRef = useRef<Promise<unknown> | null>(null);
 
   const flushSave = () => {
@@ -162,19 +184,7 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
     }
 
     const revisionAtSave = state.revision;
-    const payload = toDesignDataDto({
-      completion: completionForm.getValues(),
-      fluids: fluidsForm.getValues(),
-      ipr: iprForm.getValues(),
-      casingSections: state.casing,
-      tubingSections: state.tubing,
-      survey: state.survey,
-      casings,
-      tubings,
-      newProjectInfo: state.newProjectInfo,
-      iprResult: state.iprResult,
-      stepDone,
-    });
+    const payload = buildCurrentPayload();
     const serialized = JSON.stringify(payload);
     if (serialized === lastSavedPayloadRef.current) {
       // Nothing to persist (e.g. only the ephemeral correlation select changed), but revision was
@@ -228,19 +238,7 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
   useEffect(() => {
     const onPageHide = () => {
       if (state.saveStatus === "dirty" && canEdit && projectId) {
-        const payload = toDesignDataDto({
-          completion: completionForm.getValues(),
-          fluids: fluidsForm.getValues(),
-          ipr: iprForm.getValues(),
-          casingSections: state.casing,
-          tubingSections: state.tubing,
-          survey: state.survey,
-          casings,
-          tubings,
-          newProjectInfo: state.newProjectInfo,
-          iprResult: state.iprResult,
-          stepDone,
-        });
+        const payload = buildCurrentPayload();
         void fetch(`/api/projects/${projectId}/design-data`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
