@@ -8,24 +8,6 @@ import { PvtChart } from "../canvas/PvtChart";
 import { ChartStats } from "../canvas/ChartStats";
 import { useWorkspace } from "../state/WorkspaceContext";
 
-const LegendDot = ({ color, label }: { color: string; label: string }) => {
-  return (
-    <span className="inline-flex items-center gap-[6px] text-[11px] text-text-dim">
-      <span className="w-[9px] h-[9px] rounded-full" style={{ background: color }} />
-      {label}
-    </span>
-  );
-};
-
-const LegendLine = ({ color, label }: { color: string; label: string }) => {
-  return (
-    <span className="inline-flex items-center gap-[6px] text-[11px] text-text-dim">
-      <span className="w-[14px] h-[3px] rounded-[2px]" style={{ background: color }} />
-      {label}
-    </span>
-  );
-};
-
 export const WorkspaceRightCanvas = () => {
   const { state, dispatch, iprStale, stepDone, forms, iprValues, fluidsValues } = useWorkspace();
 
@@ -35,13 +17,7 @@ export const WorkspaceRightCanvas = () => {
         <>
           <SurveyTable />
           <div className="bg-surface border border-border rounded-card p-[14px_16px_12px]">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-[13px] font-bold tracking-[-.01em]">Trayectoria y Desviación del Pozo</div>
-              <div className="flex gap-[14px]">
-                <LegendDot color="var(--data-blue)" label="Ángulo (°)" />
-                <LegendDot color="var(--data-green)" label="Trayectoria MD/HD" />
-              </div>
-            </div>
+            <div className="text-[13px] font-bold tracking-[-.01em] mb-2">Trayectoria y Desviación del Pozo</div>
             <TrajectoryChart rows={state.survey} />
           </div>
         </>
@@ -83,9 +59,9 @@ export const WorkspaceRightCanvas = () => {
     const result = state.iprResult;
     const stats = result
       ? [
-          { label: "Ps", value: iprValues.reservoirPressure, unit: "psi" },
+          { label: "Ps", value: iprValues.reservoirPressure, unit: "psi", color: "var(--data-orange)" },
           { label: "Pwf", value: iprValues.flowingBottomholePressure, unit: "psi" },
-          { label: "Pb", value: fluidsValues.bubblePointPressure, unit: "psi", color: "var(--data-orange)" },
+          { label: "Pb", value: fluidsValues.bubblePointPressure, unit: "psi", color: "var(--danger)" },
           { label: "Qmáx", value: (result.absoluteOpenFlow ?? 0).toFixed(0), unit: "bfpd" },
           { label: "PI (J)", value: (result.productivityIndex ?? 0).toFixed(2), unit: "bfpd/psi" },
           ...(result.correlation === "FETKOVICH" && result.fetkovichExponent != null
@@ -97,7 +73,7 @@ export const WorkspaceRightCanvas = () => {
                   label: "Pwf diseño",
                   value: (result.designPoint.requiredFlowingBottomholePressure ?? 0).toFixed(0),
                   unit: "psi",
-                  color: "var(--data-green)",
+                  color: "var(--amber)",
                 },
                 { label: "Q diseño", value: (result.designPoint.totalFlowRate ?? 0).toFixed(0), unit: "bfpd" },
                 { label: "Qo diseño", value: (result.designPoint.oilFlowRate ?? 0).toFixed(0), unit: "STB/d" },
@@ -108,20 +84,16 @@ export const WorkspaceRightCanvas = () => {
 
     return (
       <div className="bg-surface border border-border rounded-card p-[14px_16px_12px] my-auto">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-[10px]">
-            <div className="text-[13px] font-bold tracking-[-.01em]">Curva de Rendimiento IPR</div>
-            {iprStale && result && (
-              <span className="px-[8px] py-[2px] rounded-full bg-amber-soft text-amber text-[10.5px] font-semibold">
-                Resultado desactualizado
-              </span>
-            )}
+        <div className="flex items-center gap-[10px] mb-2">
+          <div className="text-[13px] font-bold tracking-[-.01em]">
+            Curva de Rendimiento IPR
+            {result && ` — ${result.correlation === "FETKOVICH" ? "Fetkovich" : "Vogel"}`}
           </div>
-          <div className="flex gap-[14px]">
-            <LegendLine color="var(--data-blue)" label="Ps estática" />
-            <LegendLine color="var(--data-orange)" label={result?.correlation === "FETKOVICH" ? "IPR (Fetkovich)" : "IPR (Vogel)"} />
-            {result?.designPoint && <LegendDot color="var(--data-green)" label="Punto de diseño" />}
-          </div>
+          {iprStale && result && (
+            <span className="px-[8px] py-[2px] rounded-full bg-amber-soft text-amber text-[10.5px] font-semibold">
+              Resultado desactualizado
+            </span>
+          )}
         </div>
         {result ? (
           <>
@@ -147,23 +119,16 @@ export const WorkspaceRightCanvas = () => {
   if (state.activeTab === "fluids") {
     return (
       <div className="bg-surface border border-border rounded-card p-[14px_16px_12px] my-auto">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-[10px]">
-            <div className="text-[13px] font-bold tracking-[-.01em]">Propiedades PVT vs Presión</div>
-            <span className="text-[11px] text-text-faint font-mono">aceite negro</span>
-          </div>
-          <div className="flex gap-[14px] flex-wrap">
-            <LegendLine color="var(--data-blue)" label="Bo" />
-            <LegendLine color="var(--data-orange)" label="Rs" />
-            <LegendLine color="var(--data-green)" label="μo" />
-          </div>
+        <div className="flex items-center gap-[10px] mb-2">
+          <div className="text-[13px] font-bold tracking-[-.01em]">Propiedades PVT vs Presión</div>
+          <span className="text-[11px] text-text-faint font-mono">aceite negro</span>
         </div>
         {stepDone.fluids ? (
           <>
             <PvtChart />
             <ChartStats
               stats={[
-                { label: "Pb", value: "520", unit: "psi", color: "var(--data-orange)" },
+                { label: "Pb", value: "520", unit: "psi", color: "var(--danger)" },
                 { label: "Bo @ Pb", value: "1.284", unit: "rb/stb", color: "var(--data-blue)" },
                 { label: "Rs @ Pb", value: "385", unit: "scf/stb", color: "var(--data-orange)" },
                 { label: "μo @ Pb", value: "1.92", unit: "cp", color: "var(--data-green)" },

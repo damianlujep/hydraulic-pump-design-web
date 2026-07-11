@@ -1,75 +1,98 @@
-const W = 560;
-const H = 336;
-const M_L = 52;
-const M_R = 30;
-const M_T = 20;
-const M_B = 46;
-const PW = W - M_L - M_R;
-const PH = H - M_T - M_B;
+"use client";
+
+import { useMemo } from "react";
+import { EChart } from "@/components/charts/EChart";
+import { echarts } from "@/components/charts/echarts";
+import type { EChartsOption } from "@/components/charts/echarts";
+import { useChartPalette } from "@/components/charts/useChartPalette";
+import type { ChartPalette } from "@/components/charts/useChartPalette";
+import { fmt, buildLabelStyle, buildAxisStyle, buildGridConfig, buildTooltipBase, buildLegendConfig } from "@/components/charts/chartOptions";
+import type { TooltipParam } from "@/components/charts/chartOptions";
+import { MarkLineComponent, DataZoomComponent } from "echarts/components";
+import type { ComposeOption } from "echarts/core";
+import type { MarkLineComponentOption, DataZoomComponentOption } from "echarts/components";
+
+// Registered here, not in the shared `echarts.ts` — this chart only needs the Pb reference
+// line and zoom; see IprChart.tsx for the same per-chart registration rationale.
+echarts.use([MarkLineComponent, DataZoomComponent]);
+
+type PvtEChartsOption = EChartsOption & ComposeOption<MarkLineComponentOption | DataZoomComponentOption>;
+
 const P_MAX = 3000;
 const PB = 520;
+const STEP = 50;
 
-const X = (p: number) => M_L + (p / P_MAX) * PW;
-const Y = (v: number) => M_T + (1 - v) * PH;
-
+// Synthetic demo shape functions — no backend PVT endpoint exists yet (see docs-user/refactor-roadmap.md).
+// Normalized (0–1): Bo peaks at Pb then declines, Rs rises to 1 at Pb then flattens, μo troughs at Pb then rises.
 const rs = (p: number) => (p < PB ? 0.06 + 0.94 * (p / PB) : 1);
 const bo = (p: number) => (p < PB ? 0.42 + 0.58 * (p / PB) : 1 - 0.14 * ((p - PB) / (P_MAX - PB)));
 const mu = (p: number) => (p < PB ? 1 - 0.72 * (p / PB) : 0.28 + 0.24 * ((p - PB) / (P_MAX - PB)));
 
-const series = (f: (p: number) => number) => {
-  const pts: string[] = [];
-  for (let p = 0; p <= P_MAX; p += 50) pts.push(`${X(p)},${Y(f(p))}`);
-  return pts.join(" ");
+// Data is a fixed synthetic curve — sample once at module scope, not on every render.
+const samplePressures = Array.from({ length: P_MAX / STEP + 1 }, (_, i) => i * STEP);
+const sample = (f: (p: number) => number): [number, number][] => samplePressures.map((p) => [p, f(p)]);
+const boData = sample(bo);
+const rsData = sample(rs);
+const muData = sample(mu);
+
+// Doesn't depend on the palette — a single module-scope instance rather than one per theme toggle.
+const pvtTooltipFormatter = (params: TooltipParam | TooltipParam[]) => {
+  const first = Array.isArray(params) ? params[0] : params;
+  const i = first?.dataIndex;
+  if (i == null) return "";
+  return [
+    `Presión: <b>${fmt(boData[i][0], 0)}</b> psi`,
+    `Bo: <b>${fmt(boData[i][1])}</b> rb/stb (norm.)`,
+    `Rs: <b>${fmt(rsData[i][1])}</b> scf/stb (norm.)`,
+    `μo: <b>${fmt(muData[i][1])}</b> cp (norm.)`,
+  ].join("<br/>");
 };
 
-const P_TICKS = [0, 750, 1500, 2250, 3000];
-const V_TICKS = [0, 0.25, 0.5, 0.75, 1];
+const buildPvtOption = (c: ChartPalette): PvtEChartsOption => {
+  const axisStyle = buildAxisStyle(c);
+
+  return {
+    animation: false,
+    legend: buildLegendConfig(c),
+    grid: buildGridConfig(c),
+    tooltip: { ...buildTooltipBase(c), formatter: pvtTooltipFormatter },
+    // minValueSpan floors how far a user can zoom in — see IprChart.tsx for the same guard.
+    dataZoom: [
+      { type: "inside", xAxisIndex: 0, filterMode: "none", minValueSpan: P_MAX * 0.05 },
+      { type: "inside", yAxisIndex: 0, filterMode: "none", minValueSpan: 0.05 },
+    ],
+    xAxis: { type: "value", min: 0, max: P_MAX, name: "Presión (psi)", nameLocation: "middle", nameGap: 28, ...axisStyle },
+    yAxis: { type: "value", min: 0, max: 1, name: "Propiedad (norm.)", nameLocation: "middle", nameGap: 46, ...axisStyle },
+    series: [
+      {
+        name: "Bo — factor volumétrico",
+        type: "line",
+        data: boData,
+        showSymbol: false,
+        lineStyle: { width: 2.4, color: c.dataBlue },
+        itemStyle: { color: c.dataBlue },
+        markLine: {
+          silent: true,
+          symbol: "none",
+          animation: false,
+          data: [
+            {
+              xAxis: PB,
+              lineStyle: { color: c.danger, type: "dashed" as const, width: 1.5 },
+              label: { ...buildLabelStyle(c), formatter: `Pb ${fmt(PB, 0)} psi`, position: "insideEndTop" as const, color: c.danger },
+            },
+          ],
+        },
+      },
+      { name: "Rs — gas disuelto", type: "line", data: rsData, showSymbol: false, lineStyle: { width: 2, color: c.dataOrange }, itemStyle: { color: c.dataOrange } },
+      { name: "μo — viscosidad", type: "line", data: muData, showSymbol: false, lineStyle: { width: 2, color: c.dataGreen }, itemStyle: { color: c.dataGreen } },
+    ],
+  };
+};
 
 export const PvtChart = () => {
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block" }}>
-      <rect x={M_L} y={M_T} width={PW} height={PH} fill="var(--chart-plot)" stroke="var(--border)" />
+  const palette = useChartPalette();
+  const option = useMemo(() => (palette ? buildPvtOption(palette) : null), [palette]);
 
-      {P_TICKS.map((p) => (
-        <g key={`p-${p}`}>
-          <line x1={X(p)} y1={M_T} x2={X(p)} y2={M_T + PH} stroke="var(--grid)" strokeWidth={1} />
-          <text x={X(p)} y={M_T + PH + 15} textAnchor="middle" fontSize={9} fill="var(--text-dim)" fontFamily="IBM Plex Mono">
-            {p}
-          </text>
-        </g>
-      ))}
-
-      {V_TICKS.map((v) => (
-        <g key={`v-${v}`}>
-          <line x1={M_L} y1={Y(v)} x2={M_L + PW} y2={Y(v)} stroke="var(--grid)" strokeWidth={1} />
-          <text x={M_L - 8} y={Y(v) + 3} textAnchor="end" fontSize={9} fill="var(--text-dim)" fontFamily="IBM Plex Mono">
-            {v.toFixed(2)}
-          </text>
-        </g>
-      ))}
-
-      <line x1={X(PB)} y1={M_T} x2={X(PB)} y2={M_T + PH} stroke="var(--data-orange)" strokeWidth={1} strokeDasharray="3 3" opacity={0.6} />
-      <text x={X(PB) + 6} y={M_T + 12} fontSize={11} fontWeight={600} fill="var(--data-orange)" fontFamily="IBM Plex Mono">
-        Pb
-      </text>
-
-      <polyline points={series(bo)} fill="none" stroke="var(--data-blue)" strokeWidth={2.4} strokeLinejoin="round" />
-      <polyline points={series(rs)} fill="none" stroke="var(--data-orange)" strokeWidth={2.4} strokeLinejoin="round" />
-      <polyline points={series(mu)} fill="none" stroke="var(--data-green)" strokeWidth={2.4} strokeLinejoin="round" />
-
-      <text x={M_L + PW / 2} y={H - 6} textAnchor="middle" fontSize={10} fill="var(--text-dim)">
-        Presión (psi)
-      </text>
-      <text
-        x={13}
-        y={M_T + PH / 2}
-        textAnchor="middle"
-        fontSize={10}
-        fill="var(--text-dim)"
-        transform={`rotate(-90 13 ${M_T + PH / 2})`}
-      >
-        Propiedad (norm.)
-      </text>
-    </svg>
-  );
+  return <EChart<PvtEChartsOption> option={option} className="w-full aspect-[5/3]" />;
 };

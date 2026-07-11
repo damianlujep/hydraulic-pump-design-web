@@ -503,7 +503,7 @@ export const buildIprRequest = (ipr: IprFormValues, fluids: FluidsFormValues, pa
       waterCut: validation.waterCut,
       correlation: ipr.correlation,
       testPoints: validation.testPoints,
-      curvePointCount: 40,
+      curvePointCount: 101,
       ...(validation.desiredOilRate !== undefined ? { desiredOilRate: validation.desiredOilRate } : {}),
     },
     fingerprint: computeIprFingerprint({

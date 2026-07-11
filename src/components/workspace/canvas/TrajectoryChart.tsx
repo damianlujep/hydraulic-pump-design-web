@@ -1,99 +1,99 @@
-import type { SurveyRow } from "@/interfaces/workspace";
-import { buildTicks, niceMax } from "./chartScale";
+"use client";
 
-const W = 560;
-const H = 388;
-const M_L = 58;
-const M_R = 30;
-const M_T = 52;
-const M_B = 46;
-const PW = W - M_L - M_R;
-const PH = H - M_T - M_B;
-const TICK_COUNT = 7;
+import { useMemo } from "react";
+import type { SurveyRow } from "@/interfaces/workspace";
+import { EChart } from "@/components/charts/EChart";
+import { echarts } from "@/components/charts/echarts";
+import type { EChartsOption } from "@/components/charts/echarts";
+import { useChartPalette } from "@/components/charts/useChartPalette";
+import type { ChartPalette } from "@/components/charts/useChartPalette";
+import { fmt, buildAxisStyle, buildGridConfig, buildTooltipBase, buildLegendConfig } from "@/components/charts/chartOptions";
+import type { TooltipParam } from "@/components/charts/chartOptions";
+import { DataZoomComponent } from "echarts/components";
+import type { ComposeOption } from "echarts/core";
+import type { DataZoomComponentOption } from "echarts/components";
+
+// Registered here, not in the shared `echarts.ts` — this chart only needs zoom; see
+// IprChart.tsx for the same per-chart registration rationale.
+echarts.use([DataZoomComponent]);
+
+type TrajectoryEChartsOption = EChartsOption & ComposeOption<DataZoomComponentOption>;
+
+const buildTrajectoryOption = (rows: SurveyRow[], c: ChartPalette): TrajectoryEChartsOption => {
+  const axisStyle = buildAxisStyle(c);
+
+  // Single pass building both series' [x, y] tuples — same shape as IprChart's Qt/Qo loop.
+  let maxTvd = 1;
+  const angleData: number[][] = [];
+  const hdData: number[][] = [];
+  for (const r of rows) {
+    if (r.tvd > maxTvd) maxTvd = r.tvd;
+    angleData.push([r.angle, r.tvd]);
+    hdData.push([r.hd, r.tvd]);
+  }
+
+  return {
+    animation: false,
+    legend: buildLegendConfig(c),
+    grid: { ...buildGridConfig(c), top: 70 },
+    tooltip: {
+      ...buildTooltipBase(c),
+      // A single horizontal read-line tied to TVD (depth) — the two series live on independent
+      // X scales (angle, horizontal displacement), so a vertical crosshair would be ambiguous.
+      axisPointer: { type: "line", axis: "y", lineStyle: { color: c.textFaint } },
+      formatter: (params: TooltipParam | TooltipParam[]) => {
+        const first = Array.isArray(params) ? params[0] : params;
+        const row = first ? rows[first.dataIndex] : undefined;
+        if (!row) return "";
+        return [
+          `MD: <b>${fmt(row.md, 0)}</b> ft`,
+          `TVD: <b>${fmt(row.tvd, 0)}</b> ft`,
+          `Ángulo: <b>${fmt(row.angle, 1)}</b> °`,
+          `HD: <b>${fmt(row.hd, 0)}</b> ft`,
+        ].join("<br/>");
+      },
+    },
+    // Y-axis (depth) zoom only — the two X axes have unrelated units (degrees vs. feet), so a
+    // shared percentage-window zoom across both would clip each series to a different depth
+    // section and show two curves that no longer correspond to the same interval of the well.
+    // minValueSpan floors the zoom depth — without it, zooming past a few percent of the well's
+    // total depth collapses both series onto a near-flat line (a real, previously-seen render bug).
+    dataZoom: [{ type: "inside", yAxisIndex: 0, filterMode: "none", minValueSpan: maxTvd * 0.05 }],
+    xAxis: [
+      { type: "value", min: 0, position: "bottom", name: "Ángulo de inclinación (°)", nameLocation: "middle", nameGap: 28, ...axisStyle },
+      { type: "value", min: 0, position: "top", name: "Desplazamiento horizontal, HD (ft)", nameLocation: "middle", nameGap: 28, ...axisStyle },
+    ],
+    yAxis: { type: "value", min: 0, inverse: true, name: "TVD (ft)", nameLocation: "middle", nameGap: 46, ...axisStyle },
+    series: [
+      {
+        name: "Ángulo (°)",
+        type: "line",
+        xAxisIndex: 0,
+        data: angleData,
+        showSymbol: true,
+        symbolSize: 5,
+        lineStyle: { width: 2, color: c.dataBlue },
+        itemStyle: { color: c.dataBlue },
+      },
+      {
+        name: "Trayectoria MD/HD",
+        type: "line",
+        xAxisIndex: 1,
+        data: hdData,
+        showSymbol: true,
+        symbolSize: 5,
+        lineStyle: { width: 2, color: c.dataGreen },
+        itemStyle: { color: c.dataGreen },
+      },
+    ],
+  };
+};
 
 export const TrajectoryChart = ({ rows }: { rows: SurveyRow[] }) => {
+  const palette = useChartPalette();
+  const option = useMemo(() => (palette ? buildTrajectoryOption(rows, palette) : null), [rows, palette]);
+
   if (rows.length === 0) return null;
 
-  const tvdMax = niceMax(Math.max(...rows.map((r) => r.tvd)));
-  const angMax = niceMax(Math.max(...rows.map((r) => r.angle)));
-  const hdMax = niceMax(Math.max(...rows.map((r) => r.hd)));
-
-  const xA = (a: number) => M_L + (a / angMax) * PW;
-  const xH = (h: number) => M_L + (h / hdMax) * PW;
-  const y = (v: number) => M_T + (v / tvdMax) * PH;
-
-  const tvdTicks = buildTicks(tvdMax, TICK_COUNT);
-  const angTicks = buildTicks(angMax, 6);
-  const hdTicks = buildTicks(hdMax, 6);
-
-  const greenPoints = rows.map((d) => `${xH(d.hd)},${y(d.tvd)}`).join(" ");
-  const bluePoints = rows.map((d) => `${xA(d.angle)},${y(d.tvd)}`).join(" ");
-
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block" }}>
-      <rect x={M_L} y={M_T} width={PW} height={PH} fill="var(--chart-plot)" stroke="var(--border)" />
-
-      {tvdTicks.map((t) => (
-        <g key={`tvd-${t}`}>
-          <line x1={M_L} y1={y(t)} x2={M_L + PW} y2={y(t)} stroke="var(--grid)" strokeWidth={1} />
-          <text x={M_L - 8} y={y(t) + 3} textAnchor="end" fontSize={9} fill="var(--text-dim)" fontFamily="IBM Plex Mono">
-            {t}
-          </text>
-          <text x={M_L + PW + 8} y={y(t) + 3} fontSize={9} fill="var(--text-dim)" fontFamily="IBM Plex Mono">
-            {t}
-          </text>
-        </g>
-      ))}
-
-      {angTicks.map((a) => (
-        <g key={`ang-${a}`}>
-          <line x1={xA(a)} y1={M_T} x2={xA(a)} y2={M_T + PH} stroke="var(--grid)" strokeWidth={1} />
-          <text x={xA(a)} y={M_T + PH + 15} textAnchor="middle" fontSize={9} fill="var(--text-dim)" fontFamily="IBM Plex Mono">
-            {a}
-          </text>
-        </g>
-      ))}
-
-      {hdTicks.map((h) => (
-        <text
-          key={`hd-${h}`}
-          x={xH(h)}
-          y={M_T - 9}
-          textAnchor="middle"
-          fontSize={8.5}
-          fill="var(--text-faint)"
-          fontFamily="IBM Plex Mono"
-        >
-          {h}
-        </text>
-      ))}
-
-      <polyline points={greenPoints} fill="none" stroke="var(--data-green)" strokeWidth={2} />
-      <polyline points={bluePoints} fill="none" stroke="var(--data-blue)" strokeWidth={2} />
-
-      {rows.map((d, i) => (
-        <g key={`pt-${i}`}>
-          <circle cx={xH(d.hd)} cy={y(d.tvd)} r={2.4} fill="var(--data-green)" />
-          <circle cx={xA(d.angle)} cy={y(d.tvd)} r={2.4} fill="var(--data-blue)" />
-        </g>
-      ))}
-
-      <text x={M_L + PW / 2} y={H - 6} textAnchor="middle" fontSize={10} fill="var(--text-dim)">
-        Ángulo de inclinación (°)
-      </text>
-      <text x={M_L + PW / 2} y={15} textAnchor="middle" fontSize={9.5} fill="var(--text-faint)">
-        Desplazamiento horizontal, HD (ft)
-      </text>
-      <text
-        x={15}
-        y={M_T + PH / 2}
-        textAnchor="middle"
-        fontSize={10}
-        fill="var(--text-dim)"
-        transform={`rotate(-90 15 ${M_T + PH / 2})`}
-      >
-        TVD (ft)
-      </text>
-    </svg>
-  );
+  return <EChart<TrajectoryEChartsOption> option={option} className="w-full aspect-[560/388]" />;
 };
