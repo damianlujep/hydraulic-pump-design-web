@@ -8,6 +8,7 @@ import { ProgressTabs } from "./ProgressTabs";
 import { WorkspaceLeftPanel } from "./WorkspaceLeftPanel";
 import { WorkspaceRightCanvas } from "./WorkspaceRightCanvas";
 import { SurveyModal } from "../modals/SurveyModal";
+import { IprCalcModal } from "../modals/IprCalcModal";
 import { SizePickerModal } from "../modals/SizePickerModal";
 import { ConflictDialog } from "../modals/ConflictDialog";
 import { ReadOnlyBanner } from "./ReadOnlyBanner";
@@ -37,6 +38,7 @@ const WorkspaceBody = () => {
         </div>
       </div>
       <SurveyModal />
+      <IprCalcModal />
       <SizePickerModal />
       {state.saveStatus === "conflict" && <ConflictDialog onReload={requestReload} onKeepEditing={dismissConflict} />}
     </>

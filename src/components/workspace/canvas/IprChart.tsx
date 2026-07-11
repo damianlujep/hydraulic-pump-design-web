@@ -16,10 +16,40 @@ type IprChartProps = {
   bubblePointPressure: number;
 };
 
+type MarkerProps = {
+  x: number;
+  y: number;
+  x0: number;
+  top: number;
+  color: string;
+  label: string;
+  showVerticalGuide?: boolean;
+};
+
+// Shared by the Pb marker and the (optional) design-point marker — a dashed guide to the left
+// axis, a dot, and a label; the design point additionally gets a dashed guide down from the top.
+const Marker = ({ x, y, x0, top, color, label, showVerticalGuide = false }: MarkerProps) => (
+  <>
+    {showVerticalGuide && (
+      <line x1={x} y1={top} x2={x} y2={y} stroke={color} strokeWidth={1} strokeDasharray="3 3" opacity={0.55} />
+    )}
+    <line x1={x0} y1={y} x2={x} y2={y} stroke={color} strokeWidth={1} strokeDasharray="3 3" opacity={0.55} />
+    <circle cx={x} cy={y} r={4} fill={color} />
+    <text x={x + 8} y={y + (showVerticalGuide ? -6 : 4)} fontSize={11} fontWeight={600} fill={color} fontFamily="IBM Plex Mono">
+      {label}
+    </text>
+  </>
+);
+
 export const IprChart = ({ result, reservoirPressure, bubblePointPressure }: IprChartProps) => {
   const curvePoints = result.curvePoints ?? [];
-  const qMax = niceMax(result.absoluteOpenFlow ?? Math.max(...curvePoints.map((p) => p.totalFlowRate ?? 0), 1));
-  const pMax = niceMax(Math.max(reservoirPressure, ...curvePoints.map((p) => p.flowingBottomholePressure ?? 0)));
+  const designPoint = result.designPoint;
+  const qMax = niceMax(
+    Math.max(result.absoluteOpenFlow ?? 0, designPoint?.totalFlowRate ?? 0, ...curvePoints.map((p) => p.totalFlowRate ?? 0), 1),
+  );
+  const pMax = niceMax(
+    Math.max(reservoirPressure, designPoint?.requiredFlowingBottomholePressure ?? 0, ...curvePoints.map((p) => p.flowingBottomholePressure ?? 0)),
+  );
 
   const X = (q: number) => M_L + (q / qMax) * PW;
   const Y = (p: number) => M_T + (1 - p / pMax) * PH;
@@ -54,20 +84,19 @@ export const IprChart = ({ result, reservoirPressure, bubblePointPressure }: Ipr
 
       <line x1={X(0)} y1={Y(reservoirPressure)} x2={X(qMax)} y2={Y(reservoirPressure)} stroke="var(--data-blue)" strokeWidth={2} />
       <polyline points={poly} fill="none" stroke="var(--data-orange)" strokeWidth={2.4} strokeLinejoin="round" />
-      <line
-        x1={X(0)}
-        y1={Y(bubblePointPressure)}
-        x2={X(qb)}
-        y2={Y(bubblePointPressure)}
-        stroke="var(--data-orange)"
-        strokeWidth={1}
-        strokeDasharray="3 3"
-        opacity={0.55}
-      />
-      <circle cx={X(qb)} cy={Y(bubblePointPressure)} r={4} fill="var(--data-orange)" />
-      <text x={X(qb) + 8} y={Y(bubblePointPressure) + 4} fontSize={11} fontWeight={600} fill="var(--data-orange)" fontFamily="IBM Plex Mono">
-        Pb
-      </text>
+      <Marker x={X(qb)} y={Y(bubblePointPressure)} x0={X(0)} top={M_T} color="var(--data-orange)" label="Pb" />
+
+      {designPoint && designPoint.totalFlowRate != null && designPoint.requiredFlowingBottomholePressure != null && (
+        <Marker
+          x={X(designPoint.totalFlowRate)}
+          y={Y(designPoint.requiredFlowingBottomholePressure)}
+          x0={X(0)}
+          top={M_T}
+          color="var(--data-green)"
+          label="Diseño"
+          showVerticalGuide
+        />
+      )}
 
       <text x={M_L + PW / 2} y={H - 6} textAnchor="middle" fontSize={10} fill="var(--text-dim)">
         Tasa (bfpd)

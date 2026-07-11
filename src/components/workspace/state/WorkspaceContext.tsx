@@ -1,24 +1,26 @@
 "use client";
 
-import { createContext, useContext, useEffect, useReducer, useRef } from "react";
+import { createContext, useContext, useEffect, useReducer, useRef, useState } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { createInitialState, workspaceReducer, type WorkspaceAction, type WorkspaceState } from "./reducer";
 import { completionSchema, fluidsSchema, iprSchema, type CompletionFormValues, type FluidsFormValues, type IprFormValues } from "./schemas";
 import { buildIprRequest, computeIprFingerprint, fromCompletionDto, fromFluidsDto, fromIprDto, fromSurveyDto, toDesignDataDto } from "./designData";
+import { translateIprDomainError } from "./iprErrorMessages";
 import { useEditLock } from "./useEditLock";
 import { useSaveDesignData, useUpdateProjectMetadata, type ProjectResponse } from "@/lib/api/projects";
 import { useCalculateIpr } from "@/lib/api/calculations";
 import type { TubularItem } from "@/lib/api/casings";
 import { isErrorResponse } from "@/lib/api/errors";
-import type { LockView, StepDoneMap } from "@/interfaces/workspace";
+import type { IprCalcOutcome, IprCalcParams, LockView, StepDoneMap } from "@/interfaces/workspace";
 import { toNewProjectInfoDto, type ProjectInfoFormValues } from "@/lib/validation/projectInfo";
 
 type WorkspaceContextValue = {
   state: WorkspaceState;
   dispatch: React.Dispatch<WorkspaceAction>;
-  runCalc: () => void;
+  runCalc: (params: IprCalcParams) => Promise<IprCalcOutcome>;
+  iprStale: boolean;
   canEdit: boolean;
   lock: LockView;
   retryLock: () => void;
@@ -36,6 +38,12 @@ type WorkspaceContextValue = {
     fluids: UseFormReturn<FluidsFormValues>;
     ipr: UseFormReturn<IprFormValues>;
   };
+  // Plain watched values, computed once here (the form's owner) — consumers should read these
+  // instead of calling `.watch()`/`.getValues()` themselves. Those are non-reactive/opaque calls
+  // to React Compiler; a component that only received `forms` via context can have its render
+  // memoized and never re-invoke them, showing permanently stale data (see CLAUDE.md).
+  iprValues: IprFormValues;
+  fluidsValues: FluidsFormValues;
   requestReload: () => void;
   dismissConflict: () => void;
 };
@@ -61,9 +69,12 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
   const hydratedIpr = fromIprDto(project.designData?.ipr?.data);
   // Trust a stored result on reload — the fingerprint is seeded from the hydrated form values
   // themselves, so any edit after this point still reverts the step pill via the usual mechanism.
+  // Documented quirk: extraTestPoints/desiredOilRate are session-ephemeral (no IprDto field), so a
+  // persisted FETKOVICH result always hydrates as if calculated with only its point-1 scalars and
+  // no design rate — it will NOT show as stale even though the points that produced it are gone.
   const hydratedIprResult = project.designData?.ipr?.data?.lastResult ?? null;
   const hydratedIprFingerprint = hydratedIprResult
-    ? computeIprFingerprint({ ipr: hydratedIpr, fluids: hydratedFluids })
+    ? computeIprFingerprint({ ipr: hydratedIpr, fluids: hydratedFluids, extraTestPoints: [], desiredOilRate: "" })
     : null;
 
   const [state, dispatch] = useReducer(
@@ -116,8 +127,14 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
 
   const iprWatched = iprForm.watch();
   const fluidsWatched = fluidsForm.watch();
-  const currentFingerprint = JSON.stringify({ ipr: iprWatched, fluids: fluidsWatched });
-  const iprDone = iprForm.formState.isValid && state.iprResult !== null && state.iprFingerprint === currentFingerprint;
+  const currentFingerprint = computeIprFingerprint({
+    ipr: iprWatched,
+    fluids: fluidsWatched,
+    extraTestPoints: state.iprExtraTestPoints,
+    desiredOilRate: state.iprDesiredOilRate,
+  });
+  const iprStale = state.iprResult !== null && state.iprFingerprint !== currentFingerprint;
+  const iprDone = iprForm.formState.isValid && state.iprResult !== null && !iprStale;
 
   const stepDone: StepDoneMap = { completion: completionDone, fluids: fluidsDone, ipr: iprDone };
   const calcUnlocked = completionDone && fluidsDone && iprDone;
@@ -159,7 +176,13 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
       stepDone,
     });
     const serialized = JSON.stringify(payload);
-    if (serialized === lastSavedPayloadRef.current) return;
+    if (serialized === lastSavedPayloadRef.current) {
+      // Nothing to persist (e.g. only the ephemeral correlation select changed), but revision was
+      // still bumped by MARK_DIRTY — without this, saveStatus would be stuck at "dirty" forever
+      // since no SAVE_STARTED/SAVE_SUCCESS cycle runs to clear it.
+      dispatch({ type: "SAVE_NOOP", revision: revisionAtSave });
+      return;
+    }
 
     savingRef.current = true;
     dispatch({ type: "SAVE_STARTED" });
@@ -244,36 +267,30 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- IPR calculation (Vogel only) ---
+  // --- IPR calculation (Vogel + Fetkovich, via the pre-flight IprCalcModal) ---
   const calculateIpr = useCalculateIpr();
   const calcTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const runCalc = () => {
-    if (!canEdit || state.calcStatus === "running") return;
-    void iprForm.trigger();
-    if (!iprForm.formState.isValid) {
-      toast.error("Complete Ps, Pwf y tasa de prueba antes de calcular");
-      return;
-    }
-    const built = buildIprRequest(iprForm.getValues(), fluidsForm.getValues());
-    if ("fieldError" in built) {
-      fluidsForm.setError("bubblePointPressure", { message: built.fieldError.message });
-      toast.error(built.fieldError.message);
-      return;
-    }
+  // Validation of calc-relevant inputs lives in buildIprRequest/validateIprCalcInputs — this no
+  // longer gates on the whole IPR form (cards B/D feed a future pump-design calc, not this one).
+  // `params` is passed explicitly (not read from `state`) because the modal commits
+  // SET_IPR_CALC_PARAMS just before calling this, and a dispatch doesn't apply synchronously.
+  const runCalc = async (params: IprCalcParams): Promise<IprCalcOutcome> => {
+    if (!canEdit || state.calcStatus === "running") return { ok: false, message: "" };
+    const built = buildIprRequest(iprForm.getValues(), fluidsForm.getValues(), params);
+    if ("error" in built) return { ok: false, message: built.error.message };
 
     dispatch({ type: "CALC_RUNNING" });
-    calculateIpr.mutate(built.request, {
-      onSuccess: (result) => {
-        dispatch({ type: "CALC_SUCCESS", result, fingerprint: built.fingerprint });
-        if (calcTimer.current) clearTimeout(calcTimer.current);
-        calcTimer.current = setTimeout(() => dispatch({ type: "CALC_IDLE" }), 2500);
-      },
-      onError: (err) => {
-        dispatch({ type: "CALC_ERROR" });
-        toast.error(isErrorResponse(err) ? err.message : "Error en el cálculo IPR");
-      },
-    });
+    try {
+      const result = await calculateIpr.mutateAsync(built.request);
+      dispatch({ type: "CALC_SUCCESS", result, fingerprint: built.fingerprint });
+      if (calcTimer.current) clearTimeout(calcTimer.current);
+      calcTimer.current = setTimeout(() => dispatch({ type: "CALC_IDLE" }), 2500);
+      return { ok: true };
+    } catch (err: unknown) {
+      dispatch({ type: "CALC_ERROR" });
+      return { ok: false, message: isErrorResponse(err) ? translateIprDomainError(err.message) : "Error en el cálculo IPR" };
+    }
   };
 
   const updateMetadata = useUpdateProjectMetadata(projectId);
@@ -304,6 +321,7 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
         state,
         dispatch,
         runCalc,
+        iprStale,
         canEdit,
         lock,
         retryLock,
@@ -317,6 +335,8 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
         saveProjectInfo,
         savingProjectInfo: updateMetadata.isPending,
         forms: { completion: completionForm, fluids: fluidsForm, ipr: iprForm },
+        iprValues: iprWatched,
+        fluidsValues: fluidsWatched,
         requestReload: onReloadRequested,
         dismissConflict: () => dispatch({ type: "DISMISS_CONFLICT" }),
       }}

@@ -1,4 +1,4 @@
-import type { CalcStatus, PipeKind, PipeSection, SaveStatus, SizeModalState, SurveyRow, TabId } from "@/interfaces/workspace";
+import type { CalcStatus, PipeKind, PipeSection, SaveStatus, SizeModalState, SurveyRow, TabId, TestPointDraft } from "@/interfaces/workspace";
 import type { DesignDataDto, NewProjectInfoDto } from "@/lib/api/projects";
 import type { IprCalculationResponse } from "@/lib/api/calculations";
 
@@ -10,6 +10,12 @@ export type WorkspaceState = {
   tubing: PipeSection[];
   iprResult: IprCalculationResponse | null;
   iprFingerprint: string | null;
+  iprCalcModalOpen: boolean;
+  // Session-ephemeral calc inputs (no IprDto field exists for these yet) — kept in reducer state
+  // so closing/reopening the calc modal within a session doesn't lose points 2..n or the design
+  // rate. Never registered as DATA_ACTIONS (see below).
+  iprExtraTestPoints: TestPointDraft[];
+  iprDesiredOilRate: string;
   newProjectInfo: DesignDataDto["newProjectInfo"];
   version: number;
   revision: number;
@@ -41,7 +47,11 @@ export type WorkspaceAction =
   | { type: "SAVE_CONFLICT" }
   | { type: "DISMISS_CONFLICT" }
   | { type: "METADATA_SAVED"; version: number }
-  | { type: "SET_PROJECT_INFO"; data: NewProjectInfoDto };
+  | { type: "SET_PROJECT_INFO"; data: NewProjectInfoDto }
+  | { type: "OPEN_IPR_CALC_MODAL" }
+  | { type: "CLOSE_IPR_CALC_MODAL" }
+  | { type: "SET_IPR_CALC_PARAMS"; extraTestPoints: TestPointDraft[]; desiredOilRate: string }
+  | { type: "SAVE_NOOP"; revision: number };
 
 // Actions that mutate persistable document data — they bump `revision` and mark the project dirty
 // so the autosave effect (keyed on `revision`) picks them up. Field edits inside the RHF-controlled
@@ -72,6 +82,9 @@ export const createInitialState = (input: {
   tubing: input.tubing,
   iprResult: input.iprResult,
   iprFingerprint: input.iprFingerprint,
+  iprCalcModalOpen: false,
+  iprExtraTestPoints: [],
+  iprDesiredOilRate: "",
   newProjectInfo: input.project.designData?.newProjectInfo,
   version: input.project.version ?? 0,
   revision: 0,
@@ -140,6 +153,14 @@ const applyAction = (state: WorkspaceState, action: WorkspaceAction): WorkspaceS
       return { ...state, version: action.version };
     case "SET_PROJECT_INFO":
       return { ...state, newProjectInfo: { dataEntered: true, data: action.data } };
+    case "OPEN_IPR_CALC_MODAL":
+      return { ...state, iprCalcModalOpen: true };
+    case "CLOSE_IPR_CALC_MODAL":
+      return { ...state, iprCalcModalOpen: false };
+    case "SET_IPR_CALC_PARAMS":
+      return { ...state, iprExtraTestPoints: action.extraTestPoints, iprDesiredOilRate: action.desiredOilRate };
+    case "SAVE_NOOP":
+      return { ...state, saveStatus: action.revision === state.revision ? "saved" : "dirty" };
     default:
       return state;
   }

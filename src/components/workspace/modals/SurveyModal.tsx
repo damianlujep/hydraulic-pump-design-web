@@ -6,6 +6,7 @@ import { CheckIcon, PlusIcon, PumpIcon, XIcon } from "@/components/icons";
 import { useWorkspace } from "../state/WorkspaceContext";
 import { deriveSurveyGeometry } from "../state/survey";
 import { sanitizeNumeric } from "../state/numericInput";
+import { useModalOpenReset } from "../state/useModalOpenReset";
 
 const GRID_COLS = "grid-cols-[56px_1fr_1fr_1fr_1fr_40px]";
 const MIN_ROWS = 3;
@@ -24,14 +25,8 @@ const buildDraft = (survey: { md: number; tvd: number }[]): Draft[] => {
 export const SurveyModal = () => {
   const { state, dispatch, canEdit } = useWorkspace();
   const [draft, setDraft] = useState<Draft[]>(() => buildDraft(state.survey));
-  const [wasOpen, setWasOpen] = useState(false);
 
-  // Reset the draft from the latest survey rows each time the modal transitions to open —
-  // adjusting state during render (rather than in an effect) avoids an extra render pass.
-  if (state.surveyModalOpen !== wasOpen) {
-    setWasOpen(state.surveyModalOpen);
-    if (state.surveyModalOpen) setDraft(buildDraft(state.survey));
-  }
+  useModalOpenReset(state.surveyModalOpen, () => setDraft(buildDraft(state.survey)));
 
   if (!state.surveyModalOpen) return null;
   const rows = draft;

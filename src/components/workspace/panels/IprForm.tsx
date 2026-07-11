@@ -5,12 +5,15 @@ import { CheckIcon, PlayIcon, SpinnerIcon } from "@/components/icons";
 import { GroupCard } from "../atoms/GroupCard";
 import { InputRow } from "../atoms/InputRow";
 import { UnitField } from "../atoms/UnitField";
-import { SelectField } from "../atoms/SelectField";
 import { useWorkspace } from "../state/WorkspaceContext";
 import type { IprFormValues } from "../state/schemas";
 import { registerNumeric } from "../state/numericInput";
 import { CorrelationFieldSelect } from "../state/CorrelationFieldSelect";
-import { INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS, MULTIPHASE_FLOW_CORRELATION_OPTIONS } from "../state/correlations";
+import {
+  INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS,
+  MULTIPHASE_FLOW_CORRELATION_OPTIONS,
+  RESERVOIR_MODEL_OPTIONS,
+} from "../state/correlations";
 
 const PLAIN_NUMBER_CLASS =
   "w-[150px] p-[5px_9px] font-mono text-[13px] font-medium text-left bg-surface-3 border border-border rounded-[6px] text-text outline-none focus:border-primary focus:shadow-[0_0_0_2px_var(--primary-ring)]";
@@ -34,7 +37,7 @@ const FieldUnit = ({
 }) => <UnitField unit={unit} placeholder="—" error={!!error} {...registerNumeric(form, name)} />;
 
 export const IprForm = () => {
-  const { state, runCalc, forms } = useWorkspace();
+  const { state, dispatch, iprStale, forms } = useWorkspace();
   const { ipr } = forms;
   const { errors, touchedFields } = ipr.formState;
   const errorFor = (name: FieldName) => (touchedFields[name] ? errors[name]?.message : undefined);
@@ -49,9 +52,7 @@ export const IprForm = () => {
           <FieldUnit form={ipr} name="wellheadTemperature" unit="°F" error={errorFor("wellheadTemperature")} />
         </InputRow>
         <InputRow label="Modelo de reservorio para IPR">
-          <SelectField defaultValue="Vogel">
-            <option>Vogel</option>
-          </SelectField>
+          <CorrelationFieldSelect form={ipr} name="correlation" catalog={RESERVOIR_MODEL_OPTIONS} />
         </InputRow>
         <InputRow label="Presión estática del reservorio, Ps" error={errorFor("reservoirPressure")}>
           <FieldUnit form={ipr} name="reservoirPressure" unit="psi" error={errorFor("reservoirPressure")} />
@@ -110,14 +111,14 @@ export const IprForm = () => {
       </GroupCard>
 
       <button
-        onClick={runCalc}
+        onClick={() => dispatch({ type: "OPEN_IPR_CALC_MODAL" })}
         disabled={state.calcStatus === "running"}
         className="flex items-center justify-center gap-[9px] w-full p-[13px] rounded-[11px] bg-primary text-primary-fg border-none text-sm font-bold cursor-pointer shadow-[0_6px_18px_var(--primary-ring)] hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {state.calcStatus === "idle" && (
           <>
             <PlayIcon />
-            Ejecutar Cálculo IPR
+            {iprStale ? "Recalcular IPR" : "Ejecutar Cálculo IPR"}
           </>
         )}
         {state.calcStatus === "running" && (

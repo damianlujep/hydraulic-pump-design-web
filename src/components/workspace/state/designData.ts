@@ -1,4 +1,4 @@
-import type { PipeSection, StepDoneMap, SurveyRow } from "@/interfaces/workspace";
+import type { IprCalcParams, PipeSection, StepDoneMap, SurveyRow, TestPointDraft } from "@/interfaces/workspace";
 import type { DesignDataDto } from "@/lib/api/projects";
 import type { components } from "@/lib/api/schema";
 import type { TubularItem } from "@/lib/api/casings";
@@ -18,6 +18,7 @@ import {
   OIL_SURFACE_TENSION_CORRELATION_OPTIONS,
   INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS,
   MULTIPHASE_FLOW_CORRELATION_OPTIONS,
+  RESERVOIR_MODEL_OPTIONS,
 } from "./correlations";
 
 type CompletionDto = components["schemas"]["CompletionDto"];
@@ -67,6 +68,7 @@ export const EMPTY_IPR: IprFormValues = {
   flowingWellheadPressure: "",
   maxRefInjectionRate: "",
   maxInjectionPressureAdjusted: "",
+  correlation: RESERVOIR_MODEL_OPTIONS[0].value,
   injectedFluidHydraulicCorrelation: INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS[0].value,
   multiphaseFlowCorrelation: MULTIPHASE_FLOW_CORRELATION_OPTIONS[0].value,
 };
@@ -164,6 +166,9 @@ export const fromIprDto = (dto: IprDto | undefined): IprFormValues => ({
   flowingWellheadPressure: numToString(dto?.flowingWellheadPressure),
   maxRefInjectionRate: numToString(dto?.maxRefInjectionRate),
   maxInjectionPressureAdjusted: numToString(dto?.maxInjectionPressureAdjusted),
+  // Not a real IprDto field — seeded from the last successful calc's correlation so a persisted
+  // FETKOVICH result reopens with Fetkovich selected instead of silently reverting to Vogel.
+  correlation: dto?.lastCorrelation ?? EMPTY_IPR.correlation,
   injectedFluidHydraulicCorrelation: dto?.injectedFluidHydraulicCorrelation ?? EMPTY_IPR.injectedFluidHydraulicCorrelation,
   multiphaseFlowCorrelation: dto?.multiphaseFlowCorrelation ?? EMPTY_IPR.multiphaseFlowCorrelation,
 });
@@ -365,33 +370,147 @@ export const toDesignDataDto = (input: {
   },
 });
 
-export type IprFingerprintInput = { ipr: IprFormValues; fluids: FluidsFormValues };
+// The extra Fetkovich test points and desiredOilRate are session-ephemeral (no IprDto field
+// exists for them yet), but they're still real calc inputs — the fingerprint must cover them so
+// editing/adding/removing a point correctly flips `iprStale`, and the hydration/reducer-init
+// baseline must build this literal the same way (empty array + empty string) so a freshly loaded
+// project doesn't start out flagged stale. Rebuilt as a fresh literal inside the helper (rather
+// than trusting call-site key order) so JSON.stringify's key order is canonical everywhere.
+export type IprFingerprintInput = {
+  ipr: IprFormValues;
+  fluids: FluidsFormValues;
+  extraTestPoints: TestPointDraft[];
+  desiredOilRate: string;
+};
 
-export const computeIprFingerprint = (input: IprFingerprintInput): string => JSON.stringify(input);
+export const computeIprFingerprint = (input: IprFingerprintInput): string =>
+  JSON.stringify({
+    ipr: input.ipr,
+    fluids: input.fluids,
+    extraTestPoints: input.extraTestPoints,
+    desiredOilRate: input.desiredOilRate,
+  });
 
-export type BuildIprRequestResult =
-  | { request: IprCalculationRequest; fingerprint: string }
-  | { fieldError: { message: string } };
+type TestPoint = { flowRate: number; flowingBottomholePressure: number };
 
-// Cross-form rule the per-field zod schemas can't express alone: Pb (fluids) must not exceed
-// Ps (ipr). All other backend rules are already covered by `iprSchema`.
-export const buildIprRequest = (ipr: IprFormValues, fluids: FluidsFormValues): BuildIprRequestResult => {
+type IprValidationResult =
+  | {
+      ok: true;
+      reservoirPressure: number;
+      bubblePointPressure: number;
+      waterCut: number;
+      testPoints: TestPoint[];
+      desiredOilRate?: number;
+    }
+  | { ok: false; message: string };
+
+const isValidTestPoint = (p: TestPoint, reservoirPressure: number): boolean =>
+  Number.isFinite(p.flowRate) &&
+  p.flowRate > 0 &&
+  Number.isFinite(p.flowingBottomholePressure) &&
+  p.flowingBottomholePressure >= 0 &&
+  p.flowingBottomholePressure < reservoirPressure;
+
+// A fully-blank draft row is ignored (not yet started); a partially-filled one is an error
+// (the user began a point but didn't finish it) rather than being silently dropped.
+const parseExtraPoint = (p: TestPointDraft): TestPoint | null | "invalid" => {
+  const rate = p.flowRate.trim();
+  const pwf = p.flowingBottomholePressure.trim();
+  if (rate === "" && pwf === "") return null;
+  if (rate === "" || pwf === "") return "invalid";
+  return { flowRate: Number(rate), flowingBottomholePressure: Number(pwf) };
+};
+
+// Shared by buildIprRequest (hard fail before sending) and IprCalcModal's `canCalc` gate, so the
+// two can't drift. No `Number("") → 0` anywhere — Ps/Pb/BSW must be genuinely present and valid,
+// fixing a bug where an unfilled Fluidos y PVT step silently sent 0 for Pb/waterCut.
+export const validateIprCalcInputs = (ipr: IprFormValues, fluids: FluidsFormValues, params: IprCalcParams): IprValidationResult => {
+  // No blank-string check needed for these two: Number("") is 0, already caught by `<= 0`.
+  // waterCut is different — 0 is a genuinely valid BSW, so its blank check is load-bearing.
   const reservoirPressure = Number(ipr.reservoirPressure);
-  const bubblePointPressure = Number(fluids.bubblePointPressure);
-  if (bubblePointPressure > reservoirPressure) {
-    return { fieldError: { message: "Pb debe ser menor o igual que Ps" } };
+  if (!Number.isFinite(reservoirPressure) || reservoirPressure <= 0) {
+    return { ok: false, message: "Complete Ps en la pestaña IPR" };
   }
+  const bubblePointPressure = Number(fluids.bubblePointPressure);
+  if (!Number.isFinite(bubblePointPressure) || bubblePointPressure <= 0) {
+    return { ok: false, message: "Complete Pb en Fluidos y PVT" };
+  }
+  const waterCut = Number(fluids.waterCut);
+  if (fluids.waterCut.trim() === "" || !Number.isFinite(waterCut) || waterCut < 0 || waterCut > 1) {
+    return { ok: false, message: "Complete el BSW en Fluidos y PVT" };
+  }
+  if (bubblePointPressure > reservoirPressure) {
+    return { ok: false, message: "Pb debe ser menor o igual que Ps" };
+  }
+
+  // Read from params.point1 (the modal's own draft), not ipr.testFlowRate/flowingBottomholePressure
+  // — those only get written back to the form inside handleCalc, right before running, so reading
+  // them here would validate against whatever point 1 was *before* the user started editing it in
+  // this modal, making the gate impossible to satisfy by editing the very fields it's blocking on.
+  const point1: TestPoint = {
+    flowRate: Number(params.point1.flowRate),
+    flowingBottomholePressure: Number(params.point1.flowingBottomholePressure),
+  };
+  if (!isValidTestPoint(point1, reservoirPressure)) {
+    return { ok: false, message: "Complete Pwf y la tasa de prueba (punto 1) — Pwf debe ser menor que Ps" };
+  }
+
+  let testPoints: TestPoint[] = [point1];
+  if (ipr.correlation === "FETKOVICH") {
+    const extras: TestPoint[] = [];
+    for (const draft of params.extraTestPoints) {
+      const parsed = parseExtraPoint(draft);
+      if (parsed === "invalid") return { ok: false, message: "Complete o elimine los puntos de prueba incompletos" };
+      if (parsed !== null) extras.push(parsed);
+    }
+    if (extras.some((p) => !isValidTestPoint(p, reservoirPressure))) {
+      return { ok: false, message: "Cada punto de prueba debe tener tasa > 0 y Pwf menor que Ps" };
+    }
+    testPoints = [point1, ...extras];
+    if (testPoints.length < 2) {
+      return { ok: false, message: "Fetkovich requiere al menos 2 puntos de prueba" };
+    }
+    if (new Set(testPoints.map((p) => p.flowingBottomholePressure)).size < 2) {
+      return { ok: false, message: "Los puntos de prueba deben tener presiones Pwf distintas" };
+    }
+  }
+
+  let desiredOilRate: number | undefined;
+  const desiredOilRateStr = params.desiredOilRate.trim();
+  if (desiredOilRateStr !== "") {
+    const rate = Number(desiredOilRateStr);
+    if (!Number.isFinite(rate) || rate <= 0) {
+      return { ok: false, message: "La tasa deseada de petróleo debe ser mayor a 0" };
+    }
+    if (waterCut >= 1) {
+      return { ok: false, message: "La tasa deseada de petróleo requiere BSW menor a 1" };
+    }
+    desiredOilRate = rate;
+  }
+
+  return { ok: true, reservoirPressure, bubblePointPressure, waterCut, testPoints, desiredOilRate };
+};
+
+export type BuildIprRequestResult = { request: IprCalculationRequest; fingerprint: string } | { error: { message: string } };
+
+export const buildIprRequest = (ipr: IprFormValues, fluids: FluidsFormValues, params: IprCalcParams): BuildIprRequestResult => {
+  const validation = validateIprCalcInputs(ipr, fluids, params);
+  if (!validation.ok) return { error: { message: validation.message } };
   return {
     request: {
-      reservoirPressure,
-      bubblePointPressure,
-      waterCut: Number(fluids.waterCut),
-      correlation: "VOGEL",
-      testPoints: [
-        { flowRate: Number(ipr.testFlowRate), flowingBottomholePressure: Number(ipr.flowingBottomholePressure) },
-      ],
+      reservoirPressure: validation.reservoirPressure,
+      bubblePointPressure: validation.bubblePointPressure,
+      waterCut: validation.waterCut,
+      correlation: ipr.correlation,
+      testPoints: validation.testPoints,
       curvePointCount: 40,
+      ...(validation.desiredOilRate !== undefined ? { desiredOilRate: validation.desiredOilRate } : {}),
     },
-    fingerprint: computeIprFingerprint({ ipr, fluids }),
+    fingerprint: computeIprFingerprint({
+      ipr,
+      fluids,
+      extraTestPoints: params.extraTestPoints,
+      desiredOilRate: params.desiredOilRate,
+    }),
   };
 };

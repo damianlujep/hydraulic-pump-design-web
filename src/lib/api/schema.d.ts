@@ -529,6 +529,28 @@ export interface components {
             fluids?: components["schemas"]["StepDtoFluidsDto"];
             ipr?: components["schemas"]["StepDtoIprDto"];
         };
+        DesignPoint: {
+            /**
+             * Format: double
+             * @description Flowing BHP required to produce desiredOilRate, in psia
+             */
+            requiredFlowingBottomholePressure?: number;
+            /**
+             * Format: double
+             * @description Total liquid rate equivalent to desiredOilRate, in STB/d
+             */
+            totalFlowRate?: number;
+            /**
+             * Format: double
+             * @description Oil rate at the design point in STB/d
+             */
+            oilFlowRate?: number;
+            /**
+             * Format: double
+             * @description Water rate at the design point in STB/d
+             */
+            waterFlowRate?: number;
+        };
         DirectionalSurveyRowDto: {
             /** Format: int32 */
             id?: number;
@@ -785,6 +807,8 @@ export interface components {
             correlation?: "VOGEL" | "FETKOVICH";
             /** @description Points on the IPR curve, evenly spaced in total flow rate from 0 to absoluteOpenFlow; each value rounded to 2 decimals */
             curvePoints?: components["schemas"]["IprCurvePoint"][];
+            /** @description Jet pump design point for desiredOilRate; null when desiredOilRate was not sent. Values are full precision (not rounded) */
+            designPoint?: components["schemas"]["DesignPoint"];
         };
         NewProjectInfoDto: {
             newProjectName?: string;
@@ -947,6 +971,11 @@ export interface components {
              * @description Curve points to generate; engine defaults to 101
              */
             curvePointCount?: number;
+            /**
+             * Format: double
+             * @description Desired oil rate in STB/d for the jet pump design point; optional. Requires waterCut < 1 and must not exceed the well's maximum achievable oil rate (enforced upstream)
+             */
+            desiredOilRate?: number;
         };
         TestPoint: {
             /**
@@ -1003,6 +1032,8 @@ export interface components {
             correlation?: "VOGEL" | "FETKOVICH";
             /** @description Points on the IPR curve, evenly spaced in total flow rate from 0 to absoluteOpenFlow; each value rounded to 2 decimals */
             curvePoints?: components["schemas"]["IprCurvePoint"][];
+            /** @description Jet pump design point for desiredOilRate; null when desiredOilRate was not sent. Values are full precision (not rounded) */
+            designPoint?: components["schemas"]["DesignPoint"];
         };
         AuthResponse: {
             accessToken?: string;

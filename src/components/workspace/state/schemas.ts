@@ -14,6 +14,7 @@ import {
   OIL_SURFACE_TENSION_CORRELATION_OPTIONS,
   INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS,
   MULTIPHASE_FLOW_CORRELATION_OPTIONS,
+  RESERVOIR_MODEL_OPTIONS,
 } from "./correlations";
 
 const requiredNumber = (message = "Campo requerido") =>
@@ -67,10 +68,12 @@ export type FluidsFormValues = z.infer<typeof fluidsSchema>;
 
 // "IPR step done" = every editable numeric field is filled AND the calculation has succeeded
 // with the current inputs (tracked separately via the iprResult/fingerprint in WorkspaceContext).
-// Only reservoirPressure, flowingBottomholePressure and testFlowRate feed the actual calculation
-// request (Vogel, single test point) — the rest aren't sent to the backend yet, but still gate
-// step completion per the user's step-done contract. The cross-field Pwf < Ps rule mirrors the
-// backend's /api/v1/calculations/ipr validation for the single-test-point (Vogel) case.
+// reservoirPressure, flowingBottomholePressure and testFlowRate feed the actual calculation
+// request as test point 1 (see buildIprRequest in designData.ts) — under FETKOVICH, additional
+// points 2..n are collected ephemerally in reducer state (IprCalcModal), not in this form. The
+// rest of the numeric fields aren't sent to the backend yet, but still gate step completion per
+// the user's step-done contract. The cross-field Pwf < Ps rule mirrors the backend's
+// /api/v1/calculations/ipr validation.
 export const iprSchema = z
   .object({
     bottomholeTemperature: positiveNumber(),
@@ -88,9 +91,11 @@ export const iprSchema = z
     flowingWellheadPressure: positiveNumber(),
     maxRefInjectionRate: positiveNumber(),
     maxInjectionPressureAdjusted: positiveNumber(),
-    // Hydraulic correlation selects — always have a valid default. "Modelo de reservorio" (Vogel)
-    // is intentionally not modeled here: it's the real IprCalculationRequest.correlation field,
-    // hardcoded "VOGEL" until the Fetkovich follow-up lands.
+    // Reservoir model for the IPR calculation (Vogel/Fetkovich) — not persisted in IprDto (only
+    // lastCorrelation, seeded from the last successful calc, is), same non-persistence treatment
+    // as the ephemeral extra test points/desiredOilRate in reducer state.
+    correlation: z.enum(optionValues(RESERVOIR_MODEL_OPTIONS)),
+    // Hydraulic correlation selects — always have a valid default.
     injectedFluidHydraulicCorrelation: z.enum(optionValues(INJECTED_FLUID_HYDRAULIC_CORRELATION_OPTIONS)),
     multiphaseFlowCorrelation: z.enum(optionValues(MULTIPHASE_FLOW_CORRELATION_OPTIONS)),
   })

@@ -27,7 +27,7 @@ const LegendLine = ({ color, label }: { color: string; label: string }) => {
 };
 
 export const WorkspaceRightCanvas = () => {
-  const { state, dispatch, runCalc, stepDone, forms } = useWorkspace();
+  const { state, dispatch, iprStale, stepDone, forms, iprValues, fluidsValues } = useWorkspace();
 
   if (state.activeTab === "completion") {
     if (state.survey.length > 0) {
@@ -80,40 +80,64 @@ export const WorkspaceRightCanvas = () => {
   }
 
   if (state.activeTab === "ipr") {
-    const iprValues = forms.ipr.getValues();
-    const fluidsValues = forms.fluids.getValues();
+    const result = state.iprResult;
+    const stats = result
+      ? [
+          { label: "Ps", value: iprValues.reservoirPressure, unit: "psi" },
+          { label: "Pwf", value: iprValues.flowingBottomholePressure, unit: "psi" },
+          { label: "Pb", value: fluidsValues.bubblePointPressure, unit: "psi", color: "var(--data-orange)" },
+          { label: "Qmáx", value: (result.absoluteOpenFlow ?? 0).toFixed(0), unit: "bfpd" },
+          { label: "PI (J)", value: (result.productivityIndex ?? 0).toFixed(2), unit: "bfpd/psi" },
+          ...(result.correlation === "FETKOVICH" && result.fetkovichExponent != null
+            ? [{ label: "n", value: result.fetkovichExponent.toFixed(3), unit: "" }]
+            : []),
+          ...(result.designPoint
+            ? [
+                {
+                  label: "Pwf diseño",
+                  value: (result.designPoint.requiredFlowingBottomholePressure ?? 0).toFixed(0),
+                  unit: "psi",
+                  color: "var(--data-green)",
+                },
+                { label: "Q diseño", value: (result.designPoint.totalFlowRate ?? 0).toFixed(0), unit: "bfpd" },
+                { label: "Qo diseño", value: (result.designPoint.oilFlowRate ?? 0).toFixed(0), unit: "STB/d" },
+              ]
+            : []),
+        ]
+      : [];
+
     return (
       <div className="bg-surface border border-border rounded-card p-[14px_16px_12px] my-auto">
         <div className="flex items-center justify-between mb-2">
-          <div className="text-[13px] font-bold tracking-[-.01em]">Curva de Rendimiento IPR</div>
+          <div className="flex items-center gap-[10px]">
+            <div className="text-[13px] font-bold tracking-[-.01em]">Curva de Rendimiento IPR</div>
+            {iprStale && result && (
+              <span className="px-[8px] py-[2px] rounded-full bg-amber-soft text-amber text-[10.5px] font-semibold">
+                Resultado desactualizado
+              </span>
+            )}
+          </div>
           <div className="flex gap-[14px]">
             <LegendLine color="var(--data-blue)" label="Ps estática" />
-            <LegendLine color="var(--data-orange)" label="IPR (Vogel)" />
+            <LegendLine color="var(--data-orange)" label={result?.correlation === "FETKOVICH" ? "IPR (Fetkovich)" : "IPR (Vogel)"} />
+            {result?.designPoint && <LegendDot color="var(--data-green)" label="Punto de diseño" />}
           </div>
         </div>
-        {state.iprResult ? (
+        {result ? (
           <>
             <IprChart
-              result={state.iprResult}
+              result={result}
               reservoirPressure={Number(iprValues.reservoirPressure)}
               bubblePointPressure={Number(fluidsValues.bubblePointPressure)}
             />
-            <ChartStats
-              stats={[
-                { label: "Ps", value: iprValues.reservoirPressure, unit: "psi" },
-                { label: "Pwf", value: iprValues.flowingBottomholePressure, unit: "psi" },
-                { label: "Pb", value: fluidsValues.bubblePointPressure, unit: "psi", color: "var(--data-orange)" },
-                { label: "Qmáx", value: (state.iprResult.absoluteOpenFlow ?? 0).toFixed(0), unit: "bfpd" },
-                { label: "PI (J)", value: (state.iprResult.productivityIndex ?? 0).toFixed(2), unit: "bfpd/psi" },
-              ]}
-            />
+            <ChartStats stats={stats} />
           </>
         ) : (
           <EmptyPanel
             title="Sin curva IPR generada"
             message="Ingrese los parámetros del yacimiento y ejecute el cálculo para obtener la curva de rendimiento."
             cta="Ejecutar cálculo IPR"
-            onCta={runCalc}
+            onCta={() => dispatch({ type: "OPEN_IPR_CALC_MODAL" })}
           />
         )}
       </div>

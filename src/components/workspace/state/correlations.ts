@@ -71,3 +71,8 @@ export const MULTIPHASE_FLOW_CORRELATION_OPTIONS = [
   { value: "BEGGS_BRILL", label: "Beggs - Brill" },
   { value: "HAGEDORN_BROWN", label: "Hagedorn - Brown" },
 ] as const;
+
+export const RESERVOIR_MODEL_OPTIONS = [
+  { value: "VOGEL", label: "Vogel" },
+  { value: "FETKOVICH", label: "Fetkovich" },
+] as const;
