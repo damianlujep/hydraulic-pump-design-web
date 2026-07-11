@@ -37,9 +37,22 @@ const ExplorerPage = () => {
 
           <div className="grid grid-cols-4 gap-[14px] mb-[22px]">
             <ActiveProjectsStat />
-            <StatCard label="Pozos en diseño" value="11" />
-            <StatCard label="Simulaciones (mes)" value="187" />
-            <StatCard label="Sincronizados" value="92%" accent />
+            <StatCard
+              label="Proyectos nuevos (mes)"
+              value="—"
+              hint="Pendiente: requiere el endpoint de estadísticas agregadas (ver docs-user/refactor-roadmap.md)"
+            />
+            <StatCard
+              label="Simulaciones (mes)"
+              value="—"
+              hint="Pendiente: se habilitará junto con el módulo de Cálculos y reportes PDF"
+            />
+            <StatCard
+              label="% Diseños completos"
+              value="—"
+              accent
+              hint="Pendiente: requiere el endpoint de estadísticas agregadas (ver docs-user/refactor-roadmap.md)"
+            />
           </div>
 
           <FilterPills />
