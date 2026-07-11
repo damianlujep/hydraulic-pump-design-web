@@ -67,8 +67,8 @@ Wraps a set of `InputRow`s: `rounded-[11px]` border, `surface-2` header (`p-[10p
 ### `SelectField` (`src/components/workspace/SelectField.tsx`)
 Same visual language as `UnitField`'s input but for `<select>`; supports a `disabled` variant (dimmed, `cursor-not-allowed`) used for the "locked by correlation" Rs field in Fluidos y PVT.
 
-### `EmptyPanel` (`src/components/workspace/EmptyPanel.tsx`)
-The single reusable "no data yet" placeholder, used in all four required spots (survey, trajectory, IPR chart, PVT chart). Fixed `h-[300px]`, `border-dashed`, diagonal hatch background (`repeating-linear-gradient(45deg, var(--surface) 0 9px, var(--surface-2) 9px 10px)`), 48px icon tile, title (13.5px/600), message (11.5px), and a primary CTA button with a pencil icon. Props: `title`, `message`, `cta`, `onCta`.
+### `EmptyPanel` (`src/components/workspace/atoms/EmptyPanel.tsx`)
+The single reusable "no data yet" placeholder — used in the four Workspace canvas spots (survey, trajectory, IPR chart, PVT chart) and, with a different `title`/`message` per situation, the Explorer's empty project list (see `ProjectsTable` in §3). Fixed `h-[300px]`, `border-dashed`, diagonal hatch background (`repeating-linear-gradient(45deg, var(--surface) 0 9px, var(--surface-2) 9px 10px)`), 48px icon tile, title (13.5px/600), message (11.5px), and an optional primary CTA button with a pencil icon. Props: `title`, `message`, `cta?`, `onCta?` — omit both for a purely informational state (no button renders).
 
 ### `Modal` (`src/components/Modal.tsx`)
 Shared overlay (`fixed inset-0`, `rgba(5,8,13,.62)` + `backdrop-blur-[4px]`, `animate-fade`) and card (`rounded-[16px]`, `shadow-app`, `animate-pop-in`). Configurable via props: `maxWidthPx`, `zIndex` (new-project 50, survey 60, size-picker 70, `UserMenu`'s logout confirmation 100 — matches original stacking), `align` (`center` | `start`, the size picker anchors near the top), `scroll` (`inner` = header/body/footer each manage their own scroll region; `outer` = the whole card scrolls, used by the new-project modal).
@@ -89,6 +89,17 @@ All Feather-style inline SVGs (24×24 viewBox, `stroke="currentColor"`, round ca
 
 ### Project Explorer (`/`)
 Fixed 238px sidebar (logo lockup, grouped nav with active-item soft-primary background + inset ring, pinned "Nube conectada" status card) + flexible main column (60px header with workspace-switcher button, search input, theme toggle, `UserMenu`; scrollable body with page title, 4-up stat card grid, filter pills, and a CSS-grid projects table `grid-cols-[minmax(0,2.4fr)_minmax(0,1.2fr)_150px_132px_100px]`).
+
+**Filter pills** (`FilterPills.tsx`) — four `scope` filters, one active at a time: "Todos los proyectos" / "Mis proyectos" / "Compartidos conmigo" / "Organización" (`all`/`own`/`shared`/`org`), a row of `<button>`s (`flex gap-[6px]`) left of the "{shown} de {total} proyectos" count (`ml-auto`, `text-text-faint`, `font-mono`). Both states share the pill shape (`px-[13px] py-[6px] rounded-[8px] text-xs`); only fill/border/weight change:
+- **Active**: `font-semibold`, `bg-primary-soft`, `text-text`, `shadow-[inset_0_0_0_1px_var(--primary-ring)]` (no border utility — the inset shadow doubles as the ring).
+- **Inactive**: `font-medium`, `bg-surface`, `text-text-dim`, `border border-border`, `hover:text-text`.
+
+Clicking a pill sets `?scope=` in the URL (via `useExplorerFilters`) and resets to page 0, same as a new search. There's no "loading" pill state — the count/table skeleton already covers the in-flight fetch.
+
+**Empty project list** (`ProjectsTable.tsx`'s `emptyStateContent`) — the `EmptyPanel` shown when a query returns zero rows reads per the active `q`/`scope` combo, not one generic message:
+- **Active search** (`q` set, any scope): "Sin resultados para tu búsqueda" / quotes the term back, suggests trying another term — no CTA.
+- **Scope `all`/`own`, no search**: "Aún no hay proyectos" / "Aún no tienes proyectos propios" — the only two variants with a "Crear proyecto" CTA, which opens a second, independent `NewProjectModal` instance via its `renderTrigger` prop (own internal `open` state, same modal component/form as the header's "Crear Nuevo Proyecto").
+- **Scope `shared`/`org`, no search**: "Nadie ha compartido proyectos contigo" / "Sin proyectos en tu organización" — informational only, no CTA (a newly created project can't retroactively be shared-with-you or org-visible).
 
 ### Workspace (`/workspace`)
 58px navbar (back button, project identity, cloud-save status, theme toggle, `UserMenu`) → chevron progress-tab bar (Completación ✓ / Fluidos y PVT ✓ / IPR y OPR active / Cálculos locked) → 45/55 split: left column scrolls (data-entry forms per active tab), right column is a fixed-width canvas stack (charts/tables per active tab) on a `surface-2` background.

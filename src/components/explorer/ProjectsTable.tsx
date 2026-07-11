@@ -10,6 +10,7 @@ import { EmptyPanel } from "@/components/workspace/atoms/EmptyPanel";
 import { isErrorResponse } from "@/lib/api/errors";
 import { LockStatusBadge } from "./LockStatusBadge";
 import { Modal } from "@/components/Modal";
+import { NewProjectModal } from "./NewProjectModal";
 import { useExplorerFilters } from "./useExplorerFilters";
 
 type PendingDelete = { id: number; name: string };
@@ -19,15 +20,53 @@ const PAGE_SIZE = 20;
 
 const dateFormatter = new Intl.DateTimeFormat("es", { day: "2-digit", month: "short", year: "numeric" });
 
+// Distinguishes "no projects exist at all" from "no results for this filter" — showing the same
+// message for both wrongly implies the account has zero projects even when a search/scope filter
+// is just narrowing an existing list.
+type EmptyStateContent = { title: string; message: string; showCreateCta?: boolean };
+
+const emptyStateContent = (q: string | undefined, scope: "all" | "own" | "shared" | "org"): EmptyStateContent => {
+  if (q) {
+    return {
+      title: "Sin resultados para tu búsqueda",
+      message: `Ningún proyecto coincide con "${q}". Prueba con otro término o revisa la ortografía.`,
+    };
+  }
+  if (scope === "own") {
+    return {
+      title: "Aún no tienes proyectos propios",
+      message: "Crea un nuevo proyecto para comenzar a diseñar tu sistema de bombeo.",
+      showCreateCta: true,
+    };
+  }
+  if (scope === "shared") {
+    return {
+      title: "Nadie ha compartido proyectos contigo",
+      message: "Los proyectos que otros usuarios compartan contigo aparecerán aquí.",
+    };
+  }
+  if (scope === "org") {
+    return {
+      title: "Sin proyectos en tu organización",
+      message: "Los proyectos visibles para toda tu organización aparecerán aquí.",
+    };
+  }
+  return {
+    title: "Aún no hay proyectos",
+    message: "Crea un nuevo proyecto para comenzar a diseñar tu sistema de bombeo.",
+    showCreateCta: true,
+  };
+};
+
 export const ProjectsTable = () => {
-  const { page, q, setFilters } = useExplorerFilters();
+  const { page, q, scope, setFilters } = useExplorerFilters();
   const goToPage = (nextPage: number) => setFilters({ page: nextPage });
 
   const { data, isPending, isError, refetch } = useProjectList({
     page,
     size: PAGE_SIZE,
     sort: "-updatedAt",
-    scope: "all",
+    scope,
     q,
   });
   const deleteProject = useDeleteProject();
@@ -114,11 +153,17 @@ export const ProjectsTable = () => {
             </div>
           ) : projects.length === 0 ? (
             <div className="border-t border-border p-6">
-              <EmptyPanel
-                title="Aún no hay proyectos"
-                message="Crea un nuevo proyecto para comenzar a diseñar tu sistema de bombeo."
-                cta="Crear proyecto"
-              />
+              {(() => {
+                const { title, message, showCreateCta } = emptyStateContent(q, scope);
+                if (!showCreateCta) return <EmptyPanel title={title} message={message} />;
+                return (
+                  <NewProjectModal
+                    renderTrigger={(onClick) => (
+                      <EmptyPanel title={title} message={message} cta="Crear proyecto" onCta={onClick} />
+                    )}
+                  />
+                );
+              })()}
             </div>
           ) : (
             projects.map((project) => {

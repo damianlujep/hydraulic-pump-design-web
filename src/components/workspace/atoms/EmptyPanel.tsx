@@ -3,7 +3,7 @@ import { LineChartIcon, PencilIcon } from "@/components/icons";
 type EmptyPanelProps = {
   title: string;
   message: string;
-  cta: string;
+  cta?: string;
   onCta?: () => void;
 };
 
@@ -20,13 +20,15 @@ export const EmptyPanel = ({ title, message, cta, onCta }: EmptyPanelProps) => {
         <div className="text-[13.5px] font-semibold text-text-dim">{title}</div>
         <div className="mt-1 text-[11.5px] text-text-faint leading-[1.45]">{message}</div>
       </div>
-      <button
-        onClick={onCta}
-        className="inline-flex items-center gap-[7px] px-[15px] py-[8px] rounded-[9px] bg-primary text-primary-fg text-[12px] font-semibold shadow-[0_4px_12px_var(--primary-ring)] cursor-pointer hover:bg-primary-hover"
-      >
-        <PencilIcon size={14} />
-        {cta}
-      </button>
+      {cta && (
+        <button
+          onClick={onCta}
+          className="inline-flex items-center gap-[7px] px-[15px] py-[8px] rounded-[9px] bg-primary text-primary-fg text-[12px] font-semibold shadow-[0_4px_12px_var(--primary-ring)] cursor-pointer hover:bg-primary-hover"
+        >
+          <PencilIcon size={14} />
+          {cta}
+        </button>
+      )}
     </div>
   );
 };

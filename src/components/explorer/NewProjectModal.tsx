@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +25,11 @@ const EMPTY_VALUES: ProjectInfoFormValues = {
   commentaries: "",
 };
 
-export const NewProjectModal = () => {
+type NewProjectModalProps = {
+  renderTrigger?: (onClick: () => void) => ReactNode;
+};
+
+export const NewProjectModal = ({ renderTrigger }: NewProjectModalProps = {}) => {
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
@@ -71,13 +75,17 @@ export const NewProjectModal = () => {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-[9px] px-[18px] py-[11px] rounded-[10px] bg-primary text-primary-fg text-[13.5px] font-bold cursor-pointer shadow-[0_5px_16px_var(--primary-ring)] hover:bg-primary-hover"
-      >
-        <PlusIcon size={17} strokeWidth={2.4} />
-        Crear Nuevo Proyecto
-      </button>
+      {renderTrigger ? (
+        renderTrigger(() => setOpen(true))
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className="inline-flex items-center gap-[9px] px-[18px] py-[11px] rounded-[10px] bg-primary text-primary-fg text-[13.5px] font-bold cursor-pointer shadow-[0_5px_16px_var(--primary-ring)] hover:bg-primary-hover"
+        >
+          <PlusIcon size={17} strokeWidth={2.4} />
+          Crear Nuevo Proyecto
+        </button>
+      )}
 
       {open && (
         <Modal onClose={() => setOpen(false)} maxWidthPx={740} zIndex={50} scroll="outer">
