@@ -290,6 +290,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dashboard stats scoped to projects visible to the current user */
+        get: operations["stats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/casings": {
         parameters: {
             query?: never;
@@ -1125,6 +1142,23 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string;
         };
+        ProjectStatsResponse: {
+            /**
+             * Format: int32
+             * @description Total projects visible to the caller (owner, org-shared, or explicitly granted) — same set as GET /projects?scope=all
+             */
+            totalVisible?: number;
+            /**
+             * Format: int32
+             * @description Visible projects created on or after the 1st of the current calendar month
+             */
+            createdThisMonth?: number;
+            /**
+             * Format: int32
+             * @description Visible projects with a saved IPR calculation result. Temporary proxy for "completed" — will be redefined as "a PDF report has been generated" once the simulation/report feature ships
+             */
+            completedCount?: number;
+        };
         PageResponseOrganizationResponse: {
             content?: components["schemas"]["OrganizationResponse"][];
             /** Format: int32 */
@@ -1780,6 +1814,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TubingResponse"];
+                };
+            };
+        };
+    };
+    stats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ProjectStatsResponse"];
                 };
             };
         };

@@ -13,6 +13,18 @@ export type UpdateDesignDataRequest = components["schemas"]["UpdateDesignDataReq
 export type LockStatusResponse = components["schemas"]["LockStatusResponse"];
 export type UpdateProjectMetadataRequest = components["schemas"]["UpdateProjectMetadataRequest"];
 export type NewProjectInfoDto = components["schemas"]["NewProjectInfoDto"];
+export type ProjectStatsResponse = components["schemas"]["ProjectStatsResponse"];
+
+export const useProjectStats = () => {
+  return useQuery({
+    queryKey: queryKeys.projects.stats,
+    queryFn: async () => {
+      const res = await apiFetch("/api/projects/stats");
+      if (!res.ok) throw new Error("Failed to load project stats");
+      return res.json() as Promise<ProjectStatsResponse>;
+    },
+  });
+};
 
 export const useProjectList = (params: ProjectListParams) => {
   return useQuery({

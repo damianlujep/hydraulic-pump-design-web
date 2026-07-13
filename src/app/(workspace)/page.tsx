@@ -1,8 +1,7 @@
 import { DownloadIcon } from "@/components/icons";
 import { Sidebar } from "@/components/explorer/Sidebar";
 import { ExplorerHeader } from "@/components/explorer/ExplorerHeader";
-import { StatCard } from "@/components/explorer/StatCard";
-import { ActiveProjectsStat } from "@/components/explorer/ActiveProjectsStat";
+import { ExplorerStats } from "@/components/explorer/ExplorerStats";
 import { FilterPills } from "@/components/explorer/FilterPills";
 import { ProjectsTable } from "@/components/explorer/ProjectsTable";
 import { NewProjectModal } from "@/components/explorer/NewProjectModal";
@@ -36,23 +35,7 @@ const ExplorerPage = () => {
           </div>
 
           <div className="grid grid-cols-4 gap-[14px] mb-[22px]">
-            <ActiveProjectsStat />
-            <StatCard
-              label="Proyectos nuevos (mes)"
-              value="—"
-              hint="Pendiente: requiere el endpoint de estadísticas agregadas (ver docs-user/refactor-roadmap.md)"
-            />
-            <StatCard
-              label="Simulaciones (mes)"
-              value="—"
-              hint="Pendiente: se habilitará junto con el módulo de Cálculos y reportes PDF"
-            />
-            <StatCard
-              label="% Diseños completos"
-              value="—"
-              accent
-              hint="Pendiente: requiere el endpoint de estadísticas agregadas (ver docs-user/refactor-roadmap.md)"
-            />
+            <ExplorerStats />
           </div>
 
           <FilterPills />
