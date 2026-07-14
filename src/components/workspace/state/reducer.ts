@@ -11,9 +11,8 @@ export type WorkspaceState = {
   iprResult: IprCalculationResponse | null;
   iprFingerprint: string | null;
   iprCalcModalOpen: boolean;
-  // Session-ephemeral calc inputs (no IprDto field exists for these yet) — kept in reducer state
-  // so closing/reopening the calc modal within a session doesn't lose points 2..n or the design
-  // rate. Never registered as DATA_ACTIONS (see below).
+  // Persisted IprDto fields (extraTestPoints/desiredOilRate) — hydrated on load, committed on
+  // modal Cancel/Calcular/go-to-field via SET_IPR_CALC_PARAMS (a DATA_ACTION, see below).
   iprExtraTestPoints: TestPointDraft[];
   iprDesiredOilRate: string;
   newProjectInfo: DesignDataDto["newProjectInfo"];
@@ -65,6 +64,7 @@ const DATA_ACTIONS = new Set<WorkspaceAction["type"]>([
   "MARK_DIRTY",
   "CALC_SUCCESS",
   "SET_PROJECT_INFO",
+  "SET_IPR_CALC_PARAMS",
 ]);
 
 export const createInitialState = (input: {
@@ -74,6 +74,8 @@ export const createInitialState = (input: {
   survey: SurveyRow[];
   iprResult: IprCalculationResponse | null;
   iprFingerprint: string | null;
+  iprExtraTestPoints: TestPointDraft[];
+  iprDesiredOilRate: string;
 }): WorkspaceState => ({
   activeTab: "completion",
   calcStatus: "idle",
@@ -83,8 +85,8 @@ export const createInitialState = (input: {
   iprResult: input.iprResult,
   iprFingerprint: input.iprFingerprint,
   iprCalcModalOpen: false,
-  iprExtraTestPoints: [],
-  iprDesiredOilRate: "",
+  iprExtraTestPoints: input.iprExtraTestPoints,
+  iprDesiredOilRate: input.iprDesiredOilRate,
   newProjectInfo: input.project.designData?.newProjectInfo,
   version: input.project.version ?? 0,
   revision: 0,

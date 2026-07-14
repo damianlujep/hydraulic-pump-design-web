@@ -125,7 +125,20 @@ export const fromFluidsDto = (dto: FluidsDto | undefined): FluidsFormValues => (
   oilSurfaceTensionCorrelation: dto?.oilSurfaceTensionCorrelation ?? EMPTY_FLUIDS.oilSurfaceTensionCorrelation,
 });
 
-export const toIprDto = (values: IprFormValues, iprResult: IprCalculationResponse | null): IprDto => ({
+// Only fully-filled extra rows are persistable (IprTestPointDto's two fields aren't optional in
+// practice) — a partially-filled draft row stays session-only. Reuses parseExtraPoint (defined
+// below) so "is this row usable" has one definition shared with calc-time validation; a blank row
+// parses to null and a partial one to "invalid", both filtered out here rather than surfaced as an
+// error the way they are at calc-time.
+const toExtraTestPointsDto = (rows: TestPointDraft[]): components["schemas"]["IprTestPointDto"][] =>
+  rows.map(parseExtraPoint).filter((p): p is TestPoint => p !== null && p !== "invalid");
+
+export const toIprDto = (
+  values: IprFormValues,
+  iprResult: IprCalculationResponse | null,
+  extraTestPoints: TestPointDraft[],
+  desiredOilRate: string,
+): IprDto => ({
   bottomholeTemperature: numOrUndefined(values.bottomholeTemperature),
   wellheadTemperature: numOrUndefined(values.wellheadTemperature),
   reservoirPressure: numOrUndefined(values.reservoirPressure),
@@ -143,6 +156,9 @@ export const toIprDto = (values: IprFormValues, iprResult: IprCalculationRespons
   maxInjectionPressureAdjusted: numOrUndefined(values.maxInjectionPressureAdjusted),
   injectedFluidHydraulicCorrelation: values.injectedFluidHydraulicCorrelation,
   multiphaseFlowCorrelation: values.multiphaseFlowCorrelation,
+  correlation: values.correlation,
+  extraTestPoints: toExtraTestPointsDto(extraTestPoints),
+  desiredOilRate: numOrUndefined(desiredOilRate),
   // IprResultDto is shape-identical to IprCalculationResponse (backend parity test enforces this),
   // so the calc response passes straight through with no transformation.
   lastResult: iprResult ?? undefined,
@@ -166,11 +182,18 @@ export const fromIprDto = (dto: IprDto | undefined): IprFormValues => ({
   flowingWellheadPressure: numToString(dto?.flowingWellheadPressure),
   maxRefInjectionRate: numToString(dto?.maxRefInjectionRate),
   maxInjectionPressureAdjusted: numToString(dto?.maxInjectionPressureAdjusted),
-  // Not a real IprDto field — seeded from the last successful calc's correlation so a persisted
-  // FETKOVICH result reopens with Fetkovich selected instead of silently reverting to Vogel.
-  correlation: dto?.lastCorrelation ?? EMPTY_IPR.correlation,
+  // Fall back to lastCorrelation only for rows saved before `correlation` existed as its own field.
+  correlation: dto?.correlation ?? dto?.lastCorrelation ?? EMPTY_IPR.correlation,
   injectedFluidHydraulicCorrelation: dto?.injectedFluidHydraulicCorrelation ?? EMPTY_IPR.injectedFluidHydraulicCorrelation,
   multiphaseFlowCorrelation: dto?.multiphaseFlowCorrelation ?? EMPTY_IPR.multiphaseFlowCorrelation,
+});
+
+export const fromIprCalcParamsDto = (dto: IprDto | undefined): { extraTestPoints: TestPointDraft[]; desiredOilRate: string } => ({
+  extraTestPoints: (dto?.extraTestPoints ?? []).map((p) => ({
+    flowRate: numToString(p.flowRate),
+    flowingBottomholePressure: numToString(p.flowingBottomholePressure),
+  })),
+  desiredOilRate: numToString(dto?.desiredOilRate),
 });
 
 // Sections map positionally to the Upper/Middle/Bottom slots (matching the UI's
@@ -349,6 +372,8 @@ export const toDesignDataDto = (input: {
   tubings: TubularItem[];
   newProjectInfo: DesignDataDto["newProjectInfo"];
   iprResult: IprCalculationResponse | null;
+  iprExtraTestPoints: TestPointDraft[];
+  iprDesiredOilRate: string;
   stepDone: StepDoneMap;
 }): DesignDataDto => ({
   newProjectInfo: input.newProjectInfo,
@@ -366,16 +391,16 @@ export const toDesignDataDto = (input: {
   },
   ipr: {
     dataEntered: input.stepDone.ipr,
-    data: toIprDto(input.ipr, input.iprResult),
+    data: toIprDto(input.ipr, input.iprResult, input.iprExtraTestPoints, input.iprDesiredOilRate),
   },
 });
 
-// The extra Fetkovich test points and desiredOilRate are session-ephemeral (no IprDto field
-// exists for them yet), but they're still real calc inputs — the fingerprint must cover them so
-// editing/adding/removing a point correctly flips `iprStale`, and the hydration/reducer-init
-// baseline must build this literal the same way (empty array + empty string) so a freshly loaded
-// project doesn't start out flagged stale. Rebuilt as a fresh literal inside the helper (rather
-// than trusting call-site key order) so JSON.stringify's key order is canonical everywhere.
+// The extra Fetkovich test points and desiredOilRate are real calc inputs, not just document
+// fields — the fingerprint must cover them so editing/adding/removing a point correctly flips
+// `iprStale`, and the hydration/reducer-init baseline must build this literal from the same
+// hydrated values passed to createInitialState so a freshly loaded project doesn't start out
+// flagged stale. Rebuilt as a fresh literal inside the helper (rather than trusting call-site key
+// order) so JSON.stringify's key order is canonical everywhere.
 export type IprFingerprintInput = {
   ipr: IprFormValues;
   fluids: FluidsFormValues;

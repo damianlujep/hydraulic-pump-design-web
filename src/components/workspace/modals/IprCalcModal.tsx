@@ -117,7 +117,15 @@ export const IprCalcModal = () => {
   const validation = validateIprCalcInputs(iprValues, fluidsValues, calcParams);
   const canCalc = canEdit && !running && validation.ok;
 
-  const commitParams = () => dispatch({ type: "SET_IPR_CALC_PARAMS", extraTestPoints, desiredOilRate });
+  // Guard against a no-op dispatch (e.g. opening the modal and immediately cancelling) — SET_IPR_CALC_PARAMS
+  // is a DATA_ACTION now, so an unconditional dispatch would bump revision/flash the dirty badge for
+  // the autosave debounce even though buildCurrentPayload would end up byte-identical.
+  const commitParams = () => {
+    const unchanged =
+      JSON.stringify(extraTestPoints) === JSON.stringify(state.iprExtraTestPoints) && desiredOilRate === state.iprDesiredOilRate;
+    if (unchanged) return;
+    dispatch({ type: "SET_IPR_CALC_PARAMS", extraTestPoints, desiredOilRate });
+  };
 
   const handleCancel = () => {
     if (running) return;

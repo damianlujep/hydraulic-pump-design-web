@@ -6,7 +6,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { createInitialState, workspaceReducer, type WorkspaceAction, type WorkspaceState } from "./reducer";
 import { completionSchema, fluidsSchema, iprSchema, type CompletionFormValues, type FluidsFormValues, type IprFormValues } from "./schemas";
-import { buildIprRequest, computeIprFingerprint, fromCompletionDto, fromFluidsDto, fromIprDto, fromSurveyDto, toDesignDataDto } from "./designData";
+import {
+  buildIprRequest,
+  computeIprFingerprint,
+  fromCompletionDto,
+  fromFluidsDto,
+  fromIprCalcParamsDto,
+  fromIprDto,
+  fromSurveyDto,
+  toDesignDataDto,
+} from "./designData";
 import { translateIprDomainError } from "./iprErrorMessages";
 import { useEditLock } from "./useEditLock";
 import { useSaveDesignData, useUpdateProjectMetadata, type ProjectResponse } from "@/lib/api/projects";
@@ -66,15 +75,20 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
   const hydrated = fromCompletionDto(project.designData?.completion?.data, casings, tubings);
   const survey = fromSurveyDto(project.designData?.directionalSurvey?.data);
   const hydratedFluids = fromFluidsDto(project.designData?.fluids?.data);
-  const hydratedIpr = fromIprDto(project.designData?.ipr?.data);
-  // Trust a stored result on reload — the fingerprint is seeded from the hydrated form values
-  // themselves, so any edit after this point still reverts the step pill via the usual mechanism.
-  // Documented quirk: extraTestPoints/desiredOilRate are session-ephemeral (no IprDto field), so a
-  // persisted FETKOVICH result always hydrates as if calculated with only its point-1 scalars and
-  // no design rate — it will NOT show as stale even though the points that produced it are gone.
-  const hydratedIprResult = project.designData?.ipr?.data?.lastResult ?? null;
+  const iprDto = project.designData?.ipr?.data;
+  const hydratedIpr = fromIprDto(iprDto);
+  const hydratedCalcParams = fromIprCalcParamsDto(iprDto);
+  // Trust a stored result on reload — the fingerprint is seeded from the hydrated form values plus
+  // the hydrated extra points/desired rate, so any edit after this point still reverts the step
+  // pill via the usual mechanism.
+  const hydratedIprResult = iprDto?.lastResult ?? null;
   const hydratedIprFingerprint = hydratedIprResult
-    ? computeIprFingerprint({ ipr: hydratedIpr, fluids: hydratedFluids, extraTestPoints: [], desiredOilRate: "" })
+    ? computeIprFingerprint({
+        ipr: hydratedIpr,
+        fluids: hydratedFluids,
+        extraTestPoints: hydratedCalcParams.extraTestPoints,
+        desiredOilRate: hydratedCalcParams.desiredOilRate,
+      })
     : null;
 
   const [state, dispatch] = useReducer(
@@ -86,6 +100,8 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
       survey,
       iprResult: hydratedIprResult,
       iprFingerprint: hydratedIprFingerprint,
+      iprExtraTestPoints: hydratedCalcParams.extraTestPoints,
+      iprDesiredOilRate: hydratedCalcParams.desiredOilRate,
     },
     createInitialState,
   );
@@ -159,13 +175,15 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
       tubings,
       newProjectInfo: state.newProjectInfo,
       iprResult: state.iprResult,
+      iprExtraTestPoints: state.iprExtraTestPoints,
+      iprDesiredOilRate: state.iprDesiredOilRate,
       stepDone,
     });
 
   const lastSavedPayloadRef = useRef<string | null>(null);
   // Lazy-init on first render only, seeded with the hydrated payload (not null) so a no-op revision
-  // bump before the first real save (e.g. a rejected keystroke, or toggling the non-persisted
-  // correlation select) dedupes into SAVE_NOOP instead of firing a real PUT of unchanged data.
+  // bump before the first real save of the session (e.g. a rejected keystroke, see the
+  // numeric-input note below) dedupes into SAVE_NOOP instead of firing a real PUT of unchanged data.
   if (lastSavedPayloadRef.current === null) {
     lastSavedPayloadRef.current = JSON.stringify(buildCurrentPayload());
   }

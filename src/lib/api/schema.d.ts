@@ -768,6 +768,18 @@ export interface components {
             injectedFluidHydraulicCorrelation?: "DARCY_WEISBACH" | "HAZEN_WILLIAMS";
             /** @enum {string} */
             multiphaseFlowCorrelation?: "GRIFFITH" | "BEGGS_BRILL" | "HAGEDORN_BROWN";
+            /**
+             * @description Reservoir-model select — the user's current choice, which may differ from lastCorrelation if they haven't recalculated
+             * @enum {string}
+             */
+            correlation?: "VOGEL" | "FETKOVICH";
+            /** @description Fetkovich test points 2..n; point 1 stays in testFlowRate/flowingBottomholePressure. Empty/absent for Vogel */
+            extraTestPoints?: components["schemas"]["IprTestPointDto"][];
+            /**
+             * Format: double
+             * @description Desired oil rate in STB/d for the jet pump design point; stored draft value, not validated on save
+             */
+            desiredOilRate?: number;
             /** @description Last successful IPR calculation result, stored as-is for reload without recalculating */
             lastResult?: components["schemas"]["IprResultDto"];
             /**
@@ -826,6 +838,18 @@ export interface components {
             curvePoints?: components["schemas"]["IprCurvePoint"][];
             /** @description Jet pump design point for desiredOilRate; null when desiredOilRate was not sent. Values are full precision (not rounded) */
             designPoint?: components["schemas"]["DesignPoint"];
+        };
+        IprTestPointDto: {
+            /**
+             * Format: double
+             * @description Well-test total flow rate in STB/d
+             */
+            flowRate?: number;
+            /**
+             * Format: double
+             * @description Well-test flowing bottomhole pressure in psia
+             */
+            flowingBottomholePressure?: number;
         };
         NewProjectInfoDto: {
             newProjectName?: string;
