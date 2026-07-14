@@ -76,10 +76,10 @@ export const SurveyTable = () => {
           {state.survey.map((r) => (
             <div key={r.id} className={`grid ${GRID_COLS} border-t border-border hover:bg-primary-soft`}>
               <div className="text-right p-[6px_12px] text-text-faint">{r.id}</div>
-              <div className="text-right p-[6px_12px] text-text">{r.md}</div>
-              <div className="text-right p-[6px_12px] text-text">{r.tvd}</div>
-              <div className="text-right p-[6px_12px] text-text-dim">{r.hd.toFixed(1)}</div>
-              <div className="text-right p-[6px_12px] text-data-blue">{r.angle.toFixed(1)}</div>
+              <div className="text-right p-[6px_12px] text-text">{r.md.toFixed(3)}</div>
+              <div className="text-right p-[6px_12px] text-text">{r.tvd.toFixed(3)}</div>
+              <div className="text-right p-[6px_12px] text-text-dim">{r.hd}</div>
+              <div className="text-right p-[6px_12px] text-data-blue">{r.angle.toFixed(0)}</div>
             </div>
           ))}
         </div>

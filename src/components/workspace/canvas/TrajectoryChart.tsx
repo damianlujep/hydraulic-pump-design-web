@@ -48,7 +48,7 @@ const buildTrajectoryOption = (rows: SurveyRow[], c: ChartPalette): TrajectoryEC
         return [
           `MD: <b>${fmt(row.md, 0)}</b> ft`,
           `TVD: <b>${fmt(row.tvd, 0)}</b> ft`,
-          `Ángulo: <b>${fmt(row.angle, 1)}</b> °`,
+          `Ángulo: <b>${fmt(row.angle, 0)}</b> °`,
           `HD: <b>${fmt(row.hd, 0)}</b> ft`,
         ].join("<br/>");
       },
