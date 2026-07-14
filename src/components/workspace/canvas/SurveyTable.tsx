@@ -1,12 +1,51 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ChevronRightThinIcon, PencilIcon } from "@/components/icons";
+import { isErrorResponse } from "@/lib/api/errors";
+import { useInterpolateTvd } from "@/lib/api/calculations";
 import { useWorkspace } from "../state/WorkspaceContext";
+import { sanitizeNumeric } from "../state/numericInput";
 
 const GRID_COLS = "grid-cols-[56px_repeat(4,1fr)]";
 
+const translateTvdDomainError = (message: string): string => {
+  if (/^surveyStations must be sorted by measuredDepth with no duplicate depths$/.test(message)) {
+    return "El survey debe estar ordenado por MD, sin profundidades duplicadas";
+  }
+  return "No se pudo calcular el TVD";
+};
+
 export const SurveyTable = () => {
   const { state, dispatch, canEdit } = useWorkspace();
+  const [mdInput, setMdInput] = useState("");
+  const interpolateTvd = useInterpolateTvd();
+  const hasEnoughStations = state.survey.length >= 2;
+
+  const parsedMd = mdInput.trim() === "" ? null : Number(mdInput);
+  const mdIsValid = parsedMd !== null && Number.isFinite(parsedMd);
+
+  useEffect(() => {
+    if (!hasEnoughStations || !mdIsValid) return;
+    const timer = setTimeout(() => {
+      interpolateTvd.mutate({
+        surveyStations: state.survey.map((r) => ({ measuredDepth: r.md, trueVerticalDepth: r.tvd })),
+        targetMeasuredDepth: parsedMd,
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mdIsValid, parsedMd, state.survey, hasEnoughStations]);
+
+  const showResult = mdIsValid && interpolateTvd.variables?.targetMeasuredDepth === parsedMd;
+  const tvdValue = showResult ? interpolateTvd.data?.trueVerticalDepth : undefined;
+  const errorMessage =
+    showResult && interpolateTvd.isError
+      ? isErrorResponse(interpolateTvd.error) && interpolateTvd.error.code === "DOMAIN_ERROR"
+        ? translateTvdDomainError(interpolateTvd.error.message)
+        : "No se pudo calcular el TVD"
+      : null;
+  const tvdDisplayValue = !showResult ? "" : interpolateTvd.isPending ? "…" : (tvdValue?.toFixed(2) ?? "");
 
   return (
     <div className="bg-surface border border-border rounded-card overflow-hidden flex-none">
@@ -51,14 +90,25 @@ export const SurveyTable = () => {
           <div className="flex-1 min-w-0">
             <div className="text-[11px] font-semibold text-text-dim">Calcular TVD desde MD</div>
             <div className="mt-[3px] text-[10.5px] text-text-faint">
-              Inserte MD para calcular TVD por interpolación del survey
+              {hasEnoughStations
+                ? "Inserte MD para calcular TVD por interpolación del survey"
+                : "Se requieren al menos 2 estaciones en el survey"}
             </div>
+            {errorMessage && <div className="mt-[3px] text-[10.5px] text-danger">{errorMessage}</div>}
           </div>
           <div className="flex items-center gap-2 flex-none">
             <div className="relative flex items-center">
               <input
                 placeholder="MD"
-                className="w-24 py-[6px] pr-6 pl-[9px] font-mono text-xs text-left bg-surface-3 border border-border rounded-[7px] text-text outline-none focus:border-primary focus:shadow-[0_0_0_2px_var(--primary-ring)]"
+                inputMode="decimal"
+                disabled={!hasEnoughStations}
+                value={mdInput}
+                onChange={(e) => {
+                  const sanitized = sanitizeNumeric(e.target.value);
+                  if (sanitized !== e.target.value) e.target.value = sanitized;
+                  setMdInput(sanitized);
+                }}
+                className="w-24 py-[6px] pr-6 pl-[9px] font-mono text-xs text-left bg-surface-3 border border-border rounded-[7px] text-text outline-none focus:border-primary focus:shadow-[0_0_0_2px_var(--primary-ring)] disabled:opacity-60"
               />
               <span className="absolute right-[9px] top-1/2 -translate-y-1/2 text-[10px] text-text-faint">ft</span>
             </div>
@@ -67,6 +117,8 @@ export const SurveyTable = () => {
               <input
                 placeholder="TVD"
                 disabled
+                value={tvdDisplayValue}
+                readOnly
                 className="w-24 py-[6px] pr-6 pl-[9px] font-mono text-xs text-left bg-surface-2 border border-dashed border-border rounded-[7px] text-text-faint outline-none"
               />
               <span className="absolute right-[9px] top-1/2 -translate-y-1/2 text-[10px] text-text-faint">ft</span>

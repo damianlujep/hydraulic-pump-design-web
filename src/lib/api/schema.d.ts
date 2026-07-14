@@ -149,6 +149,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/calculations/directional-survey/interpolate-tvd": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Interpolate true vertical depth (TVD) at a measured depth from directional survey stations */
+        post: operations["interpolateTvd"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/refresh": {
         parameters: {
             query?: never;
@@ -1076,6 +1093,34 @@ export interface components {
             /** @description Jet pump design point for desiredOilRate; null when desiredOilRate was not sent. Values are full precision (not rounded) */
             designPoint?: components["schemas"]["DesignPoint"];
         };
+        SurveyStation: {
+            /**
+             * Format: double
+             * @description Measured depth in ft
+             */
+            measuredDepth: number;
+            /**
+             * Format: double
+             * @description True vertical depth in ft
+             */
+            trueVerticalDepth: number;
+        };
+        TvdInterpolationRequest: {
+            /** @description Directional survey stations; at least 2 required to build the spline */
+            surveyStations: components["schemas"]["SurveyStation"][];
+            /**
+             * Format: double
+             * @description Measured depth in ft to interpolate TVD at; may fall outside the survey's MD range (extrapolated)
+             */
+            targetMeasuredDepth: number;
+        };
+        TvdInterpolationResponse: {
+            /**
+             * Format: double
+             * @description Interpolated true vertical depth in ft, rounded to 2 decimals
+             */
+            trueVerticalDepth?: number;
+        };
         AuthResponse: {
             accessToken?: string;
             user?: components["schemas"]["UserResponse"];
@@ -1552,6 +1597,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["IprCalculationResponse"];
+                };
+            };
+        };
+    };
+    interpolateTvd: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TvdInterpolationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TvdInterpolationResponse"];
                 };
             };
         };
