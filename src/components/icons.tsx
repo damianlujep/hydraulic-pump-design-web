@@ -298,3 +298,16 @@ export const EyeIcon = (props: IconProps) => (
     <circle cx="12" cy="12" r="3" />
   </Icon>
 );
+
+export const EyeOffIcon = (props: IconProps) => (
+  <Icon strokeWidth={1.9} {...props}>
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+    <path d="M1 1l22 22" />
+  </Icon>
+);
+
+export const ShieldIcon = (props: IconProps) => (
+  <Icon strokeWidth={1.9} {...props}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </Icon>
+);

@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Modal } from "@/components/Modal";
+import { useEscapeKey } from "@/hooks/useEscapeKey";
 import {
   BellIcon,
   ChevronDownIcon,
@@ -13,15 +15,8 @@ import {
 } from "@/components/icons";
 import { useLogout } from "@/lib/api/auth";
 import { useAuth } from "@/lib/auth/auth-context";
+import { avatarGradientStyle, roleLabel, userInitials, userFullName } from "@/lib/auth/user-display";
 import { cn } from "@/utils/cn";
-
-const ROLE_LABELS: Record<string, string> = {
-  SUPER_ADMIN: "Super Administrador",
-  ADMIN: "Administrador",
-  MEMBER: "Miembro",
-};
-
-const avatarStyle = { background: "linear-gradient(135deg, var(--primary), var(--primary-hover))" };
 
 const itemClass =
   "group flex w-full items-center gap-[11px] rounded-[9px] px-[11px] py-[9px] text-left text-[12.5px] font-medium text-text-dim transition-colors hover:bg-surface-2 hover:text-text [&_svg]:flex-none [&_svg]:text-text-faint hover:[&_svg]:text-text-dim";
@@ -32,7 +27,7 @@ const sectionLabelClass =
 const Avatar = ({ initials, size, fontSize }: { initials: string; size: number; fontSize: number }) => (
   <span
     className="rounded-full flex items-center justify-center text-primary-fg font-bold flex-none"
-    style={{ ...avatarStyle, width: size, height: size, fontSize }}
+    style={{ ...avatarGradientStyle, width: size, height: size, fontSize }}
   >
     {initials}
   </span>
@@ -46,24 +41,18 @@ type UserMenuProps = {
 export const UserMenu = ({ variant = "full" }: UserMenuProps) => {
   const { user } = useAuth();
   const logout = useLogout();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  useEffect(() => {
-    if (!open && !confirmOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        setConfirmOpen(false);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, confirmOpen]);
+  useEscapeKey(() => {
+    setOpen(false);
+    setConfirmOpen(false);
+  }, open || confirmOpen);
 
-  const initials = user ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "?" : "?";
-  const fullName = user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Usuario" : "Usuario";
-  const subtitle = user ? (user.organizationName ?? ROLE_LABELS[user.role ?? ""] ?? "") : "";
+  const initials = userInitials(user);
+  const fullName = userFullName(user);
+  const subtitle = user ? (user.organizationName ?? roleLabel(user)) : "";
 
   const closeMenu = () => setOpen(false);
 
@@ -112,7 +101,14 @@ export const UserMenu = ({ variant = "full" }: UserMenuProps) => {
           </div>
 
           <div className={sectionLabelClass}>Cuenta</div>
-          <button type="button" className={itemClass} onClick={closeMenu}>
+          <button
+            type="button"
+            className={itemClass}
+            onClick={() => {
+              closeMenu();
+              router.push("/account");
+            }}
+          >
             <UserIcon size={16} />
             Mi perfil
           </button>

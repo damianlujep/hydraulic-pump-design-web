@@ -1,6 +1,17 @@
-import { CatalogIcon, DocsIcon, HistoryIcon, PumpIcon, SettingsIcon } from "@/components/icons";
+import Link from "next/link";
+import { CatalogIcon, DocsIcon, HistoryIcon, PumpIcon, SettingsIcon, UserIcon } from "@/components/icons";
+import { cn } from "@/utils/cn";
 
-export const Sidebar = () => {
+type SidebarProps = {
+  active?: "explorer" | "account";
+};
+
+const navItem =
+  "flex items-center gap-[11px] p-[9px_11px] rounded-[8px] text-[13px] font-medium text-text-dim cursor-pointer hover:bg-surface-2 hover:text-text";
+const activeClass =
+  "bg-primary-soft shadow-[inset_0_0_0_1px_var(--primary-ring)] font-semibold text-text";
+
+export const Sidebar = ({ active = "explorer" }: SidebarProps) => {
   return (
     <aside className="w-[238px] flex-none bg-surface border-r border-border flex flex-col">
       <div className="flex items-center gap-[11px] p-[17px_18px_15px] border-b border-border">
@@ -17,29 +28,33 @@ export const Sidebar = () => {
         <div className="p-[6px_10px_4px] text-[10px] tracking-[.11em] uppercase text-text-faint font-semibold">
           Espacio de trabajo
         </div>
-        <a className="flex items-center gap-[11px] p-[9px_11px] rounded-[8px] text-[13px] font-semibold text-text bg-primary-soft shadow-[inset_0_0_0_1px_var(--primary-ring)] cursor-pointer">
+        <Link href="/" className={cn(navItem, active === "explorer" && activeClass)}>
           <PumpIcon size={16} strokeWidth={1.9} />
           Explorador de Proyectos
-        </a>
-        <a className="flex items-center gap-[11px] p-[9px_11px] rounded-[8px] text-[13px] font-medium text-text-dim cursor-pointer hover:bg-surface-2 hover:text-text">
+        </Link>
+        <a className={navItem}>
           <CatalogIcon size={16} />
           Catálogo de Bombas
         </a>
-        <a className="flex items-center gap-[11px] p-[9px_11px] rounded-[8px] text-[13px] font-medium text-text-dim cursor-pointer hover:bg-surface-2 hover:text-text">
+        <a className={navItem}>
           <HistoryIcon size={16} />
           Historial de Simulaciones
         </a>
         <div className="p-[14px_10px_4px] text-[10px] tracking-[.11em] uppercase text-text-faint font-semibold">
           Recursos
         </div>
-        <a className="flex items-center gap-[11px] p-[9px_11px] rounded-[8px] text-[13px] font-medium text-text-dim cursor-pointer hover:bg-surface-2 hover:text-text">
+        <a className={navItem}>
           <DocsIcon size={16} />
           Documentación técnica
         </a>
-        <a className="flex items-center gap-[11px] p-[9px_11px] rounded-[8px] text-[13px] font-medium text-text-dim cursor-pointer hover:bg-surface-2 hover:text-text">
+        <a className={navItem}>
           <SettingsIcon size={16} />
           Configuración
         </a>
+        <Link href="/account" className={cn(navItem, active === "account" && activeClass)}>
+          <UserIcon size={16} />
+          Mi cuenta
+        </Link>
       </nav>
 
       <div className="m-[10px] p-[11px_12px] rounded-[10px] bg-surface-2 border border-border">
