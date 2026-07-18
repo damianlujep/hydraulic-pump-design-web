@@ -14,6 +14,9 @@ export type LockStatusResponse = components["schemas"]["LockStatusResponse"];
 export type UpdateProjectMetadataRequest = components["schemas"]["UpdateProjectMetadataRequest"];
 export type NewProjectInfoDto = components["schemas"]["NewProjectInfoDto"];
 export type ProjectStatsResponse = components["schemas"]["ProjectStatsResponse"];
+export type ProjectMemberResponse = components["schemas"]["ProjectMemberResponse"];
+export type AddProjectMemberRequest = components["schemas"]["AddProjectMemberRequest"];
+export type ProjectMemberRole = AddProjectMemberRequest["role"];
 
 export const useProjectStats = () => {
   return useQuery({
@@ -144,6 +147,63 @@ export const heartbeatProjectLock = async (
 // and doesn't get caught up in the 401-refresh dance.
 export const releaseProjectLock = (id: number): void => {
   void fetch(`/api/projects/${id}/lock`, { method: "DELETE", keepalive: true });
+};
+
+export const useProjectMembers = (id: number) => {
+  return useQuery({
+    queryKey: queryKeys.projects.members(id),
+    queryFn: async () => {
+      const res = await apiFetch(`/api/projects/${id}/members`);
+      if (!res.ok) {
+        const err: unknown = await res.json().catch(() => ({}));
+        throw err;
+      }
+      return res.json() as Promise<ProjectMemberResponse[]>;
+    },
+  });
+};
+
+export const useAddProjectMember = (id: number) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: AddProjectMemberRequest): Promise<ProjectMemberResponse> => {
+      const res = await apiFetch(`/api/projects/${id}/members`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err: unknown = await res.json().catch(() => ({}));
+        throw err;
+      }
+      return res.json();
+    },
+    // The POST returns the fresh grant (add and role-change alike) — upsert it into the cache
+    // directly instead of refetching the list, same precedent as useSaveDesignData.
+    onSuccess: (fresh) =>
+      qc.setQueryData<ProjectMemberResponse[]>(queryKeys.projects.members(id), (prev) =>
+        prev?.some((m) => m.userId === fresh.userId)
+          ? prev.map((m) => (m.userId === fresh.userId ? fresh : m))
+          : [...(prev ?? []), fresh],
+      ),
+  });
+};
+
+export const useRemoveProjectMember = (id: number) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (userId: number): Promise<void> => {
+      const res = await apiFetch(`/api/projects/${id}/members/${userId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const err: unknown = await res.json().catch(() => ({}));
+        throw err;
+      }
+    },
+    onSuccess: (_data, userId) =>
+      qc.setQueryData<ProjectMemberResponse[]>(queryKeys.projects.members(id), (prev) =>
+        prev?.filter((m) => m.userId !== userId),
+      ),
+  });
 };
 
 export const useDeleteProject = () => {

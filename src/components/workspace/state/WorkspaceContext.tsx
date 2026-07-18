@@ -37,6 +37,7 @@ type WorkspaceContextValue = {
   calcUnlocked: boolean;
   casings: TubularItem[];
   tubings: TubularItem[];
+  projectId: number;
   projectName: string;
   visibility: ProjectResponse["visibility"];
   isOwner: boolean;
@@ -345,6 +346,7 @@ export const WorkspaceProvider = ({ project, casings, tubings, onReloadRequested
         calcUnlocked,
         casings,
         tubings,
+        projectId,
         projectName,
         visibility: project.visibility,
         isOwner,

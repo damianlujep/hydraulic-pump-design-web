@@ -106,7 +106,7 @@ export interface paths {
         /** List a project's sharing grants (owner only) */
         get: operations["list_2"];
         put?: never;
-        /** Grant or update a user's access to a project (owner only) */
+        /** Grant or update a user's access to a project by email (owner only) */
         post: operations["add"];
         delete?: never;
         options?: never;
@@ -980,8 +980,8 @@ export interface components {
             designData?: components["schemas"]["DesignDataDto"];
         };
         AddProjectMemberRequest: {
-            /** Format: int64 */
-            userId: number;
+            /** Format: email */
+            email: string;
             /** @enum {string} */
             role: "VIEWER" | "EDITOR";
         };

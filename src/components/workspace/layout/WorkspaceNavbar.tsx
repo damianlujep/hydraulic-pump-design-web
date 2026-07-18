@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeftIcon, PencilIcon, PumpIcon, SpinnerIcon } from "@/components/icons";
+import { ArrowLeftIcon, PencilIcon, PumpIcon, SpinnerIcon, UserPlusIcon } from "@/components/icons";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/explorer/UserMenu";
 import { useWorkspace } from "../state/WorkspaceContext";
 import { ProjectMetadataModal } from "../modals/ProjectMetadataModal";
+import { ShareProjectDialog } from "../modals/ShareProjectDialog";
 
 const SaveStatusBadge = () => {
   const { state, canEdit } = useWorkspace();
@@ -57,6 +58,7 @@ export const WorkspaceNavbar = () => {
   const router = useRouter();
   const { state, projectName, isOwner, canEdit } = useWorkspace();
   const [editOpen, setEditOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const info = state.newProjectInfo?.data;
   const subtitleParts = [
     info?.wellName ? `Pozo Activo: ${info.wellName}` : null,
@@ -91,6 +93,16 @@ export const WorkspaceNavbar = () => {
                 <PencilIcon size={13} />
               </button>
             )}
+            {isOwner && (
+              <button
+                title="Compartir proyecto"
+                aria-label="Compartir proyecto"
+                onClick={() => setShareOpen(true)}
+                className="text-text-faint cursor-pointer hover:text-text"
+              >
+                <UserPlusIcon size={13} />
+              </button>
+            )}
           </div>
           {subtitleParts.length > 0 && (
             <div className="text-[11px] text-text-dim font-mono">{subtitleParts.join(" · ")}</div>
@@ -105,6 +117,7 @@ export const WorkspaceNavbar = () => {
         <UserMenu />
       </div>
       {editOpen && <ProjectMetadataModal onClose={() => setEditOpen(false)} />}
+      {shareOpen && <ShareProjectDialog onClose={() => setShareOpen(false)} />}
     </header>
   );
 };

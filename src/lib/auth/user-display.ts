@@ -13,6 +13,12 @@ export const avatarGradientStyle = {
 export const roleLabel = (user: User | null): string =>
   user?.role != null ? ROLE_LABELS[user.role] : "";
 
+export const nameInitials = (name: string | undefined): string => {
+  if (!name) return "?";
+  const words = name.trim().split(/\s+/);
+  return `${words[0]?.[0] ?? ""}${words[1]?.[0] ?? ""}`.toUpperCase() || "?";
+};
+
 export const userInitials = (user: User | null): string =>
   user
     ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "?"

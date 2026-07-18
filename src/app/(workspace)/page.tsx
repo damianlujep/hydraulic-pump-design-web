@@ -1,4 +1,3 @@
-import { DownloadIcon } from "@/components/icons";
 import { Sidebar } from "@/components/explorer/Sidebar";
 import { ExplorerHeader } from "@/components/explorer/ExplorerHeader";
 import { ExplorerStats } from "@/components/explorer/ExplorerStats";
@@ -23,13 +22,6 @@ const ExplorerPage = () => {
               </p>
             </div>
             <div className="flex items-center gap-[10px]">
-              <button
-                title="Importar datos desde archivo"
-                className="inline-flex items-center gap-[9px] px-4 py-[11px] rounded-[10px] bg-surface-2 text-text border border-border text-[13.5px] font-semibold cursor-pointer hover:border-border-strong"
-              >
-                <DownloadIcon size={16} />
-                Importar Datos
-              </button>
               <NewProjectModal />
             </div>
           </div>
