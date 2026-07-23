@@ -1,0 +1,14 @@
+services:
+  app:
+    image: ghcr.io/damianlujep/hydraulic-pump-design-web:latest
+    container_name: hpd-web
+    env_file:
+      - .env.production
+    ports:
+      - "127.0.0.1:3004:3000"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
