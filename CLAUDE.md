@@ -23,6 +23,22 @@ The Spring Boot backend (sibling repo `hydraulic-pump-design-api`) must be runni
 
 If the dev server ever serves pages with zero CSS applied or throws `SyntaxError: Unexpected end of JSON input` / `Error: Manifest file is empty`, it's a stale Turbopack dev cache — stop the process, `rm -rf .next`, and restart `yarn dev`. This has been observed after many rapid file edits while the dev server stays running.
 
+## Deployment (Docker + GitHub Actions → VPS)
+
+- **`API_URL` is the only backend-URL env var, and it's read at runtime, server-side** (`src/lib/api/server-client.ts`, the auth route handlers) — there is **zero `NEXT_PUBLIC_*` usage anywhere in `src/`**. Don't add a `NEXT_PUBLIC_API_URL` build-arg to the Dockerfile/compose/CI — it would be dead weight (nothing reads it) and the wrong lifecycle (baked into the client bundle at build time instead of injected into the running container). The same image is environment-agnostic; only the container's env vars change between local/prod.
+- **`Dockerfile`** — multi-stage (`deps` → `builder` → `runner`) on `node:24-alpine`, relies on `next.config.ts`'s `output: "standalone"` to copy just `.next/standalone` + `.next/static` + `public` into the final non-root (`nextjs`) runtime stage. Yarn is **classic v1** (`yarn lockfile v1`, no `packageManager` field) — the image's bundled yarn is used directly, no `corepack enable` needed. `HEALTHCHECK` probes `http://127.0.0.1:3000/login` **hardcoded to port 3000** — if `PORT` is ever overridden away from 3000 in a container's env, the healthcheck silently fails even though the app itself is fine on the new port (hit this once during manual testing; the prod compose files never override `PORT`, so this stays latent).
+- **`docker-compose.yml`** (repo root, local/dev use) — builds the image locally and targets `.env.production` **on purpose**: `docker compose up` here smoke-tests the exact production image against the real deployed backend (`https://hpd-api.phi-rms.com`), not a local one. To test the image against a locally-running backend instead, don't edit this file — run it manually so the container can reach the host's `:8080`, since a container's own `localhost` is never the host's:
+  ```bash
+  docker build -t hpd-web:latest .
+  docker run --rm -d -p 3004:3000 \
+    --add-host=host.docker.internal:host-gateway \
+    -e API_URL=http://host.docker.internal:8080 \
+    --name hpd-web hpd-web:latest
+  ```
+- **`docker-compose.prod.yml`** (repo root, VPS runtime) — pulls the prebuilt GHCR image (`ghcr.io/damianlujep/hydraulic-pump-design-web:latest`) rather than building; container name `hpd-web`, published as `127.0.0.1:3004:3000` (localhost-only — a reverse proxy outside this repo terminates TLS for `https://hpd-app.phi-rms.com` and forwards to it; don't publish this on `0.0.0.0`). `API_URL` comes from `.env.production`, placed on the VPS by hand (gitignored, never in the image/repo).
+- **`.github/workflows/ci.yml`** — runs on every PR: `tsc --noEmit` + `yarn lint`. Unrelated to deploy.
+- **`.github/workflows/deploy.yml`** — **manual only** (`workflow_dispatch`, no auto-deploy on push). Builds & pushes the image to GHCR, then scp's the repo's current `docker-compose.prod.yml` to the VPS and runs `docker compose pull && up -d` there — so a compose-file change just needs a normal commit + manual "Run workflow," no separate manual VPS sync (only `.env.production` is a manual, one-time VPS file).
+
 ## Architecture
 
 This is a Next.js App Router rebuild of a Claude-Design HTML prototype (see `design_handoff_hydrapump/`) — a data-dense engineering tool for designing hydraulic pumping systems (Jet & Piston lift) for oil wells. UI copy is Spanish; code identifiers are English.
