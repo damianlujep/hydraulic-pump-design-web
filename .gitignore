@@ -46,3 +46,7 @@ next-env.d.ts
 .claude
 
 docs-user
+
+# graphify
+/graph.json
+/graphify-out/
